@@ -257,12 +257,12 @@ monkeysppp.vbRotations.SVGMaker = function() {
 
   this.playerOffsetsReceiveReceive = {
     1: {
-        s:  { x: 400, y: 85 },
-        h1: { x: 420, y: 30 },
-        m1: { x: 380, y: 140 },
-        o:  { x: 100, y: 300 },
-        h2: { x: 225, y: 350 },
-        m2: { x: 350, y: 300 },
+        s:  { x: 400, y: 385 },
+        h1: { x: 370, y: 300 },
+        m1: { x: 240, y: 140 },
+        o:  { x: 50, y: 150 },
+        h2: { x: 100, y: 300 },
+        m2: { x: 230, y: 330 },
       },
     2: {
         m2: { x: 350, y: 300 },
