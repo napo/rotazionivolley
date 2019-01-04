@@ -727,7 +727,7 @@ monkeysppp.vbRotations.SVGMaker = function() {
       strokeWidth: 4,
       fill: _this.playerColour,
     });
-    var m2Label = _this.sroot.text(75, 50, 'C2');
+    var m2Label = _this.sroot.text(75, 50, 'C1');
     m2Label.attr({
       fill: 'none',
       stroke: '#eeeeee',
