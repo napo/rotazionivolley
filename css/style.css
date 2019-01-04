@@ -1,3 +1,7 @@
+body {
+	font-family: 'Verdana';
+	margin: 0 auto;
+}
 #diagram {
   min-width: 400px;
   max-width: 900px;
