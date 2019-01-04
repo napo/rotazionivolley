@@ -1,7 +1,6 @@
-body {
-	font-family: 'Verdana';
-	margin: 0 auto;
-}
+    * {
+      font-family: sans-serif;
+    }
 #diagram {
   min-width: 400px;
   max-width: 900px;
