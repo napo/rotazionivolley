@@ -1,6 +1,11 @@
-    * {
-      font-family: sans-serif;
-    }
+* {
+  font-family: sans-serif;
+}
+body {
+padding: auto;
+width: 90%;
+margin: auto;
+}
 #diagram {
   min-width: 400px;
   max-width: 900px;
