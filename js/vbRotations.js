@@ -670,7 +670,7 @@ monkeysppp.vbRotations.SVGMaker = function() {
       strokeWidth: 4,
       fill: _this.playerColour,
     });
-    var m1Label = _this.sroot.text(75, 50, 'C2');
+    var m1Label = _this.sroot.text(75, 50, 'C1');
     m1Label.attr({
       fill: 'none',
       stroke: '#eeeeee',
@@ -727,7 +727,7 @@ monkeysppp.vbRotations.SVGMaker = function() {
       strokeWidth: 4,
       fill: _this.playerColour,
     });
-    var m2Label = _this.sroot.text(75, 50, 'C1');
+    var m2Label = _this.sroot.text(75, 50, 'C2');
     m2Label.attr({
       fill: 'none',
       stroke: '#eeeeee',
