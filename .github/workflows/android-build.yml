@@ -1,0 +1,58 @@
+name: Android build
+
+# Builds the Android app and attaches the APK to the GitHub Release. Runs on
+# every published release, plus manual dispatch for testing. This is a
+# debug-signed build (installable on a device for testing) since no release
+# keystore is configured — a Play Store submission needs the repo owner's own
+# signing keystore set up as secrets, which this workflow does not attempt.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build --workspace web
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rotazionivolley-android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Attach APK to the GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: android/app/build/outputs/apk/debug/app-debug.apk

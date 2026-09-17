@@ -71,5 +71,7 @@ Requisiti per compilare da sorgente, per piattaforma:
   runner `macos-latest` (verifica solo che il progetto compili; una build firmata per
   App Store richiede certificato/provisioning profile dell'Apple Developer account del
   proprietario del repo, da configurare come secret — non incluso qui).
-- **Android** non ha ancora un workflow CI dedicato: per ora la build viene fatta
-  localmente (vedi requisiti sopra: Android SDK + JDK 21).
+- `.github/workflows/android-build.yml` — build dell'APK Android (debug-signed,
+  installabile) ad ogni **release pubblicata** su GitHub (oltre che manualmente),
+  allegato automaticamente agli asset della release. Una build firmata per il Play
+  Store richiederebbe un keystore di release configurato come secret, non incluso qui.
