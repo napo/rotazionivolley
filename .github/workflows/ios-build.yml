@@ -1,0 +1,48 @@
+name: iOS build (Capacitor)
+
+# Smoke-builds the iOS app (Capacitor + Xcode) for the Simulator, unsigned —
+# this only verifies the app compiles, it does not produce an
+# App-Store-distributable build. A real signed build needs the repo owner's
+# own Apple Developer certificate/provisioning profile configured as GitHub
+# secrets, which this workflow does not attempt to set up.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'web/**'
+      - 'ios/**'
+      - 'capacitor.config.ts'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build --workspace web
+
+      - name: Sync Capacitor iOS project
+        run: npx cap sync ios
+
+      - name: Build for iOS Simulator (unsigned)
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build
