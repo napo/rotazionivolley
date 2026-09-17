@@ -16,6 +16,12 @@
   padding: 1rem 0;
 }
 
+.app__header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
 .app__header h1 {
   font-size: 1.4rem;
   margin: 0;
@@ -44,46 +50,15 @@
   gap: 0.75rem;
 }
 
-.app__button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.app__tutorial-btn,
-.app__editor-btn,
-.app__info-btn {
-  align-self: flex-start;
-  padding: 0.6rem 1.4rem;
+.app__header-btn {
+  padding: 0.4rem 0.9rem;
   border: none;
   border-radius: 6px;
+  background: #6b7280;
   color: #fff;
   font-weight: 600;
+  font-size: 0.8rem;
   cursor: pointer;
-}
-
-.app__tutorial-btn {
-  background: #0f7d8c;
-}
-
-.app__editor-btn {
-  background: #4a5568;
-}
-
-.app__info-btn {
-  background: #6b7280;
-}
-
-.app__footer {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #ddd;
-  font-size: 0.85rem;
-  color: #555;
-}
-
-.app__footer p + p {
-  margin-top: 0.5rem;
 }
 
 @media (min-width: 860px) {

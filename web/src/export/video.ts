@@ -46,7 +46,7 @@ export async function recordSequenceAsWebm(
 
   const { canvas, ctx } = createOffscreenCanvas(scale);
   const frames = pages.map((page) =>
-    resolveDiagramState(config, page.phaseKey, page.setterPosition, activeLiberoId),
+    resolveDiagramState(config, page.team, page.phaseKey, page.setterPosition, activeLiberoId),
   );
   drawFrame(ctx, frames[0].players, frames[0].positions, pages[0].caption);
 

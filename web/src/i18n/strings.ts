@@ -9,11 +9,7 @@ export type Lang = 'it' | 'en';
 export const strings = {
   it: {
     'app.title': 'Rotazioni di ricezione nella pallavolo',
-    'app.footer.basedOn': 'Questa applicazione è basata su',
-    'app.footer.by': 'di',
-    'app.footer.source': 'Codice sorgente:',
     'app.tutorialButton': 'Tutorial',
-    'app.editorButton': 'Editor schemi',
     'app.infoButton': 'Info',
 
     'rotation.title': 'Rotazione',
@@ -24,10 +20,8 @@ export const strings = {
     'phase.ariaLabel': 'Azione di gioco',
     'phase.title': 'Azione',
 
-    'libero.title': 'Libero',
-    'libero.none': 'Nessuno',
-
-    'configPicker.label': 'Schema',
+    'configPicker.edit': 'Modifica {name}',
+    'configPicker.addNew': 'Nuovo modulo',
 
     'comment.title': 'Commento',
     'comment.placeholder': 'Aggiungi una nota per questa rotazione e fase (verrà usata come sottotitolo in PDF e video)…',
@@ -54,14 +48,14 @@ export const strings = {
     'editor.or': 'oppure',
     'editor.import': 'Importa un file JSON esportato in precedenza',
     'editor.importError.invalidJson': 'Il file non è un JSON valido',
-    'editor.meta.title': 'Dati schema',
-    'editor.meta.id': 'ID',
     'editor.meta.name': 'Nome',
     'editor.meta.description': 'Descrizione',
     'editor.hint': 'Seleziona rotazione e fase, poi trascina i giocatori sul campo per modificarne la posizione.',
-    'editor.libero.title': 'Libero (posizionamento manuale per questa cella)',
-    'editor.libero.add': 'Aggiungi {label} qui',
-    'editor.libero.remove': 'Rimuovi {label} da qui',
+    'editor.libero.title': 'Libero',
+    'editor.libero.hint':
+      'Clicca L1 o L2 (fuori campo, a sinistra), poi un giocatore in seconda linea sul campo: entreranno al suo posto, scambiandosi di posizione. La scelta vale per tutta la sequenza (fino a "Cambio" incluso) e si può cambiare di nuovo solo qui, in "Base".',
+    'editor.libero.lockedHint':
+      'Il libero si sceglie solo nella fase "Base": da lì vale per tutta la sequenza, fino a "Cambio" incluso. Torna a "Base" per cambiarlo.',
     'editor.action.apply': 'Applica come schema attivo',
     'editor.action.download': 'Scarica JSON',
     'editor.action.restart': 'Ricomincia',
@@ -82,25 +76,17 @@ export const strings = {
 
     'info.title': 'Informazioni',
     'info.close': 'Chiudi',
-    'info.about.title': 'Il progetto',
-    'info.about.body':
-      'Rotazioni Volley è uno strumento per visualizzare, modificare ed esportare schemi di rotazione e ricezione nella pallavolo, con supporto per il Libero, commenti ed export in PNG, PDF e video.',
-    'info.author.title': 'Autore',
-    'info.author.body': 'Maurizio Napolitano',
-    'info.source.title': 'Codice sorgente',
-    'info.ai.title': 'Sviluppo assistito da AI',
-    'info.ai.body':
-      "Questo progetto è sviluppato con il supporto di strumenti di intelligenza artificiale (Claude Code di Anthropic), sotto la supervisione e la revisione dell'autore.",
+    'info.project': 'Progetto di',
+    'info.builtOn': 'Applicazione costruita su VBRotations di Andy Edwards.',
+    'info.sourceLabel': 'Codice sorgente:',
+    'info.version': 'Versione {version}',
+    'info.licenseLabel': 'Software rilasciato con licenza',
 
     'language.label': 'Lingua',
   },
   en: {
     'app.title': 'Volleyball reception rotations',
-    'app.footer.basedOn': 'This application is based on',
-    'app.footer.by': 'by',
-    'app.footer.source': 'Source code:',
     'app.tutorialButton': 'Tutorial',
-    'app.editorButton': 'Scheme editor',
     'app.infoButton': 'Info',
 
     'rotation.title': 'Rotation',
@@ -111,10 +97,8 @@ export const strings = {
     'phase.ariaLabel': 'Phase of play',
     'phase.title': 'Action',
 
-    'libero.title': 'Libero',
-    'libero.none': 'None',
-
-    'configPicker.label': 'Scheme',
+    'configPicker.edit': 'Edit {name}',
+    'configPicker.addNew': 'New scheme',
 
     'comment.title': 'Comment',
     'comment.placeholder': 'Add a note for this rotation and phase (used as a subtitle in PDF and video exports)…',
@@ -141,14 +125,14 @@ export const strings = {
     'editor.or': 'or',
     'editor.import': 'Import a previously exported JSON file',
     'editor.importError.invalidJson': 'The file is not valid JSON',
-    'editor.meta.title': 'Scheme details',
-    'editor.meta.id': 'ID',
     'editor.meta.name': 'Name',
     'editor.meta.description': 'Description',
     'editor.hint': 'Pick a rotation and phase, then drag players on the court to change their position.',
-    'editor.libero.title': 'Libero (manual placement for this cell)',
-    'editor.libero.add': 'Add {label} here',
-    'editor.libero.remove': 'Remove {label} from here',
+    'editor.libero.title': 'Libero',
+    'editor.libero.hint':
+      'Click L1 or L2 (off court, on the left), then a back-row player on court: they swap places, and the libero comes on. This choice holds for the whole sequence (through "Switch"), and can only be changed again here, on "Base".',
+    'editor.libero.lockedHint':
+      'The libero is only chosen on the "Base" phase — from there it holds for the whole sequence, through "Switch". Go back to "Base" to change it.',
     'editor.action.apply': 'Apply as active scheme',
     'editor.action.download': 'Download JSON',
     'editor.action.restart': 'Start over',
@@ -169,15 +153,11 @@ export const strings = {
 
     'info.title': 'About',
     'info.close': 'Close',
-    'info.about.title': 'The project',
-    'info.about.body':
-      'Rotazioni Volley is a tool for viewing, editing and exporting volleyball rotation and reception schemes, with Libero support, comments, and PNG/PDF/video export.',
-    'info.author.title': 'Author',
-    'info.author.body': 'Maurizio Napolitano',
-    'info.source.title': 'Source code',
-    'info.ai.title': 'AI-assisted development',
-    'info.ai.body':
-      "This project is developed with the support of AI tools (Anthropic's Claude Code), under the author's supervision and review.",
+    'info.project': 'Project by',
+    'info.builtOn': 'Built on VBRotations by Andy Edwards.',
+    'info.sourceLabel': 'Source code:',
+    'info.version': 'Version {version}',
+    'info.licenseLabel': 'Software released under the',
 
     'language.label': 'Language',
   },

@@ -37,6 +37,29 @@ export type RotationPositions = z.infer<typeof RotationPositionsSchema>;
 export const PhasePositionsSchema = z.record(z.string(), RotationPositionsSchema);
 export type PhasePositions = z.infer<typeof PhasePositionsSchema>;
 
+/**
+ * Which libero is on court in place of which (real) player, for one
+ * rotation *and one team side* (serve or receive). Chosen only on the
+ * "base" phase and then locked for every phase of that sequence (base ->
+ * ... -> the final "switch" phase) — a real substitution isn't something a
+ * team can walk back mid play, only decide again once play resets to base.
+ * "base" itself is shared visually by both the serve and receive sequences,
+ * but the libero decision is not: a team may want it in for their receive
+ * sequence and out for their serve sequence at the very same rotation, so
+ * the two are tracked independently. See the editor's libero swap UI, which
+ * only allows editing this while on "base" (for whichever side — serve or
+ * receive column — is currently selected).
+ */
+export const LiberoSwapSchema = z.object({
+  libero: z.string().min(1),
+  replaces: z.string().min(1),
+});
+export type LiberoSwap = z.infer<typeof LiberoSwapSchema>;
+
+/** setterPosition ("1".."6") -> team side ("serve"/"receive") -> the active libero swap, if any. */
+export const LiberoSwapsSchema = z.record(z.string(), z.record(z.string(), LiberoSwapSchema));
+export type LiberoSwaps = z.infer<typeof LiberoSwapsSchema>;
+
 export const FormationConfigSchema = z
   .object({
     id: z.string().min(1),
@@ -54,6 +77,12 @@ export const FormationConfigSchema = z
     liberos: z.array(PlayerDefSchema).max(2).optional().default([]),
     phases: z.record(z.string(), PhaseDefSchema),
     positions: z.record(z.string(), PhasePositionsSchema),
+    /**
+     * Explicit, editor-authored record of which libero replaces which player
+     * for a given (rotation, team side) — see the editor's libero swap UI.
+     * Sparse/optional: no entry simply means no libero on court there.
+     */
+    liberoSwaps: LiberoSwapsSchema.optional().default({}),
     /**
      * Free-text comment per (phase, rotation), sparse/optional — phaseKey ->
      * setterPosition ("1".."6") -> text. Shown in a panel under the court and
@@ -108,6 +137,26 @@ export const FormationConfigSchema = z
               path: ['positions', phaseKey, key, playerId],
             });
           }
+        }
+      }
+    }
+
+    const liberoIds = config.liberos.map((l) => l.id);
+    for (const [setterKey, byTeam] of Object.entries(config.liberoSwaps)) {
+      for (const [team, swap] of Object.entries(byTeam)) {
+        if (!liberoIds.includes(swap.libero)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `liberoSwaps: "${swap.libero}" non è un libero dichiarato in "liberos"`,
+            path: ['liberoSwaps', setterKey, team, 'libero'],
+          });
+        }
+        if (!playerIds.includes(swap.replaces)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `liberoSwaps: "${swap.replaces}" non è un giocatore dichiarato in "players"`,
+            path: ['liberoSwaps', setterKey, team, 'replaces'],
+          });
         }
       }
     }

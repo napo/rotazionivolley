@@ -13,93 +13,288 @@
   letter-spacing: 0.04em;
 }
 
-.rotation-panel__columns {
-  display: flex;
-  gap: 0.75rem;
+/*
+ * Rotation / phase navigators: styled after VBRotations' original SVG graph
+ * (dots on a path rather than plain button grids/rows) — see the reference
+ * GIF this was matched against. Positions are computed in the component as
+ * percentages and applied via inline style; these rules only handle shape,
+ * colour and the connecting lines.
+ */
+.rotation-graph,
+.phase-graph {
+  background: #4596bf;
 }
 
-.rotation-panel__col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+.phase-graph {
+  position: relative;
 }
 
-.rotation-panel__col-header {
+.rotation-graph .panel__title,
+.phase-graph .panel__title {
+  color: #eef7fc;
+}
+
+.phase-graph__connector {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Reaches up past the panel's own top border, through the flex gap
+     above it, so it visually meets the rotation panel's bottom edge. */
+  top: -0.9rem;
+  height: 1.7rem;
+  pointer-events: none;
+}
+
+.phase-graph__connector svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.phase-graph__connector-line {
+  stroke: #eef7fc;
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.rotation-graph__headers {
+  position: relative;
+  height: 1.4rem;
+}
+
+.rotation-graph__headers span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
   font-size: 0.8rem;
-  color: #666;
-  text-align: center;
+  color: #eef7fc;
+  white-space: nowrap;
 }
 
-.rotation-panel__btn {
-  padding: 0.5rem 0.25rem;
-  border: 2px solid #65b6df;
-  border-radius: 6px;
+.rotation-graph__body {
+  position: relative;
+  height: 26rem;
+}
+
+.phase-graph__body {
+  position: relative;
+  height: 5.5rem;
+}
+
+.rotation-graph__lines,
+.phase-graph__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.rotation-graph__line,
+.phase-graph__line {
+  stroke: #eef7fc;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.rotation-graph__col {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rotation-graph__dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #eef7fc;
+  color: #eef7fc;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.rotation-graph__dot--a {
+  background: #65b6df;
+}
+
+.rotation-graph__dot--b {
+  background: #4596bf;
+}
+
+.rotation-graph__dot.is-active {
   background: #eef7fc;
   color: #245;
+}
+
+.phase-graph__dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0.45rem 0.8rem;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 2px solid #eef7fc;
+  color: #eef7fc;
   font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
 }
 
-.rotation-panel__btn.is-active {
+.phase-graph__dot--a {
   background: #65b6df;
-  color: #fff;
 }
 
-.phase-panel__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+.phase-graph__dot--b {
+  background: #4596bf;
 }
 
-.phase-panel__btn {
-  padding: 0.6rem 0.9rem;
-  border: 2px solid #4596bf;
-  border-radius: 6px;
-  background: #eaf3f8;
+.phase-graph__dot.is-active {
+  background: #eef7fc;
   color: #234;
-  font-weight: 600;
-  cursor: pointer;
-  flex: 1 1 auto;
 }
 
-.phase-panel__btn.is-active {
+
+.schema-switcher {
+  position: relative;
+}
+
+.schema-switcher__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  text-align: left;
+}
+
+.schema-switcher__trigger:hover {
+  color: #222;
+}
+
+.schema-switcher__caret {
+  font-size: 0.7rem;
+}
+
+.schema-switcher__menu {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  margin-top: 0.4rem;
+  min-width: 260px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.schema-switcher__row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.schema-switcher__option {
+  flex: 1;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: #333;
+  cursor: pointer;
+}
+
+.schema-switcher__option:hover {
+  background: #f0f0f0;
+}
+
+.schema-switcher__option.is-active {
   background: #4596bf;
   color: #fff;
 }
 
-.libero-panel__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+.schema-switcher__edit {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.4rem 0.5rem;
+  color: #666;
+  border-radius: 6px;
 }
 
-.libero-panel__btn {
-  padding: 0.5rem 0.9rem;
-  border: 2px solid #a15c1f;
+.schema-switcher__edit:hover {
+  background: #f0f0f0;
+  color: #222;
+}
+
+.schema-switcher__add {
+  margin-top: 0.2rem;
+  padding: 0.5rem;
+  border: 1px dashed #aaa;
   border-radius: 6px;
-  background: #f9ead9;
-  color: #6b3d10;
+  background: none;
+  color: #333;
   font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.schema-switcher__add:hover {
+  background: #f0f0f0;
+}
+
+.header-dropdown {
+  position: relative;
+}
+
+.header-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: #0f7d8c;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.8rem;
   cursor: pointer;
 }
 
-.libero-panel__btn.is-active {
-  background: #a15c1f;
-  border-color: #a15c1f;
-  color: #fff;
+.header-dropdown__caret {
+  font-size: 0.65rem;
 }
 
-.config-picker {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.config-picker select {
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.header-dropdown__menu {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  right: 0;
+  margin-top: 0.4rem;
+  min-width: 280px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem;
 }

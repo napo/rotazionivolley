@@ -1,10 +1,12 @@
 import type { FormationConfig, SetterPosition } from '../configs/schema';
+import type { Team } from '../state/AppStateContext';
 import { createOffscreenCanvas, drawFrame } from '../court/canvasRenderer';
 import { getComment, resolveDiagramState } from '../state/selectors';
 import { saveFile } from './platformSave';
 
 export async function exportStateAsPng(
   config: FormationConfig,
+  team: Team,
   phaseKey: string,
   setterPosition: SetterPosition,
   filename: string,
@@ -12,7 +14,7 @@ export async function exportStateAsPng(
   scale = 2,
 ): Promise<void> {
   const { canvas, ctx } = createOffscreenCanvas(scale);
-  const { players, positions } = resolveDiagramState(config, phaseKey, setterPosition, activeLiberoId);
+  const { players, positions } = resolveDiagramState(config, team, phaseKey, setterPosition, activeLiberoId);
   const comment = getComment(config, phaseKey, setterPosition);
   drawFrame(ctx, players, positions, comment || undefined);
 

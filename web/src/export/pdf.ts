@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import type { FormationConfig, SetterPosition } from '../configs/schema';
+import type { Team } from '../state/AppStateContext';
 import { createOffscreenCanvas, drawFrame } from '../court/canvasRenderer';
 import { COURT_VIEWBOX } from '../court/courtGeometry';
 import { getComment, resolveDiagramState } from '../state/selectors';
@@ -23,12 +24,13 @@ function renderPage(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   config: FormationConfig,
+  team: Team,
   phaseKey: string,
   setterPosition: SetterPosition,
   activeLiberoId: string | null | undefined,
   caption?: string,
 ): void {
-  const { players, positions } = resolveDiagramState(config, phaseKey, setterPosition, activeLiberoId);
+  const { players, positions } = resolveDiagramState(config, team, phaseKey, setterPosition, activeLiberoId);
   drawFrame(ctx, players, positions);
 
   pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, PAGE_WIDTH, PAGE_HEIGHT);
@@ -42,6 +44,7 @@ function renderPage(
 
 export async function exportSinglePagePdf(
   config: FormationConfig,
+  team: Team,
   phaseKey: string,
   setterPosition: SetterPosition,
   filename: string,
@@ -50,7 +53,7 @@ export async function exportSinglePagePdf(
   const pdf = newDocument();
   const { canvas, ctx } = createOffscreenCanvas(RASTER_SCALE);
   const comment = getComment(config, phaseKey, setterPosition);
-  renderPage(pdf, canvas, ctx, config, phaseKey, setterPosition, activeLiberoId, comment || undefined);
+  renderPage(pdf, canvas, ctx, config, team, phaseKey, setterPosition, activeLiberoId, comment || undefined);
   await saveFile(pdf.output('blob'), filename);
 }
 
@@ -70,7 +73,8 @@ export async function exportPipelinePdf(
     if (i > 0) {
       pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT], ORIENTATION);
     }
-    renderPage(pdf, canvas, ctx, config, pages[i].phaseKey, pages[i].setterPosition, activeLiberoId, pages[i].caption);
+    const page = pages[i];
+    renderPage(pdf, canvas, ctx, config, page.team, page.phaseKey, page.setterPosition, activeLiberoId, page.caption);
   }
   await saveFile(pdf.output('blob'), filename);
 }

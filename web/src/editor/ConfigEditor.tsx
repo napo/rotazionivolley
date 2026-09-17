@@ -4,39 +4,72 @@ import type { Team } from '../state/AppStateContext';
 import { RotationPanel } from '../controls/RotationPanel';
 import { PhasePanel } from '../controls/PhasePanel';
 import { CourtStage } from '../court/CourtStage';
-import { COURT_RECT } from '../court/courtGeometry';
-import { getBackRowMiddleId } from '../state/selectors';
+import { ANIMATION_DURATION_MS } from '../court/courtGeometry';
+import { computeBenchDisplay } from '../court/benchDisplay';
+import { getBackRowPlayerIds, getLiberoSwap, withLiberoSwap } from '../state/selectors';
 import { useI18n } from '../i18n/I18nContext';
 import { downloadConfig, validateDraft } from './exportConfig';
 import './editor.css';
 
-const COURT_CENTER: Point = {
-  x: COURT_RECT.x + COURT_RECT.width / 2,
-  y: COURT_RECT.y + COURT_RECT.height / 2,
-};
-
 interface ConfigEditorProps {
   availableConfigs: FormationConfig[];
+  /** When set, the editor opens straight into editing this config in place (same id — not a copy). */
+  initialConfig?: FormationConfig;
   onApply: (config: FormationConfig) => void;
   onClose: () => void;
 }
 
 function cloneAsNewConfig(source: FormationConfig): FormationConfig {
   const clone = structuredClone(source) as FormationConfig;
-  clone.id = `${source.id}-copia`;
   clone.name = `${source.name} (copia)`;
+  clone.id = generateId(clone.name);
   return clone;
 }
 
-export function ConfigEditor({ availableConfigs, onApply, onClose }: ConfigEditorProps) {
+function slugify(text: string): string {
+  const slug = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // strip accents
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || 'modulo';
+}
+
+/** A short, deterministic hash of `text` (djb2), base36-encoded — just enough to keep auto-generated ids apart. */
+function shortHash(text: string): string {
+  let hash = 5381;
+  for (let i = 0; i < text.length; i++) {
+    hash = (hash * 33) ^ text.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+/** Derives a stable id from a config's name — used instead of asking the user to pick one. */
+function generateId(name: string): string {
+  return `${slugify(name)}-${shortHash(name)}`;
+}
+
+export function ConfigEditor({ availableConfigs, initialConfig, onApply, onClose }: ConfigEditorProps) {
   const { t } = useI18n();
+  // Editing an existing scheme in place must keep its id stable (so "Apply"
+  // overwrites the same entry) — the id only follows the name automatically
+  // for a brand new scheme, which the user never sees or picks themselves.
+  const isEditingInPlace = initialConfig != null;
   const [baseConfigId, setBaseConfigId] = useState(availableConfigs[0]?.id ?? '');
-  const [draft, setDraft] = useState<FormationConfig | null>(null);
+  const [draft, setDraft] = useState<FormationConfig | null>(() =>
+    initialConfig ? structuredClone(initialConfig) : null,
+  );
   const [team, setTeam] = useState<Team>('serve');
   const [phaseKey, setPhaseKey] = useState('base');
   const [setterPosition, setSetterPosition] = useState<SetterPosition>(2);
   const [errors, setErrors] = useState<string[]>([]);
   const [importError, setImportError] = useState<string | null>(null);
+  const [armedLiberoId, setArmedLiberoId] = useState<string | null>(null);
+  // 0 while dragging (instant, so it doesn't fight the live drag motion),
+  // bumped only for a libero swap so that move reads as the two players
+  // trading places rather than teleporting.
+  const [animMs, setAnimMs] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function startFromExisting() {
@@ -46,6 +79,7 @@ export function ConfigEditor({ availableConfigs, onApply, onClose }: ConfigEdito
     setTeam('serve');
     setPhaseKey('base');
     setSetterPosition(2);
+    setArmedLiberoId(null);
     setErrors([]);
   }
 
@@ -63,6 +97,7 @@ export function ConfigEditor({ availableConfigs, onApply, onClose }: ConfigEdito
       setTeam('serve');
       setPhaseKey('base');
       setSetterPosition(2);
+      setArmedLiberoId(null);
       setErrors([]);
     } catch {
       setImportError(t('editor.importError.invalidJson'));
@@ -71,6 +106,7 @@ export function ConfigEditor({ availableConfigs, onApply, onClose }: ConfigEdito
 
   function updatePlayerPosition(playerId: string, point: Point) {
     if (!draft) return;
+    setAnimMs(0);
     setDraft({
       ...draft,
       positions: {
@@ -86,17 +122,38 @@ export function ConfigEditor({ availableConfigs, onApply, onClose }: ConfigEdito
     });
   }
 
-  function removePlayerPosition(playerId: string) {
+  /**
+   * Routes a click on any court marker (real player or libero) through the
+   * libero swap flow: click a benched libero to arm it, click it again (or
+   * an on-court libero) to disarm/take it off, or — while a libero is armed
+   * — click a back-row player to bring the libero on in their place (the
+   * two swap positions; see selectors.withLiberoSwap). Only ever wired up
+   * while on "base" — see isBase below: the swap is decided once there and
+   * then locked for the rest of the rotation's sequence.
+   */
+  function handleEntityClick(id: string) {
     if (!draft) return;
-    const cell = { ...(draft.positions[phaseKey]?.[String(setterPosition)] ?? {}) };
-    delete cell[playerId];
-    setDraft({
-      ...draft,
-      positions: {
-        ...draft.positions,
-        [phaseKey]: { ...draft.positions[phaseKey], [String(setterPosition)]: cell },
-      },
-    });
+    const isLibero = draft.liberos.some((l) => l.id === id);
+    const currentSwap = getLiberoSwap(draft, team, setterPosition);
+
+    if (isLibero) {
+      if (currentSwap?.libero === id) {
+        // On court already: swap in whichever other libero is armed, or take it off.
+        const nextSwap = armedLiberoId && armedLiberoId !== id ? { libero: armedLiberoId, replaces: currentSwap.replaces } : undefined;
+        setAnimMs(ANIMATION_DURATION_MS);
+        setDraft(withLiberoSwap(draft, team, setterPosition, nextSwap));
+        setArmedLiberoId(null);
+        return;
+      }
+      setArmedLiberoId((prev) => (prev === id ? null : id));
+      return;
+    }
+
+    if (!armedLiberoId) return;
+    if (!getBackRowPlayerIds(draft, setterPosition).includes(id)) return;
+    setAnimMs(ANIMATION_DURATION_MS);
+    setDraft(withLiberoSwap(draft, team, setterPosition, { libero: armedLiberoId, replaces: id }));
+    setArmedLiberoId(null);
   }
 
   function handleValidateAndRun(action: (config: FormationConfig) => void) {
@@ -111,6 +168,15 @@ export function ConfigEditor({ availableConfigs, onApply, onClose }: ConfigEdito
   }
 
   const currentCellPositions = draft?.positions[phaseKey]?.[String(setterPosition)] ?? {};
+  const liberoSwap = draft ? getLiberoSwap(draft, team, setterPosition) : undefined;
+  const isBase = phaseKey === 'base';
+
+  // Every player and libero is always shown: on court at their real spot, or
+  // benched (left of the court) when not currently in play — see the
+  // "editor.libero.hint" UI below for how a swap is made.
+  const { players: displayPlayers, positions: displayPositions, benchedIds: nonDraggableIds } = draft
+    ? computeBenchDisplay(draft, currentCellPositions, liberoSwap)
+    : { players: [], positions: {} as Record<string, Point>, benchedIds: new Set<string>() };
 
   return (
     <div className="config-editor">
@@ -161,71 +227,71 @@ export function ConfigEditor({ availableConfigs, onApply, onClose }: ConfigEdito
       ) : (
         <div className="config-editor__workspace">
           <div className="config-editor__court">
-            <CourtStage
-              players={[...draft.players, ...draft.liberos.filter((l) => currentCellPositions[l.id])]}
-              positions={currentCellPositions}
-              durationMs={0}
-              editable
-              onPlayerDrag={updatePlayerPosition}
-              ariaLabel={`${t('editor.title')}: ${phaseKey}, P${setterPosition}`}
-            />
+            <label className="config-editor__name">
+              {t('editor.meta.name')}
+              <input
+                value={draft.name}
+                onChange={(e) => {
+                  const name = e.target.value;
+                  setDraft(isEditingInPlace ? { ...draft, name } : { ...draft, name, id: generateId(name) });
+                }}
+              />
+            </label>
+
+            <div className="config-editor__canvas">
+              <CourtStage
+                players={displayPlayers}
+                positions={displayPositions}
+                durationMs={animMs}
+                editable
+                onPlayerDrag={updatePlayerPosition}
+                onTogglePlayer={isBase ? handleEntityClick : undefined}
+                nonDraggableIds={nonDraggableIds}
+                highlightedPlayerId={armedLiberoId}
+                ariaLabel={`${t('editor.title')}: ${phaseKey}, P${setterPosition}`}
+              />
+            </div>
+
+            <label className="config-editor__description">
+              {t('editor.meta.description')}
+              <textarea
+                value={draft.description ?? ''}
+                onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+              />
+            </label>
+
+            {draft.liberos.length > 0 && (
+              <div className="config-editor__libero-note">
+                <h3>{t('editor.libero.title')}</h3>
+                <p className="config-editor__hint">{isBase ? t('editor.libero.hint') : t('editor.libero.lockedHint')}</p>
+              </div>
+            )}
           </div>
 
           <div className="config-editor__side">
-            <fieldset className="config-editor__meta">
-              <legend>{t('editor.meta.title')}</legend>
-              <label>
-                {t('editor.meta.id')}
-                <input value={draft.id} onChange={(e) => setDraft({ ...draft, id: e.target.value })} />
-              </label>
-              <label>
-                {t('editor.meta.name')}
-                <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-              </label>
-              <label>
-                {t('editor.meta.description')}
-                <textarea
-                  value={draft.description ?? ''}
-                  onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                />
-              </label>
-            </fieldset>
-
             <p className="config-editor__hint">{t('editor.hint')}</p>
 
             <RotationPanel
               setterPosition={setterPosition}
               team={team}
               onSelect={(pos, newTeam) => {
+                setAnimMs(0);
+                setArmedLiberoId(null);
                 setSetterPosition(pos);
                 setTeam(newTeam);
                 setPhaseKey('base');
               }}
             />
-            <PhasePanel config={draft} team={team} phaseKey={phaseKey} onSelect={setPhaseKey} />
-
-            {draft.liberos.length > 0 && (
-              <fieldset className="config-editor__liberos">
-                <legend>{t('editor.libero.title')}</legend>
-                {draft.liberos.map((libero) => {
-                  const present = Boolean(currentCellPositions[libero.id]);
-                  const backRowMiddleId = getBackRowMiddleId(draft, setterPosition);
-                  const suggestedStart = (backRowMiddleId && currentCellPositions[backRowMiddleId]) || COURT_CENTER;
-                  return (
-                    <button
-                      key={libero.id}
-                      type="button"
-                      className={`config-editor__libero-btn${present ? ' is-present' : ''}`}
-                      onClick={() =>
-                        present ? removePlayerPosition(libero.id) : updatePlayerPosition(libero.id, suggestedStart)
-                      }
-                    >
-                      {t(present ? 'editor.libero.remove' : 'editor.libero.add', { label: libero.shortLabel })}
-                    </button>
-                  );
-                })}
-              </fieldset>
-            )}
+            <PhasePanel
+              config={draft}
+              team={team}
+              phaseKey={phaseKey}
+              onSelect={(key) => {
+                setAnimMs(0);
+                setArmedLiberoId(null);
+                setPhaseKey(key);
+              }}
+            />
 
             <div className="config-editor__actions">
               <button type="button" onClick={() => handleValidateAndRun(onApply)}>

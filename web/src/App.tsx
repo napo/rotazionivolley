@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import type { FormationConfig } from './configs/schema';
 import { CourtStage } from './court/CourtStage';
 import { ANIMATION_DURATION_MS } from './court/courtGeometry';
+import { computeBenchDisplay } from './court/benchDisplay';
 import { RotationPanel } from './controls/RotationPanel';
 import { PhasePanel } from './controls/PhasePanel';
-import { LiberoPanel } from './controls/LiberoPanel';
 import { ConfigPicker } from './controls/ConfigPicker';
+import { HeaderDropdown } from './controls/HeaderDropdown';
 import { Tutorial } from './tutorial/Tutorial';
 import { ExportMenu } from './export/ExportMenu';
 import { ConfigEditor } from './editor/ConfigEditor';
@@ -13,7 +15,7 @@ import { InfoPanel } from './info/InfoPanel';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useI18n } from './i18n/I18nContext';
 import { builtInConfigs } from './configs';
-import { getComment, resolveDiagramState } from './state/selectors';
+import { getComment, getPositions, resolveActiveLiberoSwap } from './state/selectors';
 import { useAppState } from './state/AppStateContext';
 import './App.css';
 
@@ -23,6 +25,7 @@ function App() {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [view, setView] = useState<'viewer' | 'editor'>('viewer');
+  const [editTarget, setEditTarget] = useState<FormationConfig | undefined>(undefined);
   // A custom entry overrides a built-in with the same id (e.g. a built-in
   // config with session-only comments layered on top — see setComment).
   const allConfigs = [...builtInConfigs.filter((c) => !customConfigs.some((cc) => cc.id === c.id)), ...customConfigs];
@@ -31,6 +34,7 @@ function App() {
     return (
       <ConfigEditor
         availableConfigs={allConfigs}
+        initialConfig={editTarget}
         onClose={() => setView('viewer')}
         onApply={(newConfig) => {
           addCustomConfig(newConfig);
@@ -41,24 +45,50 @@ function App() {
     );
   }
 
-  const { players, positions } = resolveDiagramState(
-    config,
-    state.phaseKey,
-    state.setterPosition,
-    state.activeLiberoId,
-  );
+  // Everyone is always shown — on court, or benched (left of the court) if
+  // a libero is swapped in for them — so the libero's entrance/exit reads
+  // as a move rather than a silent swap. See computeBenchDisplay.
+  const cellPositions = getPositions(config, state.phaseKey, state.setterPosition);
+  const activeSwap = resolveActiveLiberoSwap(config, state.team, state.setterPosition, state.activeLiberoId);
+  const { players, positions } = computeBenchDisplay(config, cellPositions, activeSwap);
 
   return (
     <div className="app">
       <header className="app__header">
-        <h1>{t('app.title')}</h1>
-        <div className="app__header-actions">
+        <div className="app__header-titles">
+          <h1>{t('app.title')}</h1>
           <ConfigPicker
             configs={allConfigs}
             configId={state.configId}
             onSelect={(configId) => dispatch({ type: 'SELECT_CONFIG', configId })}
+            onEdit={(config) => {
+              setEditTarget(config);
+              setView('editor');
+            }}
+            onAddNew={() => {
+              setEditTarget(undefined);
+              setView('editor');
+            }}
           />
+        </div>
+        <div className="app__header-actions">
           <LanguageSwitcher />
+          <button type="button" className="app__header-btn" onClick={() => setTutorialOpen(true)}>
+            {t('app.tutorialButton')}
+          </button>
+          <HeaderDropdown label={t('export.title')}>
+            <ExportMenu
+              config={config}
+              team={state.team}
+              phaseKey={state.phaseKey}
+              setterPosition={state.setterPosition}
+              activeLiberoId={state.activeLiberoId}
+              embedded
+            />
+          </HeaderDropdown>
+          <button type="button" className="app__header-btn" onClick={() => setInfoOpen(true)}>
+            {t('app.infoButton')}
+          </button>
         </div>
       </header>
 
@@ -90,42 +120,8 @@ function App() {
             phaseKey={state.phaseKey}
             onSelect={(phaseKey) => dispatch({ type: 'SELECT_PHASE', phaseKey })}
           />
-          <LiberoPanel
-            config={config}
-            activeLiberoId={state.activeLiberoId}
-            onSelect={(liberoId) => dispatch({ type: 'SELECT_LIBERO', liberoId })}
-          />
-          <div className="app__button-row">
-            <button type="button" className="app__tutorial-btn" onClick={() => setTutorialOpen(true)}>
-              {t('app.tutorialButton')}
-            </button>
-            <button type="button" className="app__editor-btn" onClick={() => setView('editor')}>
-              {t('app.editorButton')}
-            </button>
-            <button type="button" className="app__info-btn" onClick={() => setInfoOpen(true)}>
-              {t('app.infoButton')}
-            </button>
-          </div>
-          <ExportMenu
-            config={config}
-            team={state.team}
-            phaseKey={state.phaseKey}
-            setterPosition={state.setterPosition}
-            activeLiberoId={state.activeLiberoId}
-          />
         </div>
       </main>
-
-      <footer className="app__footer">
-        <p>{config.description}</p>
-        <p>
-          {t('app.footer.basedOn')} <a href="https://github.com/monkeysppp/VBRotations">VBRotations</a>{' '}
-          {t('app.footer.by')} <a href="https://github.com/monkeysppp/">Andy Edwards</a>.
-          <br />
-          {t('app.footer.source')}{' '}
-          <a href="https://github.com/napo/rotazionivolley">https://github.com/napo/rotazionivolley</a>
-        </p>
-      </footer>
 
       {tutorialOpen && <Tutorial onClose={() => setTutorialOpen(false)} />}
       {infoOpen && <InfoPanel onClose={() => setInfoOpen(false)} />}

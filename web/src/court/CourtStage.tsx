@@ -16,6 +16,8 @@ interface CourtStageProps {
   onTogglePlayer?: (playerId: string) => void;
   editable?: boolean;
   onPlayerDrag?: (playerId: string, point: Point) => void;
+  /** Player ids that stay non-draggable even when `editable` — e.g. a benched player in the libero swap UI. */
+  nonDraggableIds?: ReadonlySet<string>;
   ariaLabel: string;
 }
 
@@ -27,6 +29,7 @@ export function CourtStage({
   onTogglePlayer,
   editable = false,
   onPlayerDrag,
+  nonDraggableIds,
   ariaLabel,
 }: CourtStageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,7 +70,7 @@ export function CourtStage({
                 position={position}
                 durationMs={durationMs}
                 highlighted={highlightedPlayerId === player.id}
-                draggable={editable}
+                draggable={editable && !nonDraggableIds?.has(player.id)}
                 onToggle={onTogglePlayer}
                 onDragMove={onPlayerDrag}
               />

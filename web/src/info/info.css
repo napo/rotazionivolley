@@ -57,3 +57,7 @@
   margin: 0;
   line-height: 1.5;
 }
+
+.info-overlay__box p + p {
+  margin-top: 0.6rem;
+}

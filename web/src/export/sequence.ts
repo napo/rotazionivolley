@@ -5,6 +5,7 @@ import type { Team } from '../state/AppStateContext';
 export type PipelineSequenceKind = 'phasesForRotation' | 'rotationsForPhase' | 'full';
 
 export interface SequencePage {
+  team: Team;
   phaseKey: string;
   setterPosition: SetterPosition;
   caption: string;
@@ -29,6 +30,7 @@ export function buildPipelinePages(
 ): SequencePage[] {
   if (sequence === 'phasesForRotation') {
     return getPhasesForTeam(config, current.team).map((phase) => ({
+      team: current.team,
       phaseKey: phase.key,
       setterPosition: current.setterPosition,
       caption: withComment(
@@ -43,6 +45,7 @@ export function buildPipelinePages(
   if (sequence === 'rotationsForPhase') {
     const label = config.phases[current.phaseKey]?.label ?? current.phaseKey;
     return SETTER_POSITIONS.map((setterPosition) => ({
+      team: current.team,
       phaseKey: current.phaseKey,
       setterPosition,
       caption: withComment(config, current.phaseKey, setterPosition, `P${setterPosition} — ${label}`),
@@ -51,8 +54,13 @@ export function buildPipelinePages(
 
   const pages: SequencePage[] = [];
   for (const [phaseKey, phase] of Object.entries(config.phases)) {
+    // "base" (team: "both") has no team of its own — the libero choice
+    // there is scoped per side, so fall back to whichever side the export
+    // was started from.
+    const team = phase.team === 'both' ? current.team : phase.team;
     for (const setterPosition of SETTER_POSITIONS) {
       pages.push({
+        team,
         phaseKey,
         setterPosition,
         caption: withComment(config, phaseKey, setterPosition, `P${setterPosition} — ${phase.label}`),

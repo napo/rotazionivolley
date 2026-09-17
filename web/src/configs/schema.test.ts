@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultConfig } from './index';
 import { parseFormationConfig, safeParseFormationConfig } from './schema';
+import { buildFixtureConfig } from './testFixtures';
 
 describe('FormationConfigSchema', () => {
   it('accepts the built-in ricezione-a-3 config', () => {
@@ -26,12 +27,14 @@ describe('FormationConfigSchema', () => {
   });
 
   it('accepts liberos with no coordinates at all (sparse by design)', () => {
-    expect(defaultConfig.liberos.map((l) => l.id)).toEqual(['L1', 'L2']);
-    for (const phaseKey of Object.keys(defaultConfig.phases)) {
+    const fixture = buildFixtureConfig();
+    expect(fixture.liberos.map((l) => l.id)).toEqual(['L1']);
+    for (const phaseKey of Object.keys(fixture.phases)) {
       for (const setterPosition of ['1', '2', '3', '4', '5', '6']) {
-        expect(defaultConfig.positions[phaseKey][setterPosition].L1).toBeUndefined();
+        expect(fixture.positions[phaseKey][setterPosition].L1).toBeUndefined();
       }
     }
+    expect(() => parseFormationConfig(fixture)).not.toThrow();
   });
 
   it('rejects a libero entry whose role is not "libero"', () => {
@@ -43,7 +46,7 @@ describe('FormationConfigSchema', () => {
   });
 
   it('defaults liberos to an empty array when omitted', () => {
-    const withoutLiberos = structuredClone(defaultConfig) as Record<string, unknown>;
+    const withoutLiberos = structuredClone(buildFixtureConfig()) as Record<string, unknown>;
     delete withoutLiberos.liberos;
 
     const result = safeParseFormationConfig(withoutLiberos);

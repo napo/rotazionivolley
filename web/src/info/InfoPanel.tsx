@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n/I18nContext';
+import { APP_VERSION } from '../version';
 import './info.css';
 
 interface InfoPanelProps {
@@ -18,29 +19,26 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
           </button>
         </div>
 
-        <section>
-          <h3>{t('info.about.title')}</h3>
-          <p>{t('info.about.body')}</p>
-        </section>
-
-        <section>
-          <h3>{t('info.author.title')}</h3>
-          <p>{t('info.author.body')}</p>
-        </section>
-
-        <section>
-          <h3>{t('info.source.title')}</h3>
-          <p>
-            <a href="https://github.com/napo/rotazionivolley" target="_blank" rel="noreferrer">
-              github.com/napo/rotazionivolley
-            </a>
-          </p>
-        </section>
-
-        <section>
-          <h3>{t('info.ai.title')}</h3>
-          <p>{t('info.ai.body')}</p>
-        </section>
+        <p>
+          {t('info.project')}{' '}
+          <a href="https://github.com/napo" target="_blank" rel="noreferrer">
+            Maurizio Napolitano
+          </a>
+        </p>
+        <p>{t('info.builtOn')}</p>
+        <p>
+          {t('info.sourceLabel')}{' '}
+          <a href="https://github.com/napo/rotazionivolley" target="_blank" rel="noreferrer">
+            https://github.com/napo/rotazionivolley
+          </a>
+        </p>
+        <p>{t('info.version', { version: APP_VERSION })}</p>
+        <p>
+          {t('info.licenseLabel')}{' '}
+          <a href="https://github.com/napo/rotazionivolley/blob/master/LICENSE" target="_blank" rel="noreferrer">
+            Apache License 2.0
+          </a>
+        </p>
       </div>
     </div>
   );

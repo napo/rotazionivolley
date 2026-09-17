@@ -13,8 +13,9 @@ import {
  * Headless Canvas 2D renderer shared by every "offscreen" export path (PNG,
  * PDF page rasterization, video frames) so they never drift out of sync with
  * each other or with the live Konva view — geometry constants and visual
- * styling (shadow, corner radius) are kept in step with CourtBackground.tsx /
- * PlayerMarker.tsx by hand, since Canvas 2D and Konva don't share a renderer.
+ * styling (shadow, court line width) are kept in step with
+ * CourtBackground.tsx / PlayerMarker.tsx by hand, since Canvas 2D and Konva
+ * don't share a renderer.
  */
 export function drawFrame(
   ctx: CanvasRenderingContext2D,
@@ -33,14 +34,14 @@ export function drawFrame(
   ctx.shadowOffsetY = 4;
   ctx.fillStyle = COLOURS.court;
   ctx.beginPath();
-  ctx.roundRect(COURT_RECT.x, COURT_RECT.y, COURT_RECT.width, COURT_RECT.height, 6);
+  ctx.rect(COURT_RECT.x, COURT_RECT.y, COURT_RECT.width, COURT_RECT.height);
   ctx.fill();
   ctx.restore();
 
   ctx.strokeStyle = COLOURS.line;
   ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.roundRect(COURT_RECT.x, COURT_RECT.y, COURT_RECT.width, COURT_RECT.height, 6);
+  ctx.rect(COURT_RECT.x, COURT_RECT.y, COURT_RECT.width, COURT_RECT.height);
   ctx.stroke();
 
   drawLine(ctx, CENTRE_LINE.x1, CENTRE_LINE.y1, CENTRE_LINE.x2, CENTRE_LINE.y2);

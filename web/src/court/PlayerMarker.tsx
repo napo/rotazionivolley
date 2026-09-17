@@ -65,7 +65,9 @@ export function PlayerMarker({
     };
   }, []);
 
-  const fontSize = player.shortLabel.length > 1 ? 20 : 26;
+  // One size for every marker, regardless of label length — a 1-letter role
+  // (P, O) and a 2-letter one (C1, L2) must read as the same-size symbol.
+  const fontSize = 22;
 
   return (
     <Group

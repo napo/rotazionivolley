@@ -4,10 +4,10 @@
  * transformation. The viewBox adds margin for the player circle radius/stroke
  * and for court lines that extend slightly outside the field rectangle.
  */
-export const COURT_VIEWBOX = { minX: -40, minY: -20, width: 640, height: 560 } as const;
+export const COURT_VIEWBOX = { minX: -40, minY: -85, width: 640, height: 670 } as const;
 
-export const COURT_RECT = { x: 75, y: 50, width: 450, height: 425 } as const;
-export const CENTRE_LINE = { x1: 60, y1: 50, x2: 540, y2: 50 } as const;
+export const COURT_RECT = { x: 75, y: -15, width: 450, height: 535 } as const;
+export const CENTRE_LINE = { x1: 60, y1: -15, x2: 540, y2: -15 } as const;
 export const ATTACK_LINE = { x1: 75, y1: 200, x2: 525, y2: 200 } as const;
 export const ATTACK_LINE_TICKS = [
   { x1: 10, y1: 200, x2: 75, y2: 200 },
@@ -15,6 +15,22 @@ export const ATTACK_LINE_TICKS = [
 ] as const;
 
 export const PLAYER_RADIUS = 27;
+
+/**
+ * Off-court "bench" spots for up to two liberos, left of the court, stacked
+ * in a single column with the lowest one level with the baseline (the
+ * court's bottom edge) — liberos are back-row players, so this reads as
+ * "waiting behind the back row" rather than floating near the net. See the
+ * editor's libero swap UI. Indexed by the libero's position in
+ * `config.liberos` (0 or 1) — not by a specific id, so this stays agnostic
+ * to whatever ids a given config uses for its liberos.
+ */
+const LIBERO_BENCH_X = 20;
+const LIBERO_BENCH_BASELINE_Y = COURT_RECT.y + COURT_RECT.height;
+export const LIBERO_BENCH_SLOTS = [
+  { x: LIBERO_BENCH_X, y: LIBERO_BENCH_BASELINE_Y - 140 },
+  { x: LIBERO_BENCH_X, y: LIBERO_BENCH_BASELINE_Y },
+] as const;
 
 /**
  * Chosen and verified for accessibility (see court/colorAccessibility.ts /

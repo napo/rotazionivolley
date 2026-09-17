@@ -14,6 +14,8 @@ interface ExportMenuProps {
   phaseKey: string;
   setterPosition: SetterPosition;
   activeLiberoId?: string | null;
+  /** When embedded in a dropdown (e.g. the header), skip the panel chrome and title — the trigger button already labels it. */
+  embedded?: boolean;
 }
 
 type Format = 'png' | 'pdf-single' | 'pdf-pipeline' | 'video';
@@ -26,7 +28,7 @@ const SEQUENCE_LABEL_KEYS: Record<PipelineSequenceKind, StringKey> = {
 
 const videoSupported = isVideoExportSupported();
 
-export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiberoId = null }: ExportMenuProps) {
+export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiberoId = null, embedded = false }: ExportMenuProps) {
   const { t } = useI18n();
   const [format, setFormat] = useState<Format>('png');
   const [sequence, setSequence] = useState<PipelineSequenceKind>('phasesForRotation');
@@ -41,9 +43,9 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
     try {
       const base = `${config.id}-p${setterPosition}-${phaseKey}`;
       if (format === 'png') {
-        await exportStateAsPng(config, phaseKey, setterPosition, `${base}.png`, activeLiberoId);
+        await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId);
       } else if (format === 'pdf-single') {
-        await exportSinglePagePdf(config, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId);
+        await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId);
       } else if (format === 'pdf-pipeline') {
         const pages = buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence);
         await exportPipelinePdf(config, pages, `${config.id}-sequenza-${sequence}.pdf`, activeLiberoId);
@@ -59,8 +61,8 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
   }
 
   return (
-    <section className="panel export-menu" aria-label={t('export.title')}>
-      <h2 className="panel__title">{t('export.title')}</h2>
+    <section className={embedded ? 'export-menu' : 'panel export-menu'} aria-label={t('export.title')}>
+      {!embedded && <h2 className="panel__title">{t('export.title')}</h2>}
 
       <fieldset className="export-menu__group">
         <legend>{t('export.format')}</legend>

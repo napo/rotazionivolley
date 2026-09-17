@@ -20,7 +20,6 @@ export function CourtBackground() {
         fill={COLOURS.court}
         stroke={COLOURS.line}
         strokeWidth={4}
-        cornerRadius={6}
         shadowColor="rgba(20, 40, 60, 0.35)"
         shadowBlur={16}
         shadowOffsetY={4}
