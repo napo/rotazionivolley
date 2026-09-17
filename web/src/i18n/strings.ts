@@ -79,6 +79,7 @@ export const strings = {
     'info.project': 'Progetto di',
     'info.builtOn': 'Applicazione costruita su VBRotations di Andy Edwards.',
     'info.sourceLabel': 'Codice sorgente:',
+    'info.aiAssisted': "Realizzato con l'aiuto di Claude AI.",
     'info.version': 'Versione {version}',
     'info.licenseLabel': 'Software rilasciato con licenza',
 
@@ -156,6 +157,7 @@ export const strings = {
     'info.project': 'Project by',
     'info.builtOn': 'Built on VBRotations by Andy Edwards.',
     'info.sourceLabel': 'Source code:',
+    'info.aiAssisted': 'Built with the help of Claude AI.',
     'info.version': 'Version {version}',
     'info.licenseLabel': 'Software released under the',
 

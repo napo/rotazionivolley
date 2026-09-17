@@ -32,6 +32,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
             https://github.com/napo/rotazionivolley
           </a>
         </p>
+        <p>{t('info.aiAssisted')}</p>
         <p>{t('info.version', { version: APP_VERSION })}</p>
         <p>
           {t('info.licenseLabel')}{' '}
