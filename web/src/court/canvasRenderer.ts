@@ -69,7 +69,7 @@ export function drawFrame(
     ctx.arc(position.x, position.y, PLAYER_RADIUS, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.fillStyle = '#eeeeee';
+    ctx.fillStyle = COLOURS.playerLabel;
     ctx.font = `bold ${player.shortLabel.length > 1 ? 20 : 26}px Verdana, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

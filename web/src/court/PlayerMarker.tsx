@@ -119,7 +119,7 @@ export function PlayerMarker({
         fontStyle="bold"
         fontFamily="Verdana, sans-serif"
         fontSize={fontSize}
-        fill="#eeeeee"
+        fill={highlighted ? COLOURS.playerLabelHighlighted : COLOURS.playerLabel}
         listening={false}
       />
     </Group>

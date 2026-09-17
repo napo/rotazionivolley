@@ -17,7 +17,7 @@ describe('getPositions', () => {
     expect(positions.C2).toEqual({ x: 225, y: 50 });
     expect(positions.O).toEqual({ x: 100, y: 50 });
     expect(positions.S2).toEqual({ x: 100, y: 300 });
-    expect(positions.C1).toEqual({ x: 225, y: 350 });
+    expect(positions.C1).toEqual({ x: 225, y: 300 });
   });
 
   it('returns coordinates for every setter position and every phase', () => {
@@ -36,6 +36,19 @@ describe('getPositions', () => {
   });
 });
 
+describe('base formation alignment', () => {
+  it('is a clean 2x3 grid for every rotation: front row and back row each share one y, and x columns line up', () => {
+    for (let setterPosition = 1; setterPosition <= 6; setterPosition++) {
+      const positions = getPositions(defaultConfig, 'base', setterPosition as 1 | 2 | 3 | 4 | 5 | 6);
+      const points = Object.values(positions);
+      const ys = new Set(points.map((p) => p.y));
+      const xs = new Set(points.map((p) => p.x));
+      expect(ys.size, `rotation ${setterPosition} should have exactly 2 distinct y values`).toBe(2);
+      expect(xs.size, `rotation ${setterPosition} should have exactly 3 distinct x values (shared columns)`).toBe(3);
+    }
+  });
+});
+
 describe('getBackRowMiddleId', () => {
   it('matches the migrated base data for every rotation', () => {
     const expected: Record<number, string> = { 1: 'C1', 2: 'C1', 3: 'C2', 4: 'C2', 5: 'C2', 6: 'C1' };
@@ -49,14 +62,14 @@ describe('resolveDiagramState with an active libero', () => {
   it('without an active libero, returns all 6 standard players unchanged', () => {
     const { players, positions } = resolveDiagramState(defaultConfig, 'base', 1, null);
     expect(players.map((p) => p.id).sort()).toEqual(['C1', 'C2', 'O', 'P', 'S1', 'S2']);
-    expect(positions.C1).toEqual({ x: 225, y: 350 });
+    expect(positions.C1).toEqual({ x: 225, y: 300 });
   });
 
   it('replaces the back-row middle with the active libero, at the same coordinates', () => {
     const { players, positions } = resolveDiagramState(defaultConfig, 'base', 1, 'L1');
     const ids = players.map((p) => p.id).sort();
     expect(ids).toEqual(['C2', 'L1', 'O', 'P', 'S1', 'S2']); // C1 (back row at rotation 1) is replaced
-    expect(positions.L1).toEqual({ x: 225, y: 350 }); // borrows C1's coordinates
+    expect(positions.L1).toEqual({ x: 225, y: 300 }); // borrows C1's coordinates
     expect(positions.C1).toBeUndefined();
   });
 

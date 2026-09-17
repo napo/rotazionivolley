@@ -6,7 +6,7 @@
 
 .tutorial-overlay__spotlight {
   position: fixed;
-  border: 3px solid #44cc44;
+  border: 3px solid #0f7d8c;
   border-radius: 8px;
   box-shadow: 0 0 0 9999px rgba(60, 60, 60, 0.8);
   pointer-events: none;
@@ -19,7 +19,7 @@
   bottom: 1.5rem;
   transform: translateX(-50%);
   max-width: min(90vw, 420px);
-  background: #44cc44;
+  background: #0f7d8c;
   color: #fff;
   border-radius: 8px;
   padding: 1rem 1.25rem;
@@ -39,7 +39,7 @@
   border-radius: 6px;
   border: none;
   background: #fff;
-  color: #237a23;
+  color: #0f7d8c;
   font-weight: 600;
   cursor: pointer;
 }

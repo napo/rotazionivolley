@@ -76,17 +76,17 @@
 
 .libero-panel__btn {
   padding: 0.5rem 0.9rem;
-  border: 2px solid #b98ad6;
+  border: 2px solid #a15c1f;
   border-radius: 6px;
-  background: #f3eaf9;
-  color: #4a2e63;
+  background: #f9ead9;
+  color: #6b3d10;
   font-weight: 600;
   cursor: pointer;
 }
 
 .libero-panel__btn.is-active {
-  background: #a06bd6;
-  border-color: #a06bd6;
+  background: #a15c1f;
+  border-color: #a15c1f;
   color: #fff;
 }
 

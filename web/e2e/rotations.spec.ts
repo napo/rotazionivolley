@@ -41,14 +41,14 @@ test.describe('Rotazioni volley - percorso principale', () => {
 
   test('cliccare un giocatore lo evidenzia', async ({ page }) => {
     await page.goto('/');
-    expect(await getPlayerFill(page, 'O')).toBe('#efa581');
+    expect(await getPlayerFill(page, 'O')).toBe('#164863');
 
     const rect = await getPlayerPageRect(page, 'O');
     await page.mouse.click(rect.centerX, rect.centerY);
-    expect(await getPlayerFill(page, 'O')).toBe('#66dd66');
+    expect(await getPlayerFill(page, 'O')).toBe('#ffb300');
 
     await page.mouse.click(rect.centerX, rect.centerY);
-    expect(await getPlayerFill(page, 'O')).toBe('#efa581');
+    expect(await getPlayerFill(page, 'O')).toBe('#164863');
   });
 
   test('il tutorial si può scorrere fino alla fine e chiudere', async ({ page }) => {
