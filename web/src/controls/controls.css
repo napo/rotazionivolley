@@ -1,0 +1,105 @@
+.panel {
+  background: #f4f4f4;
+  border-radius: 8px;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.panel__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rotation-panel__columns {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.rotation-panel__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rotation-panel__col-header {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+}
+
+.rotation-panel__btn {
+  padding: 0.5rem 0.25rem;
+  border: 2px solid #65b6df;
+  border-radius: 6px;
+  background: #eef7fc;
+  color: #245;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rotation-panel__btn.is-active {
+  background: #65b6df;
+  color: #fff;
+}
+
+.phase-panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.phase-panel__btn {
+  padding: 0.6rem 0.9rem;
+  border: 2px solid #4596bf;
+  border-radius: 6px;
+  background: #eaf3f8;
+  color: #234;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1 1 auto;
+}
+
+.phase-panel__btn.is-active {
+  background: #4596bf;
+  color: #fff;
+}
+
+.libero-panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.libero-panel__btn {
+  padding: 0.5rem 0.9rem;
+  border: 2px solid #b98ad6;
+  border-radius: 6px;
+  background: #f3eaf9;
+  color: #4a2e63;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.libero-panel__btn.is-active {
+  background: #a06bd6;
+  border-color: #a06bd6;
+  color: #fff;
+}
+
+.config-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.config-picker select {
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}

@@ -1,0 +1,104 @@
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.app__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.app__header h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.app__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+.app__court {
+  width: 100%;
+}
+
+.app__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app__button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.app__tutorial-btn,
+.app__editor-btn,
+.app__info-btn {
+  align-self: flex-start;
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app__tutorial-btn {
+  background: #44cc44;
+}
+
+.app__editor-btn {
+  background: #a06bd6;
+}
+
+.app__info-btn {
+  background: #6b7280;
+}
+
+.app__footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.app__footer p + p {
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 860px) {
+  .app__layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .app__court {
+    flex: 1 1 60%;
+    min-width: 0;
+  }
+
+  .app__controls {
+    flex: 1 1 320px;
+    max-width: 340px;
+  }
+}

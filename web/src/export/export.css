@@ -1,0 +1,47 @@
+.export-menu__group {
+  border: none;
+  padding: 0;
+  margin: 0 0 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.export-menu__group legend {
+  font-size: 0.8rem;
+  color: #666;
+  padding: 0;
+  margin-bottom: 0.2rem;
+}
+
+.export-menu__group label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.export-menu__submit {
+  padding: 0.55rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  background: #4596bf;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.export-menu__submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.export-menu__disabled {
+  opacity: 0.55;
+}
+
+.export-menu__error {
+  color: #b3261e;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}

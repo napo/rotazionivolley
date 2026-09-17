@@ -1,0 +1,45 @@
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.tutorial-overlay__spotlight {
+  position: fixed;
+  border: 3px solid #44cc44;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(60, 60, 60, 0.8);
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.tutorial-overlay__callout {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  max-width: min(90vw, 420px);
+  background: #44cc44;
+  color: #fff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.tutorial-overlay__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tutorial-overlay__actions button {
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background: #fff;
+  color: #237a23;
+  font-weight: 600;
+  cursor: pointer;
+}

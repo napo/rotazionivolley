@@ -1,0 +1,175 @@
+.config-editor {
+  max-width: 1100px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding: 0 1rem 2rem;
+  background: #fafafa;
+}
+
+.config-editor__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.config-editor__header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.config-editor__back {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.config-editor__start {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 420px;
+}
+
+.config-editor__start label,
+.config-editor__import {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.config-editor__or {
+  text-align: center;
+  color: #888;
+  margin: 0;
+}
+
+.config-editor__workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.config-editor__court {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.config-editor__side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.config-editor__meta {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.config-editor__meta legend {
+  font-size: 0.8rem;
+  color: #666;
+  padding: 0;
+}
+
+.config-editor__meta label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.config-editor__meta input,
+.config-editor__meta textarea {
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font: inherit;
+}
+
+.config-editor__liberos {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.config-editor__liberos legend {
+  font-size: 0.8rem;
+  color: #666;
+  padding: 0;
+  margin-bottom: 0.2rem;
+}
+
+.config-editor__libero-btn {
+  padding: 0.5rem 0.8rem;
+  border: 2px solid #b98ad6;
+  border-radius: 6px;
+  background: #f3eaf9;
+  color: #4a2e63;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.config-editor__libero-btn.is-present {
+  background: #a06bd6;
+  border-color: #a06bd6;
+  color: #fff;
+}
+
+.config-editor__hint {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0;
+}
+
+.config-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.config-editor__actions button {
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: #4596bf;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.config-editor__error {
+  color: #b3261e;
+  font-size: 0.85rem;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+@media (min-width: 860px) {
+  .config-editor__workspace {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .config-editor__court {
+    flex: 1 1 55%;
+    min-width: 0;
+  }
+
+  .config-editor__side {
+    flex: 1 1 320px;
+    max-width: 360px;
+  }
+}

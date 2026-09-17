@@ -1,0 +1,25 @@
+.language-switcher {
+  display: inline-flex;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.language-switcher__btn {
+  padding: 0.35rem 0.7rem;
+  border: none;
+  background: #fff;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.language-switcher__btn + .language-switcher__btn {
+  border-left: 1px solid #ccc;
+}
+
+.language-switcher__btn.is-active {
+  background: #4596bf;
+  color: #fff;
+}

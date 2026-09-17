@@ -1,0 +1,21 @@
+{
+  "name": "rotazionivolley",
+  "private": true,
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace web",
+    "build": "npm run build --workspace web",
+    "test": "npm run test --workspace web",
+    "test:e2e": "npm run test:e2e --workspace web",
+    "typecheck": "npm run typecheck --workspace web",
+    "lint": "npm run lint --workspace web",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "cap:sync": "cap sync",
+    "cap:android": "cap open android",
+    "cap:ios": "cap open ios"
+  }
+}

@@ -1,0 +1,14 @@
+.comment-panel {
+  margin-top: 1rem;
+}
+
+.comment-panel__textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}

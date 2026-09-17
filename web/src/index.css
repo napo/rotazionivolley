@@ -1,0 +1,23 @@
+:root {
+  color-scheme: light;
+  font: 16px/1.4 system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fafafa;
+  color: #222;
+}
+
+h1,
+h2 {
+  font-weight: 600;
+}
+
+a {
+  color: #2f6f9f;
+}
