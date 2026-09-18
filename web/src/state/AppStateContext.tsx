@@ -1,6 +1,6 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { defaultConfig, getConfigById } from '../configs';
-import type { FormationConfig, SetterPosition } from '../configs/schema';
+import { safeParseFormationConfig, type FormationConfig, type SetterPosition } from '../configs/schema';
 import { withComment } from './selectors';
 
 export type Team = 'serve' | 'receive';
@@ -59,7 +59,7 @@ interface AppStateContextValue {
   /**
    * Configs created in the editor, or built-ins with session-only edits
    * layered on top (e.g. comments typed in the viewer — see setComment),
-   * in-memory for this session. When an entry's id matches a built-in, it
+   * persisted in localStorage (see loadCustomConfigs). When an entry's id matches a built-in, it
    * takes priority over it (see `config` below).
    */
   customConfigs: FormationConfig[];
@@ -68,11 +68,38 @@ interface AppStateContextValue {
   setComment: (phaseKey: string, setterPosition: SetterPosition, text: string) => void;
 }
 
+const CUSTOM_CONFIGS_KEY = 'rv-custom-configs';
+
+// Entries that no longer validate (schema changed, hand-edited storage) are
+// dropped rather than breaking startup.
+function loadCustomConfigs(): FormationConfig[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CONFIGS_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((entry) => {
+      const result = safeParseFormationConfig(entry);
+      return result.success ? [result.data] : [];
+    });
+  } catch {
+    return [];
+  }
+}
+
 const AppStateContext = createContext<AppStateContextValue | null>(null);
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, defaultConfig.id, initialStateFor);
-  const [customConfigs, setCustomConfigs] = useState<FormationConfig[]>([]);
+  const [customConfigs, setCustomConfigs] = useState<FormationConfig[]>(loadCustomConfigs);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CUSTOM_CONFIGS_KEY, JSON.stringify(customConfigs));
+    } catch {
+      // storage full/unavailable — schemes just stay session-only
+    }
+  }, [customConfigs]);
 
   const addCustomConfig = useCallback((config: FormationConfig) => {
     setCustomConfigs((prev) => [...prev.filter((c) => c.id !== config.id), config]);

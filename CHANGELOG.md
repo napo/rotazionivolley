@@ -2,6 +2,11 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [Non rilasciato]
+
+### Aggiunto
+- Gli schemi creati nell'editor (e le note) vengono salvati nel browser e ricaricati all'avvio, invece di perdersi al ricaricamento della pagina.
+
 ## [2.0.1] - 2026-09-18
 
 ### Aggiunto
