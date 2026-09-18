@@ -1,7 +1,7 @@
 {
   "name": "web",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "typecheck": "tsc -b --noEmit",
-    "generate:favicon": "node scripts/generate-favicon.mjs"
+    "generate:assets": "node scripts/generate-assets.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
