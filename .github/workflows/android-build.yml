@@ -1,10 +1,10 @@
 name: Android build
 
 # Builds the Android app and attaches the APK to the GitHub Release. Runs on
-# every published release, plus manual dispatch for testing. This is a
-# debug-signed build (installable on a device for testing) since no release
-# keystore is configured — a Play Store submission needs the repo owner's own
-# signing keystore set up as secrets, which this workflow does not attempt.
+# every published release, plus manual dispatch for testing. Builds a
+# release-signed APK when the release-signing secrets (ANDROID_KEYSTORE_*)
+# are configured on the repo; otherwise falls back to a debug-signed build
+# (installable on a device for testing, but not suitable for distribution).
 
 on:
   release:
@@ -48,18 +48,47 @@ jobs:
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
+      - name: Check for release signing secrets
+        id: signing
+        run: |
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "has_keystore=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_keystore=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Decode release keystore
+        if: steps.signing.outputs.has_keystore == 'true'
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build release APK
+        if: steps.signing.outputs.has_keystore == 'true'
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon
+
       - name: Build debug APK
+        if: steps.signing.outputs.has_keystore == 'false'
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK as build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rotazionivolley-android-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: rotazionivolley-android-${{ steps.signing.outputs.has_keystore == 'true' && 'release' || 'debug' }}
+          path: |
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: ignore
 
       - name: Attach APK to the GitHub Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: |
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/apk/debug/app-debug.apk
