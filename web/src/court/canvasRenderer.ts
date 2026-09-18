@@ -17,10 +17,23 @@ import {
  * CourtBackground.tsx / PlayerMarker.tsx by hand, since Canvas 2D and Konva
  * don't share a renderer.
  */
+/**
+ * Left inset and line height shared with the PDF export path, which draws
+ * the same title text as vector content instead of baking it into the
+ * raster image — see export/pdf.ts. Sized to fit up to 3 lines (document
+ * header + a page's own line, for the "rotations of one phase" pipeline)
+ * inside the sky strip above the court rectangle (COURT_VIEWBOX.minY to
+ * COURT_RECT.y, 70px).
+ */
+export const TITLE_LEFT_INSET = 10;
+export const TITLE_TOP_INSET = 18;
+export const TITLE_LINE_HEIGHT = 18;
+
 export function drawFrame(
   ctx: CanvasRenderingContext2D,
   players: PlayerDef[],
   positions: Record<string, Point>,
+  title?: string[],
   caption?: string,
 ): void {
   const { minX, minY, width, height } = COURT_VIEWBOX;
@@ -75,6 +88,16 @@ export function drawFrame(
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(player.shortLabel, position.x, position.y + 1);
+  }
+
+  if (title && title.length > 0) {
+    ctx.fillStyle = '#1a1a1a';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    title.forEach((line, i) => {
+      ctx.font = i === 0 ? 'bold 17px Verdana, sans-serif' : '14px Verdana, sans-serif';
+      ctx.fillText(line, minX + TITLE_LEFT_INSET, minY + TITLE_TOP_INSET + i * TITLE_LINE_HEIGHT);
+    });
   }
 
   if (caption) {

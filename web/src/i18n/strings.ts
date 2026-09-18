@@ -34,12 +34,13 @@ export const strings = {
     'export.format.video': 'Video (sequenza animata, .webm)',
     'export.format.videoUnsupported': ' — non supportato su questo dispositivo',
     'export.sequence.title': 'Sequenza da esportare',
-    'export.sequence.phasesForRotation': 'Tutte le fasi della rotazione corrente',
-    'export.sequence.rotationsForPhase': 'Tutte le rotazioni della fase corrente',
-    'export.sequence.full': 'Sequenza completa (fasi × rotazioni)',
+    'export.sequence.serveRotation': 'Servizio rotazione P{position}',
+    'export.sequence.receiveRotation': 'Ricezione rotazione P{position}',
+    'export.sequence.full': 'Tutte le fasi',
     'export.submit': 'Esporta',
     'export.submitBusy': 'Esportazione…',
     'export.error.generic': 'Esportazione non riuscita',
+    'export.header.rotation': '{team} situazione P{position}',
 
     'editor.title': 'Editor schemi',
     'editor.back': '← Torna alla visualizzazione',
@@ -82,6 +83,12 @@ export const strings = {
     'info.aiAssisted': "Realizzato con l'aiuto di Claude AI.",
     'info.version': 'Versione {version}',
     'info.licenseLabel': 'Software rilasciato con licenza',
+    'info.downloads.intro':
+      'Se vuoi provare rotazionivolley sul tuo computer o sul tuo smartphone/tablet, trovi le versioni per Windows, macOS, Linux e Android a questo indirizzo:',
+    'info.downloads.macNotarizationNote':
+      'macOS: la versione per Mac non è firmata con un account Apple Developer (a pagamento). Al primo avvio, se macOS la blocca, autorizzala da Preferenze di Sistema → Privacy e sicurezza → "Apri comunque".',
+    'info.downloads.androidSideloadNote':
+      "Android: l'APK non è distribuito tramite il Play Store, quindi per installarlo devi abilitare \"Installa da fonti sconosciute\" per il browser o l'app che usi per scaricarlo.",
 
     'language.label': 'Lingua',
   },
@@ -112,12 +119,13 @@ export const strings = {
     'export.format.video': 'Video (animated sequence, .webm)',
     'export.format.videoUnsupported': ' — not supported on this device',
     'export.sequence.title': 'Sequence to export',
-    'export.sequence.phasesForRotation': 'All phases of the current rotation',
-    'export.sequence.rotationsForPhase': 'All rotations of the current phase',
-    'export.sequence.full': 'Full sequence (phases × rotations)',
+    'export.sequence.serveRotation': 'Serve rotation P{position}',
+    'export.sequence.receiveRotation': 'Receive rotation P{position}',
+    'export.sequence.full': 'All phases',
     'export.submit': 'Export',
     'export.submitBusy': 'Exporting…',
     'export.error.generic': 'Export failed',
+    'export.header.rotation': '{team} situation P{position}',
 
     'editor.title': 'Scheme editor',
     'editor.back': '← Back to viewer',
@@ -160,6 +168,12 @@ export const strings = {
     'info.aiAssisted': 'Built with the help of Claude AI.',
     'info.version': 'Version {version}',
     'info.licenseLabel': 'Software released under the',
+    'info.downloads.intro':
+      'If you want to try rotazionivolley on your computer or your smartphone/tablet, you\'ll find the Windows, macOS, Linux and Android versions at this address:',
+    'info.downloads.macNotarizationNote':
+      'macOS: the Mac build isn\'t signed with a (paid) Apple Developer account. If macOS blocks it on first launch, allow it from System Settings → Privacy & Security → "Open Anyway".',
+    'info.downloads.androidSideloadNote':
+      'Android: the APK isn\'t distributed through the Play Store, so installing it requires enabling "Install from unknown sources" for the browser or app you use to download it.',
 
     'language.label': 'Language',
   },

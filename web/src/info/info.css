@@ -61,3 +61,8 @@
 .info-overlay__box p + p {
   margin-top: 0.6rem;
 }
+
+.info-overlay__note {
+  font-size: 0.85rem;
+  color: #666;
+}

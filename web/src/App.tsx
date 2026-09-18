@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FormationConfig } from './configs/schema';
-import { CourtStage } from './court/CourtStage';
+import { CourtStage, type CourtStageApi } from './court/CourtStage';
 import { ANIMATION_DURATION_MS } from './court/courtGeometry';
 import { computeBenchDisplay } from './court/benchDisplay';
 import { RotationPanel } from './controls/RotationPanel';
@@ -23,6 +23,7 @@ function App() {
   const { state, dispatch, config, customConfigs, addCustomConfig, setComment } = useAppState();
   const { t } = useI18n();
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const courtStageApiRef = useRef<CourtStageApi | null>(null);
   const [infoOpen, setInfoOpen] = useState(false);
   const [view, setView] = useState<'viewer' | 'editor'>('viewer');
   const [editTarget, setEditTarget] = useState<FormationConfig | undefined>(undefined);
@@ -101,6 +102,7 @@ function App() {
             highlightedPlayerId={state.highlightedPlayerId}
             onTogglePlayer={(playerId) => dispatch({ type: 'TOGGLE_HIGHLIGHT', playerId })}
             ariaLabel={`${config.name}, ${config.phases[state.phaseKey]?.label ?? state.phaseKey}, P${state.setterPosition}`}
+            apiRef={courtStageApiRef}
           />
           <CommentPanel
             value={getComment(config, state.phaseKey, state.setterPosition)}
@@ -123,7 +125,14 @@ function App() {
         </div>
       </main>
 
-      {tutorialOpen && <Tutorial onClose={() => setTutorialOpen(false)} />}
+      {tutorialOpen && (
+        <Tutorial
+          onClose={() => setTutorialOpen(false)}
+          getSamplePlayerRect={() =>
+            players[0] ? (courtStageApiRef.current?.getPlayerScreenRect(players[0].id) ?? null) : null
+          }
+        />
+      )}
       {infoOpen && <InfoPanel onClose={() => setInfoOpen(false)} />}
     </div>
   );

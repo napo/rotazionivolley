@@ -29,6 +29,14 @@ export type Point = z.infer<typeof PointSchema>;
 export const SETTER_POSITIONS = [1, 2, 3, 4, 5, 6] as const;
 export type SetterPosition = (typeof SETTER_POSITIONS)[number];
 
+/**
+ * The order rotations actually advance in during a match (a side-out moves
+ * the setter from zone N to zone N-1), rather than numeric order — used
+ * wherever rotations are shown or exported as a sequence a player would
+ * recognize (the rotation navigator, pipeline PDF/video exports).
+ */
+export const ROTATION_ORDER: readonly SetterPosition[] = [1, 6, 5, 4, 3, 2];
+
 /** playerId -> coordinates, for one (phase, setterPosition) combination */
 export const RotationPositionsSchema = z.record(z.string(), PointSchema);
 export type RotationPositions = z.infer<typeof RotationPositionsSchema>;

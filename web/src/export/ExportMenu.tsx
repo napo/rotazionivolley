@@ -2,9 +2,9 @@ import { useState } from 'react';
 import type { FormationConfig, SetterPosition } from '../configs/schema';
 import type { Team } from '../state/AppStateContext';
 import { useI18n } from '../i18n/I18nContext';
-import type { StringKey } from '../i18n/strings';
 import { exportStateAsPng } from './png';
 import { buildPipelinePages, exportPipelinePdf, exportSinglePagePdf, type PipelineSequenceKind } from './pdf';
+import type { Translate } from './sequence';
 import { isVideoExportSupported, recordSequenceAsWebm } from './video';
 import './export.css';
 
@@ -20,18 +20,30 @@ interface ExportMenuProps {
 
 type Format = 'png' | 'pdf-single' | 'pdf-pipeline' | 'video';
 
-const SEQUENCE_LABEL_KEYS: Record<PipelineSequenceKind, StringKey> = {
-  phasesForRotation: 'export.sequence.phasesForRotation',
-  rotationsForPhase: 'export.sequence.rotationsForPhase',
-  full: 'export.sequence.full',
-};
+const SEQUENCE_KINDS: PipelineSequenceKind[] = ['serveRotation', 'receiveRotation', 'full'];
+
+/**
+ * Names the actual rotation this choice would export (e.g. "Servizio
+ * rotazione P1"), reading the rotation (Px) straight off what's currently
+ * selected on screen — so switching rotation changes what these say, and
+ * picking one doesn't require remembering what's currently selected.
+ */
+function sequenceLabel(kind: PipelineSequenceKind, t: Translate, setterPosition: SetterPosition): string {
+  if (kind === 'serveRotation') {
+    return t('export.sequence.serveRotation', { position: setterPosition });
+  }
+  if (kind === 'receiveRotation') {
+    return t('export.sequence.receiveRotation', { position: setterPosition });
+  }
+  return t('export.sequence.full');
+}
 
 const videoSupported = isVideoExportSupported();
 
 export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiberoId = null, embedded = false }: ExportMenuProps) {
   const { t } = useI18n();
   const [format, setFormat] = useState<Format>('png');
-  const [sequence, setSequence] = useState<PipelineSequenceKind>('phasesForRotation');
+  const [sequence, setSequence] = useState<PipelineSequenceKind>('serveRotation');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,14 +55,14 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
     try {
       const base = `${config.id}-p${setterPosition}-${phaseKey}`;
       if (format === 'png') {
-        await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId);
+        await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t);
       } else if (format === 'pdf-single') {
-        await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId);
+        await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t);
       } else if (format === 'pdf-pipeline') {
-        const pages = buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence);
+        const pages = buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t);
         await exportPipelinePdf(config, pages, `${config.id}-sequenza-${sequence}.pdf`, activeLiberoId);
       } else {
-        const pages = buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence);
+        const pages = buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t);
         await recordSequenceAsWebm(config, pages, `${config.id}-sequenza-${sequence}.webm`, activeLiberoId);
       }
     } catch (err) {
@@ -104,7 +116,7 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
       {usesSequence && (
         <fieldset className="export-menu__group">
           <legend>{t('export.sequence.title')}</legend>
-          {(Object.keys(SEQUENCE_LABEL_KEYS) as PipelineSequenceKind[]).map((kind) => (
+          {SEQUENCE_KINDS.map((kind) => (
             <label key={kind}>
               <input
                 type="radio"
@@ -112,7 +124,7 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
                 checked={sequence === kind}
                 onChange={() => setSequence(kind)}
               />
-              {t(SEQUENCE_LABEL_KEYS[kind])}
+              {sequenceLabel(kind, t, setterPosition)}
             </label>
           ))}
         </fieldset>

@@ -6,7 +6,8 @@ test.describe('Export video', () => {
     const videoOption = page.getByLabel(/Video \(sequenza animata/);
     await expect(videoOption).toBeEnabled();
     await videoOption.check();
-    await page.getByLabel('Tutte le fasi della rotazione corrente').check();
+    // Default state on load: P2, servizio.
+    await page.getByLabel('Servizio rotazione P2').check();
 
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 30000 }),

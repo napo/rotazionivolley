@@ -48,7 +48,7 @@ export async function recordSequenceAsWebm(
   const frames = pages.map((page) =>
     resolveDiagramState(config, page.team, page.phaseKey, page.setterPosition, activeLiberoId),
   );
-  drawFrame(ctx, frames[0].players, frames[0].positions, pages[0].caption);
+  drawFrame(ctx, frames[0].players, frames[0].positions, pages[0].titleLines, pages[0].comment || undefined);
 
   const stream = canvas.captureStream(30);
   const mimeType = pickMimeType();
@@ -72,7 +72,7 @@ export async function recordSequenceAsWebm(
       const elapsed = performance.now() - startTime;
       if (elapsed >= totalDuration) {
         const last = pages.length - 1;
-        drawFrame(ctx, frames[last].players, frames[last].positions, pages[last].caption);
+        drawFrame(ctx, frames[last].players, frames[last].positions, pages[last].titleLines, pages[last].comment || undefined);
         resolve();
         return;
       }
@@ -88,7 +88,13 @@ export async function recordSequenceAsWebm(
       const withinSegment = elapsed - acc;
       const isLastSegment = segmentIndex === pages.length - 1;
       if (withinSegment < HOLD_MS || isLastSegment) {
-        drawFrame(ctx, frames[segmentIndex].players, frames[segmentIndex].positions, pages[segmentIndex].caption);
+        drawFrame(
+          ctx,
+          frames[segmentIndex].players,
+          frames[segmentIndex].positions,
+          pages[segmentIndex].titleLines,
+          pages[segmentIndex].comment || undefined,
+        );
       } else {
         const progress = (withinSegment - HOLD_MS) / TRANSITION_MS;
         const tweened = tweenPositions(frames[segmentIndex].positions, frames[segmentIndex + 1].positions, progress);

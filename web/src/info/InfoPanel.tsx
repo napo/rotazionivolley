@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useI18n } from '../i18n/I18nContext';
 import { APP_VERSION } from '../version';
+import { isWebPlatform } from '../platform';
 import './info.css';
 
 interface InfoPanelProps {
@@ -8,6 +10,9 @@ interface InfoPanelProps {
 
 export function InfoPanel({ onClose }: InfoPanelProps) {
   const { t } = useI18n();
+  // Only the plain web build needs pointers to the native installers — a
+  // desktop/mobile build is itself one of those installers already.
+  const [showDownloads] = useState(isWebPlatform);
 
   return (
     <div className="info-overlay" role="dialog" aria-modal="true" aria-label={t('info.title')}>
@@ -40,6 +45,19 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
             Apache License 2.0
           </a>
         </p>
+
+        {showDownloads && (
+          <>
+            <p>
+              {t('info.downloads.intro')}{' '}
+              <a href="https://github.com/napo/rotazionivolley/releases" target="_blank" rel="noreferrer">
+                GitHub Releases
+              </a>
+            </p>
+            <p className="info-overlay__note">{t('info.downloads.macNotarizationNote')}</p>
+            <p className="info-overlay__note">{t('info.downloads.androidSideloadNote')}</p>
+          </>
+        )}
       </div>
     </div>
   );

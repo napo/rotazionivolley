@@ -1,4 +1,4 @@
-import type { SetterPosition } from '../configs/schema';
+import { ROTATION_ORDER, type SetterPosition } from '../configs/schema';
 import type { Team } from '../state/AppStateContext';
 import { useI18n } from '../i18n/I18nContext';
 import './controls.css';
@@ -9,10 +9,8 @@ interface RotationPanelProps {
   onSelect: (setterPosition: SetterPosition, team: Team) => void;
 }
 
-// Display order follows the actual rotation sequence (a side-out advances the
-// setter from zone N to zone N-1), not numeric order — matching the original
-// VBRotations navigator this panel is modelled on.
-const DISPLAY_ORDER: SetterPosition[] = [2, 1, 6, 5, 4, 3];
+// Matches the original VBRotations navigator this panel is modelled on.
+const DISPLAY_ORDER = ROTATION_ORDER;
 
 // Row-pair gap (serve <-> receive, same setter position) vs. step gap
 // (receive at N -> serve at N-1, i.e. the actual rotation advancing) — kept

@@ -1310,6 +1310,16 @@
   },
   "liberoSwaps": {
     "1": {
+      "serve": {
+        "libero": "L1",
+        "replaces": "C1"
+      },
+      "receive": {
+        "libero": "L1",
+        "replaces": "C1"
+      }
+    },
+    "2": {
       "receive": {
         "libero": "L1",
         "replaces": "C1"
@@ -1319,10 +1329,18 @@
       "receive": {
         "libero": "L1",
         "replaces": "C2"
+      },
+      "serve": {
+        "libero": "L1",
+        "replaces": "C2"
       }
     },
     "4": {
       "receive": {
+        "libero": "L1",
+        "replaces": "C2"
+      },
+      "serve": {
         "libero": "L1",
         "replaces": "C2"
       }
@@ -1334,6 +1352,10 @@
       }
     },
     "6": {
+      "serve": {
+        "libero": "L1",
+        "replaces": "C1"
+      },
       "receive": {
         "libero": "L1",
         "replaces": "C1"

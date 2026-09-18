@@ -25,7 +25,8 @@ test.describe('Export', () => {
   }) => {
     await page.goto('/');
     await page.getByLabel('PDF (sequenza / pipeline)').check();
-    await page.getByLabel('Tutte le fasi della rotazione corrente').check();
+    // Default state on load: P2, servizio.
+    await page.getByLabel('Servizio rotazione P2').check();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.getByRole('button', { name: 'Esporta' }).click(),
@@ -44,7 +45,7 @@ test.describe('Export', () => {
     test.setTimeout(60000);
     await page.goto('/');
     await page.getByLabel('PDF (sequenza / pipeline)').check();
-    await page.getByLabel('Sequenza completa (fasi × rotazioni)').check();
+    await page.getByLabel('Tutte le fasi').check();
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 45000 }),
       page.getByRole('button', { name: 'Esporta' }).click(),
