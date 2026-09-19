@@ -5,6 +5,7 @@ Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 ## [2.1.0] - 2026-09-19
 
 ### Aggiunto
+- Pagina Info e README: gli schemi creati restano sul dispositivo e non sul server centrale; si possono condividere come file JSON da importare.
 - Editor: bollo "P2" per giocare con due palleggiatori (l'Opposto diventa P2 e P diventa P1; le rotazioni restano riferite al primo palleggiatore). Cliccando "O" si torna al modulo con un solo palleggiatore.
 - Pulsante "Cancella" per eliminare uno schema personalizzato, sia nell'elenco degli schemi sia nell'editor (con conferma).
 - Gli schemi creati nell'editor (e le note) vengono salvati nel browser e ricaricati all'avvio, invece di perdersi al ricaricamento della pagina.

@@ -46,6 +46,8 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
           </a>
         </p>
 
+        <p>{t('info.schemesLocal')}</p>
+
         {showDownloads && (
           <>
             <p>

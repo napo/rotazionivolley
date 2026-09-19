@@ -9,7 +9,7 @@ l'applicazione può essere usata a questo indirizzo [https://napo.github.io/rota
 ## Cosa si può fare
 
 - **Rotazioni e fasi**: naviga le sei rotazioni (in ricezione e in battuta) e le fasi di gioco, con i giocatori che si muovono in campo in modo animato.
-- **Editor degli schemi**: crea un nuovo modulo partendo da uno esistente (o importando un JSON), trascina i giocatori nelle posizioni volute per ogni rotazione e fase, scegli quando entra il libero, aggiungi note e salva. Gli schemi restano nel browser, si possono modificare, cancellare e scaricare come JSON.
+- **Editor degli schemi**: crea un nuovo modulo partendo da uno esistente (o importando un JSON), trascina i giocatori nelle posizioni volute per ogni rotazione e fase, scegli quando entra il libero, aggiungi note e salva. Gli schemi restano sul tuo dispositivo (nel browser o nell'app), non sul server centrale: si possono modificare, cancellare e scaricare come JSON. Per condividerli basta inviare il file JSON, che chi lo riceve può importare dall'editor.
 - **Due palleggiatori**: nell'editor il bollo **P2** trasforma l'opposto in un secondo palleggiatore (le rotazioni restano riferite al primo, P1). Cliccando **O** si torna al modulo con un solo palleggiatore.
 - **Note**: un commento per ogni rotazione e fase, riportato anche negli export.
 - **Export**: PNG, PDF (pagina singola o sequenza) e video animato `.webm`.
