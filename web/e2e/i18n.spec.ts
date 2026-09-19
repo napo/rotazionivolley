@@ -5,9 +5,11 @@ test.describe('Lingua e Info', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Rotazioni di ricezione nella pallavolo' })).toBeVisible();
 
-    await page.getByRole('button', { name: 'EN', exact: true }).click();
+    await page.locator('.language-switcher').selectOption('en');
     await expect(page.getByRole('heading', { name: 'Volleyball reception rotations' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Scheme editor' })).toBeVisible();
+    await page.locator('.schema-switcher__trigger').click();
+    await expect(page.getByRole('button', { name: /New scheme/ })).toBeVisible();
+    await page.keyboard.press('Escape');
 
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Volleyball reception rotations' })).toBeVisible();
@@ -24,7 +26,7 @@ test.describe('Lingua e Info', () => {
       'href',
       'https://github.com/napo/rotazionivolley',
     );
-    await expect(dialog.getByText(/intelligenza artificiale/)).toBeVisible();
+    await expect(dialog.getByText(/Claude AI/)).toBeVisible();
 
     await page.getByRole('button', { name: 'Chiudi' }).click();
     await expect(dialog).toHaveCount(0);

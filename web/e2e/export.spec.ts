@@ -1,21 +1,24 @@
 import { test, expect } from '@playwright/test';
+import { exportSubmit, openExportMenu } from './testUtils';
 
 test.describe('Export', () => {
   test('esporta PNG', async ({ page }) => {
     await page.goto('/');
+    await openExportMenu(page);
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Esporta' }).click(),
+      exportSubmit(page).click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/\.png$/);
   });
 
   test('esporta PDF a pagina singola', async ({ page }) => {
     await page.goto('/');
+    await openExportMenu(page);
     await page.getByLabel('PDF (pagina singola)').check();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Esporta' }).click(),
+      exportSubmit(page).click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/\.pdf$/);
   });
@@ -24,12 +27,13 @@ test.describe('Export', () => {
     page,
   }) => {
     await page.goto('/');
+    await openExportMenu(page);
     await page.getByLabel('PDF (sequenza / pipeline)').check();
     // Default state on load: P2, servizio.
     await page.getByLabel('Servizio rotazione P2').check();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Esporta' }).click(),
+      exportSubmit(page).click(),
     ]);
     const path = await download.path();
     expect(path).toBeTruthy();
@@ -44,11 +48,12 @@ test.describe('Export', () => {
     // under parallel test-worker CPU contention rather than the 30s default.
     test.setTimeout(60000);
     await page.goto('/');
+    await openExportMenu(page);
     await page.getByLabel('PDF (sequenza / pipeline)').check();
     await page.getByLabel('Tutte le fasi').check();
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 45000 }),
-      page.getByRole('button', { name: 'Esporta' }).click(),
+      exportSubmit(page).click(),
     ]);
     const buffer = await download.createReadStream().then(streamToBuffer);
     const pageCount = countPdfPages(buffer);

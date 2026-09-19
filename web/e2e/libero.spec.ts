@@ -1,42 +1,41 @@
 import { test, expect } from '@playwright/test';
-import { getPlayerPageRect } from './testUtils';
+import { getPlayerPageRect, selectReceiveRotation } from './testUtils';
 
+// Liberos are part of the scheme now (authored in the editor, see
+// liberoSwaps): in the default scheme L1 replaces the back-row middle in
+// receive at P2, and sits benched (left of the court) otherwise.
 test.describe('Libero', () => {
-  test('attivare un libero sostituisce il centrale di seconda linea nella stessa posizione', async ({ page }) => {
+  test('in ricezione il libero prende il posto del centrale di seconda linea', async ({ page }) => {
     await page.goto('/');
 
-    // Default load: P2, servizio, base. C1 is the back-row middle at rotation 2.
+    // Default load: P2, servizio -> no swap, L1 is on the bench and C1 plays.
     const c1Before = await getPlayerPageRect(page, 'C1');
+    const l1Bench = await getPlayerPageRect(page, 'L1');
 
-    await page.getByRole('button', { name: 'L1', exact: true }).click();
-    await page.waitForTimeout(150);
+    await selectReceiveRotation(page, 'P2');
+    await page.waitForTimeout(700);
 
     const l1Rect = await getPlayerPageRect(page, 'L1');
     expect(Math.round(l1Rect.centerX)).toBe(Math.round(c1Before.centerX));
     expect(Math.round(l1Rect.centerY)).toBe(Math.round(c1Before.centerY));
 
-    // C1 itself should no longer be drawn.
-    const c1After = await page.evaluate(() => window.__rvTestHooks?.getPlayerRect('C1') ?? null);
-    expect(c1After).toBeNull();
-
-    // Switching back to "Nessuno" restores C1.
-    await page.getByRole('button', { name: 'Nessuno' }).click();
-    await page.waitForTimeout(150);
-    const c1Restored = await getPlayerPageRect(page, 'C1');
-    expect(Math.round(c1Restored.centerX)).toBe(Math.round(c1Before.centerX));
+    // C1 itself goes to the bench, in the slot L1 just left.
+    const c1After = await getPlayerPageRect(page, 'C1');
+    expect(Math.round(c1After.centerX)).toBe(Math.round(l1Bench.centerX));
+    expect(Math.round(c1After.centerY)).toBe(Math.round(l1Bench.centerY));
   });
 
-  test('il libero attivo resta applicato quando si cambia fase', async ({ page }) => {
+  test('il libero resta in campo quando si cambia fase', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'L1', exact: true }).click();
-    await page.waitForTimeout(150);
+    await selectReceiveRotation(page, 'P2');
+    await page.waitForTimeout(700);
+    const c1Benched = await getPlayerPageRect(page, 'C1');
 
-    await page.locator('[data-tutorial="phase"]').getByRole('button', { name: 'Servizio' }).click();
+    await page.locator('[data-tutorial="phase"]').getByRole('button', { name: 'Ricezione' }).click();
     await page.waitForTimeout(700);
 
-    const rect = await page.evaluate(() => window.__rvTestHooks?.getPlayerRect('L1') ?? null);
-    expect(rect).not.toBeNull();
-    const c1 = await page.evaluate(() => window.__rvTestHooks?.getPlayerRect('C1') ?? null);
-    expect(c1).toBeNull();
+    const c1 = await getPlayerPageRect(page, 'C1');
+    expect(Math.round(c1.centerX)).toBe(Math.round(c1Benched.centerX));
+    expect(Math.round(c1.centerY)).toBe(Math.round(c1Benched.centerY));
   });
 });

@@ -45,3 +45,27 @@ export async function dragPlayer(page: Page, playerId: string, deltaX: number, d
   await page.mouse.move(before.centerX + deltaX, before.centerY + deltaY, { steps: 10 });
   await page.mouse.up();
 }
+
+/** Opens the header's Export dropdown, so its options and submit button become reachable. */
+export async function openExportMenu(page: Page) {
+  await page.locator('.header-dropdown__trigger').click();
+}
+
+export function exportSubmit(page: Page) {
+  return page.locator('.export-menu__submit');
+}
+
+/** Selects the receive-side dot for a rotation in the rotation navigator. */
+export async function selectReceiveRotation(page: Page, position: string) {
+  await page
+    .locator('[data-tutorial="rotation"] [data-tutorial="rotation-receive"]')
+    .getByRole('button', { name: position })
+    .click();
+}
+
+/** Opens the scheme picker and starts a new scheme in the editor, based on the first available scheme. */
+export async function openNewSchemeEditor(page: Page) {
+  await page.locator('.schema-switcher__trigger').click();
+  await page.getByRole('button', { name: /Nuovo modulo/ }).click();
+  await page.getByRole('button', { name: 'Inizia da questo schema' }).click();
+}
