@@ -76,19 +76,29 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
+      # Gradle's fixed "app-release.apk" says nothing about the app or its
+      # version, so name the file like the desktop installers.
+      - name: Rename APK
+        run: |
+          version=$(node -p "require('./web/package.json').version")
+          mkdir -p dist
+          for apk in android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/debug/app-debug.apk; do
+            if [ -f "$apk" ]; then
+              suffix=""
+              case "$apk" in *debug*) suffix="-debug" ;; esac
+              cp "$apk" "dist/Rotazioni Volley-${version}${suffix}.apk"
+            fi
+          done
+
       - name: Upload APK as build artifact
         uses: actions/upload-artifact@v4
         with:
           name: rotazionivolley-android-${{ steps.signing.outputs.has_keystore == 'true' && 'release' || 'debug' }}
-          path: |
-            android/app/build/outputs/apk/release/app-release.apk
-            android/app/build/outputs/apk/debug/app-debug.apk
+          path: dist/*.apk
           if-no-files-found: ignore
 
       - name: Attach APK to the GitHub Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            android/app/build/outputs/apk/release/app-release.apk
-            android/app/build/outputs/apk/debug/app-debug.apk
+          files: dist/*.apk
