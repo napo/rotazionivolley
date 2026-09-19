@@ -158,3 +158,30 @@
     max-width: 360px;
   }
 }
+
+.config-editor__second-setter {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.config-editor__badge {
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 2px solid #4596bf;
+  background: #fff;
+  color: #4596bf;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.config-editor__badge.is-on {
+  background: #4596bf;
+  color: #fff;
+}
+
+.config-editor__actions .config-editor__delete {
+  background: #c0392b;
+}

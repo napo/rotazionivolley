@@ -64,6 +64,8 @@ interface AppStateContextValue {
    */
   customConfigs: FormationConfig[];
   addCustomConfig: (config: FormationConfig) => void;
+  /** Removes a custom entry (for a built-in id, this drops its overrides and restores the original). */
+  removeCustomConfig: (configId: string) => void;
   /** Sets the comment for the given (phase, rotation) on the active config. */
   setComment: (phaseKey: string, setterPosition: SetterPosition, text: string) => void;
 }
@@ -105,6 +107,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setCustomConfigs((prev) => [...prev.filter((c) => c.id !== config.id), config]);
   }, []);
 
+  const removeCustomConfig = useCallback((configId: string) => {
+    setCustomConfigs((prev) => prev.filter((c) => c.id !== configId));
+  }, []);
+
   const config = useMemo(
     () => customConfigs.find((c) => c.id === state.configId) ?? getConfigById(state.configId) ?? defaultConfig,
     [state.configId, customConfigs],
@@ -118,8 +124,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ state, dispatch, config, customConfigs, addCustomConfig, setComment }),
-    [state, config, customConfigs, addCustomConfig, setComment],
+    () => ({ state, dispatch, config, customConfigs, addCustomConfig, removeCustomConfig, setComment }),
+    [state, config, customConfigs, addCustomConfig, removeCustomConfig, setComment],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

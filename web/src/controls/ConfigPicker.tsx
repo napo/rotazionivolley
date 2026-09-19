@@ -8,10 +8,13 @@ interface ConfigPickerProps {
   configId: string;
   onSelect: (configId: string) => void;
   onEdit: (config: FormationConfig) => void;
+  /** Only configs for which this returns true get a delete button (built-ins can't be removed). */
+  canDelete: (config: FormationConfig) => boolean;
+  onDelete: (config: FormationConfig) => void;
   onAddNew: () => void;
 }
 
-export function ConfigPicker({ configs, configId, onSelect, onEdit, onAddNew }: ConfigPickerProps) {
+export function ConfigPicker({ configs, configId, onSelect, onEdit, canDelete, onDelete, onAddNew }: ConfigPickerProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -69,6 +72,19 @@ export function ConfigPicker({ configs, configId, onSelect, onEdit, onAddNew }: 
               >
                 ✎
               </button>
+              {canDelete(config) && (
+                <button
+                  type="button"
+                  className="schema-switcher__edit"
+                  aria-label={t('configPicker.delete', { name: config.name })}
+                  onClick={() => {
+                    onDelete(config);
+                    setOpen(false);
+                  }}
+                >
+                  🗑
+                </button>
+              )}
             </div>
           ))}
           <button

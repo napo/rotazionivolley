@@ -21,6 +21,7 @@ export const strings = {
     'phase.title': 'Azione',
 
     'configPicker.edit': 'Modifica {name}',
+    'configPicker.delete': 'Cancella {name}',
     'configPicker.addNew': 'Nuovo modulo',
 
     'comment.title': 'Commento',
@@ -57,7 +58,14 @@ export const strings = {
       'Clicca L1 o L2 (fuori campo, a sinistra), poi un giocatore in seconda linea sul campo: entreranno al suo posto, scambiandosi di posizione. La scelta vale per tutta la sequenza (fino a "Cambio" incluso) e si può cambiare di nuovo solo qui, in "Base".',
     'editor.libero.lockedHint':
       'Il libero si sceglie solo nella fase "Base": da lì vale per tutta la sequenza, fino a "Cambio" incluso. Torna a "Base" per cambiarlo.',
-    'editor.action.apply': 'Applica come schema attivo',
+    'editor.action.apply': 'Salva',
+    'editor.action.delete': 'Cancella',
+    'editor.deleteConfirm': 'Cancellare lo schema "{name}"?',
+    'editor.secondSetter.badge': 'P2',
+    'editor.singleSetter.badge': 'O',
+    'editor.singleSetter.hint': 'Abilita questo se vuoi giocare con un modulo con un solo palleggiatore.',
+    'editor.secondSetter.hint':
+      'Abilita questo se vuoi giocare con un modulo con due palleggiatori. Le rotazioni useranno come riferimento il primo palleggiatore, pertanto rimangono P1... P6',
     'editor.action.download': 'Scarica JSON',
     'editor.action.restart': 'Ricomincia',
 
@@ -106,6 +114,7 @@ export const strings = {
     'phase.title': 'Action',
 
     'configPicker.edit': 'Edit {name}',
+    'configPicker.delete': 'Delete {name}',
     'configPicker.addNew': 'New scheme',
 
     'comment.title': 'Comment',
@@ -142,7 +151,14 @@ export const strings = {
       'Click L1 or L2 (off court, on the left), then a back-row player on court: they swap places, and the libero comes on. This choice holds for the whole sequence (through "Switch"), and can only be changed again here, on "Base".',
     'editor.libero.lockedHint':
       'The libero is only chosen on the "Base" phase — from there it holds for the whole sequence, through "Switch". Go back to "Base" to change it.',
-    'editor.action.apply': 'Apply as active scheme',
+    'editor.action.apply': 'Save',
+    'editor.action.delete': 'Delete',
+    'editor.deleteConfirm': 'Delete the scheme "{name}"?',
+    'editor.secondSetter.badge': 'P2',
+    'editor.singleSetter.badge': 'O',
+    'editor.singleSetter.hint': 'Enable this to play a system with a single setter.',
+    'editor.secondSetter.hint':
+      'Enable this to play a system with two setters. Rotations use the first setter as reference, so they stay P1... P6',
     'editor.action.download': 'Download JSON',
     'editor.action.restart': 'Start over',
 

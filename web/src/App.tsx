@@ -14,13 +14,13 @@ import { CommentPanel } from './comments/CommentPanel';
 import { InfoPanel } from './info/InfoPanel';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useI18n } from './i18n/I18nContext';
-import { builtInConfigs } from './configs';
+import { builtInConfigs, defaultConfig } from './configs';
 import { getComment, getPositions, resolveActiveLiberoSwap } from './state/selectors';
 import { useAppState } from './state/AppStateContext';
 import './App.css';
 
 function App() {
-  const { state, dispatch, config, customConfigs, addCustomConfig, setComment } = useAppState();
+  const { state, dispatch, config, customConfigs, addCustomConfig, removeCustomConfig, setComment } = useAppState();
   const { t } = useI18n();
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const courtStageApiRef = useRef<CourtStageApi | null>(null);
@@ -31,12 +31,31 @@ function App() {
   // config with session-only comments layered on top — see setComment).
   const allConfigs = [...builtInConfigs.filter((c) => !customConfigs.some((cc) => cc.id === c.id)), ...customConfigs];
 
+  // Built-ins can't be removed, only custom schemes (a built-in that merely
+  // carries custom overrides is not deletable either).
+  const isDeletable = (c: FormationConfig) =>
+    customConfigs.some((cc) => cc.id === c.id) && !builtInConfigs.some((b) => b.id === c.id);
+
+  function deleteConfig(target: FormationConfig) {
+    if (!window.confirm(t('editor.deleteConfirm', { name: target.name }))) return false;
+    removeCustomConfig(target.id);
+    if (state.configId === target.id) dispatch({ type: 'SELECT_CONFIG', configId: defaultConfig.id });
+    return true;
+  }
+
   if (view === 'editor') {
     return (
       <ConfigEditor
         availableConfigs={allConfigs}
         initialConfig={editTarget}
         onClose={() => setView('viewer')}
+        onDelete={
+          editTarget && isDeletable(editTarget)
+            ? () => {
+                if (deleteConfig(editTarget)) setView('viewer');
+              }
+            : undefined
+        }
         onApply={(newConfig) => {
           addCustomConfig(newConfig);
           dispatch({ type: 'SELECT_CONFIG', configId: newConfig.id });
@@ -66,6 +85,8 @@ function App() {
               setEditTarget(config);
               setView('editor');
             }}
+            canDelete={isDeletable}
+            onDelete={deleteConfig}
             onAddNew={() => {
               setEditTarget(undefined);
               setView('editor');

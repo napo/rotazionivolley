@@ -17,7 +17,7 @@ test.describe('Editor schemi', () => {
     const after = await getPlayerPageRect(page, 'P');
     expect(Math.round(after.centerX)).not.toBe(Math.round(before.centerX));
 
-    await page.getByRole('button', { name: 'Applica come schema attivo' }).click();
+    await page.getByRole('button', { name: 'Salva' }).click();
 
     // Editor closes (view switches back) and the main viewer now offers a config picker.
     await expect(page.locator('.config-editor')).toHaveCount(0);

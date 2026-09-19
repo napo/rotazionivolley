@@ -16,6 +16,8 @@ interface ConfigEditorProps {
   /** When set, the editor opens straight into editing this config in place (same id — not a copy). */
   initialConfig?: FormationConfig;
   onApply: (config: FormationConfig) => void;
+  /** Set only when the scheme being edited can be deleted. */
+  onDelete?: () => void;
   onClose: () => void;
 }
 
@@ -50,7 +52,34 @@ function generateId(name: string): string {
   return `${slugify(name)}-${shortHash(name)}`;
 }
 
-export function ConfigEditor({ availableConfigs, initialConfig, onApply, onClose }: ConfigEditorProps) {
+/** A second setter is modelled as the opposite turned into "P2", with the original setter renamed "P1". */
+function hasSecondSetter(config: FormationConfig): boolean {
+  return config.players.filter((p) => p.role === 'setter').length > 1;
+}
+
+function withSecondSetter(config: FormationConfig, enabled: boolean): FormationConfig {
+  const firstSetter = config.players.find((p) => p.role === 'setter');
+  const other = config.players.find((p) => p.id !== firstSetter?.id && (enabled ? p.role === 'opposite' : p.role === 'setter'));
+  if (!firstSetter || !other) return config;
+  return {
+    ...config,
+    players: config.players.map((p) => {
+      if (p.id === firstSetter.id) {
+        return enabled
+          ? { ...p, label: 'Palleggiatore 1', shortLabel: 'P1' }
+          : { ...p, label: 'Palleggiatore', shortLabel: 'P' };
+      }
+      if (p.id === other.id) {
+        return enabled
+          ? { ...p, label: 'Palleggiatore 2', shortLabel: 'P2', role: 'setter' }
+          : { ...p, label: 'Opposto', shortLabel: 'O', role: 'opposite' };
+      }
+      return p;
+    }),
+  };
+}
+
+export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelete, onClose }: ConfigEditorProps) {
   const { t } = useI18n();
   // Editing an existing scheme in place must keep its id stable (so "Apply"
   // overwrites the same entry) — the id only follows the name automatically
@@ -252,6 +281,18 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onClose
               />
             </div>
 
+            <div className="config-editor__second-setter">
+              <button
+                type="button"
+                className={`config-editor__badge${hasSecondSetter(draft) ? ' is-on' : ''}`}
+                aria-pressed={hasSecondSetter(draft)}
+                onClick={() => setDraft(withSecondSetter(draft, !hasSecondSetter(draft)))}
+              >
+                {t(hasSecondSetter(draft) ? 'editor.singleSetter.badge' : 'editor.secondSetter.badge')}
+              </button>
+              <p className="config-editor__hint">{t(hasSecondSetter(draft) ? 'editor.singleSetter.hint' : 'editor.secondSetter.hint')}</p>
+            </div>
+
             <label className="config-editor__description">
               {t('editor.meta.description')}
               <textarea
@@ -300,6 +341,11 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onClose
               <button type="button" onClick={() => handleValidateAndRun(downloadConfig)}>
                 {t('editor.action.download')}
               </button>
+              {onDelete && (
+                <button type="button" className="config-editor__delete" onClick={onDelete}>
+                  {t('editor.action.delete')}
+                </button>
+              )}
               <button type="button" onClick={() => setDraft(null)}>
                 {t('editor.action.restart')}
               </button>
