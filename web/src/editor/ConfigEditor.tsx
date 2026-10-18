@@ -9,6 +9,7 @@ import { computeBenchDisplay } from '../court/benchDisplay';
 import { getBackRowPlayerIds, getLiberoSwap, withLiberoSwap } from '../state/selectors';
 import { useI18n } from '../i18n/I18nContext';
 import { downloadConfig, validateDraft } from './exportConfig';
+import type { SaveOutcome } from '../export/platformSave';
 import './editor.css';
 
 interface ConfigEditorProps {
@@ -95,6 +96,10 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
   const [errors, setErrors] = useState<string[]>([]);
   const [importError, setImportError] = useState<string | null>(null);
   const [armedLiberoId, setArmedLiberoId] = useState<string | null>(null);
+  // Only ever set on a mobile build (Capacitor) after a successful download:
+  // there's no OS "save as" dialog there to confirm it for the user (see
+  // platformSave.ts), so this stands in for it.
+  const [savedNote, setSavedNote] = useState(false);
   // 0 while dragging (instant, so it doesn't fight the live drag motion),
   // bumped only for a libero swap so that move reads as the two players
   // trading places rather than teleporting.
@@ -185,7 +190,7 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
     setArmedLiberoId(null);
   }
 
-  function handleValidateAndRun(action: (config: FormationConfig) => void) {
+  function handleValidateAndRun(action: (config: FormationConfig) => void | Promise<SaveOutcome>) {
     if (!draft) return;
     const result = validateDraft(draft);
     if (!result.success) {
@@ -193,7 +198,11 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
       return;
     }
     setErrors([]);
-    action(result.data);
+    setSavedNote(false);
+    const outcome = action(result.data);
+    if (outcome) {
+      void outcome.then((o) => setSavedNote(o.kind === 'mobile'));
+    }
   }
 
   const currentCellPositions = draft?.positions[phaseKey]?.[String(setterPosition)] ?? {};
@@ -350,6 +359,8 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
                 {t('editor.action.restart')}
               </button>
             </div>
+
+            {savedNote && <p className="config-editor__hint">{t('export.saved')}</p>}
 
             {errors.length > 0 && (
               <ul className="config-editor__error" role="alert">

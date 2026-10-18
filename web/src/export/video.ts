@@ -1,7 +1,7 @@
 import type { FormationConfig } from '../configs/schema';
 import { createOffscreenCanvas, drawFrame, tweenPositions } from '../court/canvasRenderer';
 import { resolveDiagramState } from '../state/selectors';
-import { saveFile } from './platformSave';
+import { saveFile, type SaveOutcome } from './platformSave';
 import type { SequencePage } from './sequence';
 
 const HOLD_MS = 900;
@@ -36,7 +36,7 @@ export async function recordSequenceAsWebm(
   filename: string,
   activeLiberoId?: string | null,
   scale = 2,
-): Promise<void> {
+): Promise<SaveOutcome> {
   if (!isVideoExportSupported()) {
     throw new Error("L'export video non è supportato in questo browser/ambiente");
   }
@@ -111,5 +111,5 @@ export async function recordSequenceAsWebm(
   recorder.stop();
   await stopped;
 
-  await saveFile(new Blob(chunks, { type: mimeType || 'video/webm' }), filename);
+  return saveFile(new Blob(chunks, { type: mimeType || 'video/webm' }), filename);
 }

@@ -2,6 +2,15 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [Non rilasciato]
+
+### Aggiunto
+- Avviso di aggiornamento nelle app installate (desktop, Android, iOS): segnala quando su GitHub è disponibile una versione più recente, con un link per scaricarla, e un messaggio di ringraziamento con invito a una donazione (facoltativa, stessa pagina PayPal degli altri progetti dell'autore) subito dopo un aggiornamento. Si può disattivare dalla pagina Info. L'app web resta esclusa: è sempre già l'ultima versione.
+
+### Corretto
+- Export (PNG/PDF/video) e "Scarica JSON" nelle app Android/iOS: venivano scritti in una cartella cache temporanea e offerti solo tramite la finestra di condivisione del sistema, quindi se questa veniva chiusa senza scegliere nulla il file andava perso. Ora vengono salvati subito nella cartella Documenti dell'app (visibile da un file manager), con la condivisione offerta in aggiunta.
+- App desktop (Tauri): la finestra "Salva con nome" ora si apre di default nella cartella Download e filtra per l'estensione del file, invece di aprirsi senza queste indicazioni.
+
 ## [2.1.0] - 2026-09-19
 
 ### Aggiunto

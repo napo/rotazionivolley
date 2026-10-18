@@ -4,7 +4,7 @@ import type { Team } from '../state/AppStateContext';
 import { createOffscreenCanvas, drawFrame, TITLE_LEFT_INSET, TITLE_LINE_HEIGHT, TITLE_TOP_INSET } from '../court/canvasRenderer';
 import { COURT_VIEWBOX } from '../court/courtGeometry';
 import { getComment, resolveDiagramState } from '../state/selectors';
-import { saveFile } from './platformSave';
+import { saveFile, type SaveOutcome } from './platformSave';
 import { buildSingleDiagramTitle, type SequencePage, type Translate } from './sequence';
 
 export type { PipelineSequenceKind, SequencePage, CurrentSelection } from './sequence';
@@ -69,13 +69,13 @@ export async function exportSinglePagePdf(
   filename: string,
   activeLiberoId: string | null | undefined,
   t: Translate,
-): Promise<void> {
+): Promise<SaveOutcome> {
   const pdf = newDocument();
   const { canvas, ctx } = createOffscreenCanvas(RASTER_SCALE);
   const title = buildSingleDiagramTitle(config, team, phaseKey, setterPosition, t);
   const comment = getComment(config, phaseKey, setterPosition);
   renderPage(pdf, canvas, ctx, config, team, phaseKey, setterPosition, activeLiberoId, title, comment || undefined);
-  await saveFile(pdf.output('blob'), filename);
+  return saveFile(pdf.output('blob'), filename);
 }
 
 export async function exportPipelinePdf(
@@ -83,7 +83,7 @@ export async function exportPipelinePdf(
   pages: SequencePage[],
   filename: string,
   activeLiberoId?: string | null,
-): Promise<void> {
+): Promise<SaveOutcome> {
   if (pages.length === 0) {
     throw new Error('La sequenza da esportare è vuota');
   }
@@ -108,5 +108,5 @@ export async function exportPipelinePdf(
       page.comment || undefined,
     );
   }
-  await saveFile(pdf.output('blob'), filename);
+  return saveFile(pdf.output('blob'), filename);
 }

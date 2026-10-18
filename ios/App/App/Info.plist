@@ -66,5 +66,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- Exports are saved to Directory.Documents (see
+	     web/src/export/platformSave.ts); these two keys make that folder
+	     show up in the Files app under "On My iPhone/iPad", since iOS
+	     otherwise keeps an app's Documents folder private. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>

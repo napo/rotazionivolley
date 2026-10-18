@@ -41,6 +41,7 @@ export const strings = {
     'export.submit': 'Esporta',
     'export.submitBusy': 'Esportazione…',
     'export.error.generic': 'Esportazione non riuscita',
+    'export.saved': "Salvato nei Documenti dell'app. Puoi anche condividerlo da lì.",
     'export.header.rotation': '{team} situazione P{position}',
 
     'editor.title': 'Editor schemi',
@@ -100,6 +101,16 @@ export const strings = {
     'info.downloads.androidSideloadNote':
       "Android: l'APK non è distribuito tramite il Play Store, quindi per installarlo devi abilitare \"Installa da fonti sconosciute\" per il browser o l'app che usi per scaricarlo.",
 
+
+    'update.available': 'È disponibile la versione {version} (tu hai la {current}).',
+    'update.download': 'Scarica',
+    'update.later': 'Più tardi',
+    'update.updated': 'Rotazioni Volley è stato aggiornato alla versione {version}.',
+    'update.support': "Se l'app ti è utile, puoi sostenerne lo sviluppo con una donazione.",
+    'update.donate': 'Fai una donazione',
+    'update.close': 'Chiudi',
+    'info.updatesCheck': "Controlla gli aggiornamenti all'avvio",
+
     'language.label': 'Lingua',
   },
   en: {
@@ -136,6 +147,7 @@ export const strings = {
     'export.submit': 'Export',
     'export.submitBusy': 'Exporting…',
     'export.error.generic': 'Export failed',
+    'export.saved': "Saved to the app's Documents. You can also share it from there.",
     'export.header.rotation': '{team} situation P{position}',
 
     'editor.title': 'Scheme editor',
@@ -194,6 +206,16 @@ export const strings = {
       'The schemes you create with the editor stay on this device (in the browser or app), not on a central server. To share them, use "Download JSON" and send the file: whoever receives it can import it from the editor.',
     'info.downloads.androidSideloadNote':
       'Android: the APK isn\'t distributed through the Play Store, so installing it requires enabling "Install from unknown sources" for the browser or app you use to download it.',
+
+
+    'update.available': 'Version {version} is available (you have {current}).',
+    'update.download': 'Download',
+    'update.later': 'Later',
+    'update.updated': 'Rotazioni Volley was updated to version {version}.',
+    'update.support': 'If you find the app useful, you can support its development with a donation.',
+    'update.donate': 'Make a donation',
+    'update.close': 'Close',
+    'info.updatesCheck': 'Check for updates at start',
 
     'language.label': 'Language',
   },

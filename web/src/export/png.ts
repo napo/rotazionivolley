@@ -2,7 +2,7 @@ import type { FormationConfig, SetterPosition } from '../configs/schema';
 import type { Team } from '../state/AppStateContext';
 import { createOffscreenCanvas, drawFrame } from '../court/canvasRenderer';
 import { getComment, resolveDiagramState } from '../state/selectors';
-import { saveFile } from './platformSave';
+import { saveFile, type SaveOutcome } from './platformSave';
 import { buildSingleDiagramTitle, type Translate } from './sequence';
 
 export async function exportStateAsPng(
@@ -14,7 +14,7 @@ export async function exportStateAsPng(
   activeLiberoId: string | null | undefined,
   t: Translate,
   scale = 2,
-): Promise<void> {
+): Promise<SaveOutcome> {
   const { canvas, ctx } = createOffscreenCanvas(scale);
   const { players, positions } = resolveDiagramState(config, team, phaseKey, setterPosition, activeLiberoId);
   const title = buildSingleDiagramTitle(config, team, phaseKey, setterPosition, t);
@@ -24,5 +24,5 @@ export async function exportStateAsPng(
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Impossibile generare il PNG'))), 'image/png');
   });
-  await saveFile(blob, filename);
+  return saveFile(blob, filename);
 }

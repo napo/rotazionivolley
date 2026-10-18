@@ -12,6 +12,7 @@ import { ExportMenu } from './export/ExportMenu';
 import { ConfigEditor } from './editor/ConfigEditor';
 import { CommentPanel } from './comments/CommentPanel';
 import { InfoPanel } from './info/InfoPanel';
+import { UpdateNotice } from './update/UpdateNotice';
 import { LanguageSwitcher } from './i18n/LanguageSwitcher';
 import { useI18n } from './i18n/I18nContext';
 import { builtInConfigs, defaultConfig } from './configs';
@@ -74,6 +75,7 @@ function App() {
 
   return (
     <div className="app">
+      <UpdateNotice />
       <header className="app__header">
         <div className="app__header-titles">
           <h1>{t('app.title')}</h1>

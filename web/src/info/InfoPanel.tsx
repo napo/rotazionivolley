@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useI18n } from '../i18n/I18nContext';
 import { APP_VERSION } from '../version';
 import { isWebPlatform } from '../platform';
+import { isNativeBuild, setUpdateChecksEnabled, updateChecksEnabled } from '../update/updates';
 import './info.css';
 
 interface InfoPanelProps {
@@ -13,6 +14,9 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
   // Only the plain web build needs pointers to the native installers — a
   // desktop/mobile build is itself one of those installers already.
   const [showDownloads] = useState(isWebPlatform);
+  // Only the installed apps ever check for updates — see update/updates.ts.
+  const [showUpdatesToggle] = useState(isNativeBuild);
+  const [checksEnabled, setChecksEnabled] = useState(updateChecksEnabled);
 
   return (
     <div className="info-overlay" role="dialog" aria-modal="true" aria-label={t('info.title')}>
@@ -47,6 +51,22 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
         </p>
 
         <p>{t('info.schemesLocal')}</p>
+
+        {showUpdatesToggle && (
+          <p>
+            <label>
+              <input
+                type="checkbox"
+                checked={checksEnabled}
+                onChange={(e) => {
+                  setChecksEnabled(e.target.checked);
+                  setUpdateChecksEnabled(e.target.checked);
+                }}
+              />{' '}
+              {t('info.updatesCheck')}
+            </label>
+          </p>
+        )}
 
         {showDownloads && (
           <>

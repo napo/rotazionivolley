@@ -46,25 +46,38 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
   const [sequence, setSequence] = useState<PipelineSequenceKind>('serveRotation');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Only ever set on a mobile build (Capacitor): there's no OS "save as"
+  // dialog there to confirm the export for the user (see platformSave.ts),
+  // so this stands in for it.
+  const [savedNote, setSavedNote] = useState(false);
 
   const usesSequence = format === 'pdf-pipeline' || format === 'video';
 
   async function handleExport() {
     setBusy(true);
     setError(null);
+    setSavedNote(false);
     try {
       const base = `${config.id}-p${setterPosition}-${phaseKey}`;
-      if (format === 'png') {
-        await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t);
-      } else if (format === 'pdf-single') {
-        await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t);
-      } else if (format === 'pdf-pipeline') {
-        const pages = buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t);
-        await exportPipelinePdf(config, pages, `${config.id}-sequenza-${sequence}.pdf`, activeLiberoId);
-      } else {
-        const pages = buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t);
-        await recordSequenceAsWebm(config, pages, `${config.id}-sequenza-${sequence}.webm`, activeLiberoId);
-      }
+      const outcome =
+        format === 'png'
+          ? await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t)
+          : format === 'pdf-single'
+            ? await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t)
+            : format === 'pdf-pipeline'
+              ? await exportPipelinePdf(
+                  config,
+                  buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
+                  `${config.id}-sequenza-${sequence}.pdf`,
+                  activeLiberoId,
+                )
+              : await recordSequenceAsWebm(
+                  config,
+                  buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
+                  `${config.id}-sequenza-${sequence}.webm`,
+                  activeLiberoId,
+                );
+      setSavedNote(outcome.kind === 'mobile');
     } catch (err) {
       setError(err instanceof Error ? err.message : t('export.error.generic'));
     } finally {
@@ -133,6 +146,7 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
       <button type="button" className="export-menu__submit" onClick={handleExport} disabled={busy}>
         {busy ? t('export.submitBusy') : t('export.submit')}
       </button>
+      {savedNote && <p className="export-menu__saved">{t('export.saved')}</p>}
       {error && (
         <p role="alert" className="export-menu__error">
           {error}
