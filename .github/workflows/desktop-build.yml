@@ -3,6 +3,11 @@ name: Desktop build (Tauri)
 # Builds the Linux, Windows and macOS desktop apps via Tauri. Android is
 # currently built locally, not in CI (see README); iOS has its own workflow
 # (ios-build.yml) since it needs a macOS runner with Xcode.
+#
+# On a published release, each platform's installers are signed for the
+# in-app auto-updater (see web/src/update) using the TAURI_SIGNING_PRIVATE_KEY*
+# secrets, and a final job collects every platform's signature into the
+# latest.json manifest the updater reads from the release.
 
 on:
   push:
@@ -61,6 +66,12 @@ jobs:
 
       - name: Build Tauri app
         run: npx tauri build
+        env:
+          # Signs the updater artifacts (.sig) below — only set on a real
+          # release; an unsigned build (plain push/workflow_dispatch) just
+          # skips producing them.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -77,6 +88,33 @@ jobs:
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/rpm/*.rpm
             src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/release/bundle/appimage/*.AppImage.sig
             src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/msi/*.msi.sig
             src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/nsis/*.exe.sig
             src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/macos/*.app.tar.gz
+            src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
+
+  updater-manifest:
+    name: Update manifest (latest.json)
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the release's signed installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download ${{ github.event.release.tag_name }} --repo ${{ github.repository }} --dir release-files --skip-existing
+
+      - name: Build latest.json
+        run: node scripts/updater-manifest.mjs release-files ${{ github.event.release.tag_name }} ${{ github.repository }}
+
+      - name: Attach latest.json to the GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: release-files/latest.json

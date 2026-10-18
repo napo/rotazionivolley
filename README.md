@@ -13,5 +13,6 @@ l'applicazione può essere usata a questo indirizzo [https://napo.github.io/rota
 - **Due palleggiatori**: nell'editor il bollo **P2** trasforma l'opposto in un secondo palleggiatore (le rotazioni restano riferite al primo, P1). Cliccando **O** si torna al modulo con un solo palleggiatore.
 - **Note**: un commento per ogni rotazione e fase, riportato anche negli export.
 - **Export**: PNG, PDF (pagina singola o sequenza) e video animato `.webm`.
+- **Aggiornamenti**: le app desktop/Android/iOS segnalano quando c'è una versione più recente (su desktop si installa in-app con un clic); si può disattivare dalla pagina Info.
 
 ![](https://raw.githubusercontent.com/napo/rotazionivolley/master/demo/rotazionivolley.gif)

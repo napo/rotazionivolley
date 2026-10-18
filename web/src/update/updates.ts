@@ -4,10 +4,15 @@ import { Capacitor } from '@capacitor/core';
 /**
  * Update check for the installed apps (Tauri desktop, Capacitor Android/iOS)
  * — never for the plain web build, which is always the latest version
- * already. Unlike volleyreportxls's Tauri-mobile build, this project's
- * Android/iOS apps are Capacitor, which has no auto-updater: every platform
- * here just points the user at the GitHub release to download by hand (the
- * desktop installers and the APK), rather than installing it for them.
+ * already.
+ * - Desktop: the Tauri updater plugin itself checks a signed latest.json
+ *   published on each GitHub release (see .github/workflows/desktop-build.yml
+ *   and scripts/updater-manifest.mjs) and, once the user confirms, downloads,
+ *   verifies and installs the update, then restarts the app.
+ * - Android/iOS: this project's mobile apps are Capacitor, which has no
+ *   auto-updater (and Tauri's doesn't support mobile either) — so there the
+ *   app just reads the plain GitHub Releases API and points the user at the
+ *   release (the APK, on Android) to download and install by hand.
  * Only the version number is requested from GitHub — no other data leaves
  * the device.
  */
@@ -82,11 +87,13 @@ interface Release {
   readonly assets?: readonly ReleaseAsset[];
 }
 
-export interface UpdateInfo {
-  readonly version: string;
-  /** Where "download" should send the user: the release page, or (Android) the APK asset directly. */
-  readonly url: string;
-}
+type DesktopUpdate = Awaited<ReturnType<typeof import('@tauri-apps/plugin-updater').check>>;
+
+export type UpdateInfo =
+  /** Desktop: `update` is the Tauri plugin's own handle — see installUpdate. */
+  | { readonly kind: 'desktop'; readonly version: string; readonly update: NonNullable<DesktopUpdate> }
+  /** Android/iOS: nothing to install in-app — `url` is where the user downloads it themselves. */
+  | { readonly kind: 'mobile'; readonly version: string; readonly url: string };
 
 /** The release's APK asset — named "Rotazioni Volley-<version>.apk" by the Android build, see android-build.yml — skipping any "-debug" build. */
 function androidAsset(release: Release): ReleaseAsset | undefined {
@@ -101,6 +108,12 @@ export async function checkForUpdate(
   const platform = nativePlatform();
   if (!platform) return null;
 
+  if (platform === 'desktop') {
+    const { check } = await import('@tauri-apps/plugin-updater');
+    const update = await check();
+    return update ? { kind: 'desktop', version: update.version, update } : null;
+  }
+
   const response = await fetchImpl(RELEASES_API, { headers: { Accept: 'application/vnd.github+json' } });
   if (!response.ok) return null;
   const release = (await response.json()) as Release;
@@ -108,5 +121,24 @@ export async function checkForUpdate(
   if (!latest || compareVersions(latest, currentVersion) <= 0) return null;
 
   const asset = platform === 'android' ? androidAsset(release) : undefined;
-  return { version: latest, url: asset?.browser_download_url ?? release.html_url ?? RELEASES_URL };
+  return { kind: 'mobile', version: latest, url: asset?.browser_download_url ?? release.html_url ?? RELEASES_URL };
+}
+
+/** Desktop only: download, verify, install (the user already confirmed) and restart. onProgress(0..1, or null while the total size is still unknown). */
+export async function installUpdate(
+  info: Extract<UpdateInfo, { kind: 'desktop' }>,
+  onProgress: (progress: number | null) => void,
+): Promise<void> {
+  let total = 0;
+  let received = 0;
+  await info.update.downloadAndInstall((event) => {
+    if (event.event === 'Started') total = event.data.contentLength ?? 0;
+    if (event.event === 'Progress') {
+      received += event.data.chunkLength;
+      onProgress(total ? received / total : null);
+    }
+    if (event.event === 'Finished') onProgress(1);
+  });
+  const { relaunch } = await import('@tauri-apps/plugin-process');
+  await relaunch();
 }

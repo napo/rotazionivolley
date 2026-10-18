@@ -38,5 +38,11 @@
     "android": {
       "debugApplicationIdSuffix": ".debug"
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZFMzFGMjlBNTI2MEIxMEUKUldRT3NXQlNtdkl4YnYvbE8rU2RTRjcwTG1TTDdEZ1Ztc2ZzZGh6SjNMOG12TkM1ZSszdlNVN1cK",
+      "endpoints": ["https://github.com/napo/rotazionivolley/releases/latest/download/latest.json"]
+    }
   }
 }

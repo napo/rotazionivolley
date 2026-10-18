@@ -109,6 +109,11 @@ export const strings = {
     'update.support': "Se l'app ti è utile, puoi sostenerne lo sviluppo con una donazione.",
     'update.donate': 'Fai una donazione',
     'update.close': 'Chiudi',
+    'update.updateNow': 'Aggiorna ora',
+    'update.downloading': 'Download in corso…',
+    'update.progress': 'Download: {percent}%',
+    'update.installing': 'Installazione in corso…',
+    'update.failed': "Aggiornamento non riuscito.",
     'info.updatesCheck': "Controlla gli aggiornamenti all'avvio",
 
     'language.label': 'Lingua',
@@ -215,6 +220,11 @@ export const strings = {
     'update.support': 'If you find the app useful, you can support its development with a donation.',
     'update.donate': 'Make a donation',
     'update.close': 'Close',
+    'update.updateNow': 'Update now',
+    'update.downloading': 'Downloading…',
+    'update.progress': 'Downloading: {percent}%',
+    'update.installing': 'Installing…',
+    'update.failed': 'Update failed.',
     'info.updatesCheck': 'Check for updates at start',
 
     'language.label': 'Language',
