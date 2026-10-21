@@ -165,6 +165,7 @@ function App() {
             unavailableReason={faultsUnavailable}
             enabled={faultsOn}
             onToggle={() => setFaultsOn((on) => !on)}
+            onSelectPlayer={(playerId) => dispatch({ type: 'SET_HIGHLIGHT', playerId })}
             players={players}
             zones={zones}
             relations={relations}

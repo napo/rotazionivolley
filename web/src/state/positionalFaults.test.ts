@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultConfig } from '../configs';
+import { builtInConfigs, defaultConfig } from '../configs';
 import { SETTER_POSITIONS } from '../configs/schema';
 import { checkPositionalFaults, getPositionalCheckPhases, getRotationZones } from './positionalFaults';
 import { getPositions, resolveActiveLiberoSwap } from './selectors';
@@ -58,19 +58,22 @@ describe('checkPositionalFaults', () => {
   });
 });
 
-describe('schema predefinito', () => {
-  it('la formazione di ricezione non ha falli di posizione in nessuna rotazione', () => {
-    const phases = getPositionalCheckPhases(defaultConfig.phases);
-    expect(phases).toEqual(['base', 'receiveReceive']);
-    for (const sp of SETTER_POSITIONS) {
-      const swap = resolveActiveLiberoSwap(defaultConfig, 'receive', sp);
-      const zones = getRotationZones(defaultConfig, sp, swap);
-      for (const phase of phases) {
-        const positions = { ...getPositions(defaultConfig, phase, sp) };
-        if (swap) positions[swap.libero] = positions[swap.libero] ?? positions[swap.replaces]!;
-        const bad = checkPositionalFaults(zones, positions).filter((r) => !r.ok);
-        expect(bad, `P${sp} ${phase}`).toEqual([]);
+describe('schemi inclusi', () => {
+  it.each(builtInConfigs.map((config) => [config.name, config] as const))(
+    '%s: la formazione di ricezione non ha falli di posizione in nessuna rotazione',
+    (_name, config) => {
+      const phases = getPositionalCheckPhases(config.phases);
+      expect(phases).toEqual(['base', 'receiveReceive']);
+      for (const sp of SETTER_POSITIONS) {
+        const swap = resolveActiveLiberoSwap(config, 'receive', sp);
+        const zones = getRotationZones(config, sp, swap);
+        for (const phase of phases) {
+          const positions = { ...getPositions(config, phase, sp) };
+          if (swap) positions[swap.libero] = positions[swap.libero] ?? positions[swap.replaces]!;
+          const bad = checkPositionalFaults(zones, positions).filter((r) => !r.ok);
+          expect(bad, `P${sp} ${phase}`).toEqual([]);
+        }
       }
-    }
-  });
+    },
+  );
 });

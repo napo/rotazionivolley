@@ -7,6 +7,9 @@ import { CourtStage } from '../court/CourtStage';
 import { ANIMATION_DURATION_MS } from '../court/courtGeometry';
 import { computeBenchDisplay } from '../court/benchDisplay';
 import { getBackRowPlayerIds, getLiberoSwap, withLiberoSwap } from '../state/selectors';
+import { checkPositionalFaults, getPositionalCheckPhases, getRotationZones } from '../state/positionalFaults';
+import { PositionalFaultOverlay } from '../court/PositionalFaultOverlay';
+import '../faults/faults.css';
 import { useI18n } from '../i18n/I18nContext';
 import { downloadConfig, validateDraft } from './exportConfig';
 import type { SaveOutcome } from '../export/platformSave';
@@ -223,6 +226,14 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
     ? computeBenchDisplay(draft, currentCellPositions, liberoSwap)
     : { players: [], positions: {} as Record<string, Point>, benchedIds: new Set<string>() };
 
+  // Positional faults are flagged live while editing a receive formation at
+  // the service hit (same rule and phases as the viewer, see App.tsx), so a
+  // drag that breaks the rotational order is noticed straight away.
+  const checksFaults = !!draft && team === 'receive' && getPositionalCheckPhases(draft.phases).includes(phaseKey);
+  const faultZones = draft && checksFaults ? getRotationZones(draft, setterPosition, liberoSwap) : {};
+  const editorFaults = checkPositionalFaults(faultZones, displayPositions).filter((r) => !r.ok);
+  const faultLabel = (id: string) => displayPlayers.find((p) => p.id === id)?.shortLabel ?? id;
+
   return (
     <div className="config-editor">
       <div className="config-editor__header">
@@ -294,8 +305,32 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
                 nonDraggableIds={nonDraggableIds}
                 highlightedPlayerId={armedLiberoId}
                 ariaLabel={`${t('editor.title')}: ${phaseKey}, P${setterPosition}`}
+                overlay={
+                  editorFaults.length > 0 ? (
+                    <PositionalFaultOverlay zones={faultZones} positions={displayPositions} relations={editorFaults} />
+                  ) : null
+                }
               />
             </div>
+
+            {editorFaults.length > 0 && (
+              <div role="alert" className="fault-panel__alert">
+                <span aria-hidden="true">⚠ </span>
+                {t('faults.editorAlert')}
+                <ul className="fault-panel__list">
+                  {editorFaults.map((r) => (
+                    <li key={`${r.firstId}-${r.secondId}`}>
+                      {t(r.kind === 'frontBack' ? 'faults.pairFrontBack' : 'faults.pairLeftRight', {
+                        first: faultLabel(r.firstId),
+                        firstZone: r.firstZone,
+                        second: faultLabel(r.secondId),
+                        secondZone: r.secondZone,
+                      })}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="config-editor__second-setter">
               <button

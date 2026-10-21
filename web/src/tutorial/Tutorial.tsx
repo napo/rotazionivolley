@@ -41,6 +41,9 @@ export function Tutorial({ onClose, getSamplePlayerRect }: TutorialProps) {
       }
     }
     const el = document.querySelector(step.target);
+    // Targets below the court (e.g. the positional-fault panel) can be off
+    // screen: bring them into view before measuring the spotlight.
+    el?.scrollIntoView?.({ block: 'nearest' });
     if (el?.classList.contains('rotation-graph__col')) {
       setRect(unionRect(Array.from(el.querySelectorAll('.rotation-graph__dot'))) ?? el.getBoundingClientRect());
       return;

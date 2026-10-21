@@ -2,6 +2,16 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [Non rilasciato]
+
+### Aggiunto
+- Falli di posizione: pulsanti per scegliere tra la vista di un singolo giocatore (solo i suoi possibili falli) e "Tutta la formazione"; un avviso segnala sempre i falli presenti, anche con l'overlay nascosto. Nell'editor i falli creati trascinando i giocatori nella formazione di ricezione vengono segnalati subito, con l'overlay sul campo. Nuovo passo del tutorial dedicato ai falli.
+- Pagina Info: sezione "Sostieni lo sviluppo" con la donazione volontaria tramite PayPal (stesso approccio di analisirefertogara). L'app la ricorda solo negli avvisi di aggiornamento, ora anche in quello della versione web/PWA.
+
+### Corretto
+- App desktop: i link esterni (GitHub, donazione, download) ora si aprono nel browser di sistema.
+- Il controllo delle versioni falliva su Windows (a-capo CRLF), per cui la 2.2.0 non ha installer Windows né aggiornamento in-app per il desktop.
+
 ## [2.2.0] - 2026-10-22
 
 ### Aggiunto

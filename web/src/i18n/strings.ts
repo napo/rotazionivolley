@@ -34,7 +34,7 @@ export const strings = {
       'Con il regolamento FIVB 2025-2028 la squadra al servizio può disporsi liberamente: i falli di posizione valgono solo per chi riceve. Seleziona una rotazione in Ricezione.',
     'faults.unavailablePhase': 'Il controllo vale al momento del servizio: disponibile nelle fasi {phases}.',
     'faults.hint':
-      'Il numero accanto a ogni giocatore è la sua zona di rotazione. Clicca un giocatore per vedere con chi può fare fallo di posizione.',
+      'Il numero accanto a ogni giocatore è la sua zona di rotazione. Scegli un giocatore (qui sopra o cliccandolo in campo) per vedere solo i suoi possibili falli; "Tutta la formazione" torna alla vista completa.',
     'faults.rule':
       'Si confrontano solo le zone adiacenti: 4-5, 3-6, 2-1 (avanti/dietro) e 4-3-2, 5-6-1 (sinistra/destra). In campo contano i piedi; qui si usa il centro del bollino.',
     'faults.summaryOk': 'Nessun fallo di posizione in questa formazione.',
@@ -48,6 +48,11 @@ export const strings = {
     'faults.needsLeft': 'deve avere {other} (zona {zone}) alla sua sinistra',
     'faults.needsRight': 'deve avere {other} (zona {zone}) alla sua destra',
     'faults.faultNow': 'ora è fallo',
+    'faults.alertShowHint': 'premi "Mostra" per vedere dove',
+    'faults.viewLabel': 'Vista dei falli di posizione',
+    'faults.viewAll': 'Tutta la formazione',
+    'faults.viewPlayer': 'Solo i possibili falli di {player} (zona {zone})',
+    'faults.editorAlert': 'Attenzione: in questa formazione di ricezione ci sono falli di posizione:',
 
     'export.title': 'Esporta',
     'export.format': 'Formato',
@@ -107,6 +112,8 @@ export const strings = {
     'tutorial.step5': 'Questa colonna mostra la situazione\nin cui la squadra è in ricezione.',
     'tutorial.step6':
       'Da qui si selezionano le situazioni\ndi gioco (base, servizio, ricezione,\nalzata, attacco, cambio).\nI giocatori si muoveranno nel\ncampo di conseguenza.',
+    'tutorial.step7':
+      'Falli di posizione: in ricezione\n(fasi Base e Ricezione) "Mostra"\ndisegna zone e coppie da rispettare.\nScegli un giocatore per vedere solo\ni suoi possibili falli, oppure\n"Tutta la formazione".\nSe c\'è un fallo compare un avviso rosso.',
 
     'info.title': 'Informazioni',
     'info.close': 'Chiudi',
@@ -172,7 +179,7 @@ export const strings = {
       'Under the FIVB 2025-2028 rules the serving team may line up freely: positional faults apply only to the receiving team. Pick a Receive rotation.',
     'faults.unavailablePhase': 'The check applies at the service hit: available in the {phases} phases.',
     'faults.hint':
-      "The number next to each player is their rotational zone. Click a player to see who they can commit a positional fault with.",
+      'The number next to each player is their rotational zone. Pick a player (above, or by clicking them on court) to see only their possible faults; "Whole formation" goes back to the full view.',
     'faults.rule':
       'Only adjacent zones are compared: 4-5, 3-6, 2-1 (front/back) and 4-3-2, 5-6-1 (left/right). On court the feet count; here the marker centre is used.',
     'faults.summaryOk': 'No positional faults in this formation.',
@@ -186,6 +193,11 @@ export const strings = {
     'faults.needsLeft': 'must have {other} (zone {zone}) on their left',
     'faults.needsRight': 'must have {other} (zone {zone}) on their right',
     'faults.faultNow': 'fault now',
+    'faults.alertShowHint': 'press "Show" to see where',
+    'faults.viewLabel': 'Positional fault view',
+    'faults.viewAll': 'Whole formation',
+    'faults.viewPlayer': 'Only the possible faults of {player} (zone {zone})',
+    'faults.editorAlert': 'Warning: this receive formation has positional faults:',
 
     'configPicker.edit': 'Edit {name}',
     'configPicker.delete': 'Delete {name}',
@@ -252,6 +264,8 @@ export const strings = {
     'tutorial.step5': 'This column shows the formation\nwhen the team is receiving.',
     'tutorial.step6':
       'From here you pick the phase of\nplay (base, serve, receive, set,\nattack, switch). Players move on\nthe court accordingly.',
+    'tutorial.step7':
+      'Positional faults: when receiving\n(Base and Receive phases) "Show"\ndraws the zones and pairs to respect.\nPick a player to see only their\npossible faults, or\n"Whole formation".\nA red warning appears on any fault.',
 
     'info.title': 'About',
     'info.close': 'Close',

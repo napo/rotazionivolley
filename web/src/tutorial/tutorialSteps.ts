@@ -20,4 +20,5 @@ export const tutorialSteps: TutorialStep[] = [
   { target: '[data-tutorial="rotation-serve"]', textKey: 'tutorial.step4' },
   { target: '[data-tutorial="rotation-receive"]', textKey: 'tutorial.step5' },
   { target: '[data-tutorial="phase"]', textKey: 'tutorial.step6' },
+  { target: '[data-tutorial="faults"]', textKey: 'tutorial.step7' },
 ];

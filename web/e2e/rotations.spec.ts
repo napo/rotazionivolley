@@ -56,9 +56,10 @@ test.describe('Rotazioni volley - percorso principale', () => {
     await page.getByRole('button', { name: 'Tutorial' }).click();
     await expect(page.locator('.tutorial-overlay')).toBeVisible();
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       await page.getByRole('button', { name: 'Avanti' }).click();
     }
+    await expect(page.locator('.tutorial-overlay')).toContainText('Falli di posizione');
     await page.getByRole('button', { name: 'Fine' }).click();
     await expect(page.locator('.tutorial-overlay')).toHaveCount(0);
   });

@@ -18,6 +18,7 @@ export type AppAction =
   | { type: 'SELECT_ROTATION'; setterPosition: SetterPosition; team: Team }
   | { type: 'SELECT_PHASE'; phaseKey: string }
   | { type: 'TOGGLE_HIGHLIGHT'; playerId: string }
+  | { type: 'SET_HIGHLIGHT'; playerId: string | null }
   | { type: 'SELECT_CONFIG'; configId: string }
   | { type: 'SELECT_LIBERO'; liberoId: string | null };
 
@@ -43,6 +44,8 @@ function reducer(state: AppState, action: AppAction): AppState {
         ...state,
         highlightedPlayerId: state.highlightedPlayerId === action.playerId ? null : action.playerId,
       };
+    case 'SET_HIGHLIGHT':
+      return { ...state, highlightedPlayerId: action.playerId };
     case 'SELECT_CONFIG':
       return initialStateFor(action.configId);
     case 'SELECT_LIBERO':
