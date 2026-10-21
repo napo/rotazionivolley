@@ -2,9 +2,10 @@ import { isTauri } from '@tauri-apps/api/core';
 import { downloadDir, join } from '@tauri-apps/api/path';
 import { save as tauriSaveDialog } from '@tauri-apps/plugin-dialog';
 import { writeFile as tauriWriteFile } from '@tauri-apps/plugin-fs';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { isIosDevice } from '../platform';
 
 /**
  * What actually happened to the file, so the caller can tell the user when
@@ -14,14 +15,34 @@ import { Share } from '@capacitor/share';
 export type SaveOutcome =
   /** The browser download flow (web build): the browser's own UI is the confirmation. */
   | { kind: 'web' }
+  /** iPhone/iPad web build: the share sheet was shown (it offers "Save to Files"). */
+  | { kind: 'shared' }
+  /** iPhone/iPad web build: the file is ready but iOS only opens the share
+   *  sheet straight after a tap, and the export took too long — the caller
+   *  shows a button that calls `share` from a fresh tap. */
+  | { kind: 'shareReady'; share: () => Promise<SaveOutcome> }
   /** Tauri's native Save As dialog was shown and the user picked a location. */
   | { kind: 'tauri'; path: string }
-  /** The user cancelled the Tauri Save As dialog — nothing was written. */
+  /** The user cancelled the Save As dialog/picker — nothing was written. */
   | { kind: 'cancelled' }
-  /** Capacitor (Android/iOS): no native save dialog exists without extra
-   *  plugins, so the file was written straight to a location the user can
-   *  find on their own (see saveFileCapacitor) — the caller should say so. */
+  /** Capacitor (Android/iOS): the native SaveAs picker was shown and the
+   *  user picked a location. */
+  | { kind: 'mobilePicked' }
+  /** Capacitor fallback when the SaveAs plugin isn't available: the file was
+   *  written straight to a location the user can find on their own (see
+   *  saveFileCapacitor) — the caller should say so. */
   | { kind: 'mobile' };
+
+/**
+ * App-local native plugin (android/.../SaveAsPlugin.java,
+ * ios/App/App/SaveAsPlugin.swift): shows the OS "save as" picker and copies
+ * the file at `path` to wherever the user chooses.
+ */
+interface SaveAsPlugin {
+  save(options: { path: string; filename: string; mimeType: string }): Promise<{ saved: boolean }>;
+}
+
+const SaveAs = registerPlugin<SaveAsPlugin>('SaveAs');
 
 /**
  * Single point where export code hands off a finished file, so png.ts/pdf.ts/
@@ -37,8 +58,30 @@ export async function saveFile(blob: Blob, filename: string): Promise<SaveOutcom
   if (Capacitor.isNativePlatform()) {
     return saveFileCapacitor(blob, filename);
   }
+  const file = new File([blob], filename, { type: blob.type });
+  if (isIosDevice() && navigator.canShare?.({ files: [file] })) {
+    return shareFileWeb(file);
+  }
   saveFileWeb(blob, filename);
   return { kind: 'web' };
+}
+
+/**
+ * iOS (Safari or the installed PWA) has no usable "download" for generated
+ * files — they open in a viewer, or nowhere in a home-screen app — so they go
+ * through the share sheet, whose "Save to Files" lets the user pick where.
+ */
+async function shareFileWeb(file: File): Promise<SaveOutcome> {
+  try {
+    await navigator.share({ files: [file] });
+    return { kind: 'shared' };
+  } catch (err) {
+    const name = (err as { name?: string }).name;
+    if (name === 'AbortError') return { kind: 'cancelled' };
+    // The tap that started the export has expired (long PDF/video).
+    if (name === 'NotAllowedError') return { kind: 'shareReady', share: () => shareFileWeb(file) };
+    throw err;
+  }
 }
 
 function saveFileWeb(blob: Blob, filename: string): void {
@@ -79,6 +122,32 @@ async function saveFileTauri(blob: Blob, filename: string): Promise<SaveOutcome>
 
 async function saveFileCapacitor(blob: Blob, filename: string): Promise<SaveOutcome> {
   const base64Data = await blobToBase64(blob);
+  // Written to Cache first under its final name (the iOS picker exports the
+  // file as-is, name included), then handed to the native SaveAs picker so
+  // the user chooses where it goes.
+  const temp = await Filesystem.writeFile({
+    path: filename,
+    data: base64Data,
+    directory: Directory.Cache,
+  });
+  try {
+    const { saved } = await SaveAs.save({
+      path: temp.uri,
+      filename,
+      mimeType: blob.type || 'application/octet-stream',
+    });
+    return saved ? { kind: 'mobilePicked' } : { kind: 'cancelled' };
+  } catch (err) {
+    // Only fall back when the plugin is missing (e.g. an older native shell);
+    // a real write failure should surface as an error.
+    if ((err as { code?: string }).code !== 'UNIMPLEMENTED') throw err;
+    return saveFileCapacitorFallback(base64Data, filename);
+  } finally {
+    await Filesystem.deleteFile({ path: filename, directory: Directory.Cache }).catch(() => undefined);
+  }
+}
+
+async function saveFileCapacitorFallback(base64Data: string, filename: string): Promise<SaveOutcome> {
   // Permissions only matter on Android 10 and older (Directory.Documents is
   // unrestricted scoped storage from Android 11 on, and ignored on iOS) —
   // request them defensively and press on regardless of the outcome.

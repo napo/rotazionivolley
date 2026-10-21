@@ -6,12 +6,17 @@ Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
 ### Aggiunto
 - Falli di posizione: in Ricezione (fasi "Base" e "Ricezione") il pulsante "Mostra" sotto il campo disegna un overlay con la zona di rotazione di ogni giocatore e le coppie adiacenti da rispettare (tratteggio verde = ok, linea rossa = fallo). Cliccando un giocatore compaiono le frecce verso chi deve avere davanti/dietro/a sinistra/a destra, con la spiegazione. Segue il regolamento FIVB 2025-2028: la squadra al servizio è libera.
-- Avviso di aggiornamento nelle app installate (desktop, Android, iOS): segnala quando su GitHub è disponibile una versione più recente, e un messaggio di ringraziamento con invito a una donazione (facoltativa, stessa pagina PayPal degli altri progetti dell'autore) subito dopo un aggiornamento. Si può disattivare dalla pagina Info. L'app web resta esclusa: è sempre già l'ultima versione.
+- Avviso di aggiornamento nelle app installate (desktop, Android, iOS): segnala quando su GitHub è disponibile una versione più recente, e un messaggio di ringraziamento con invito a una donazione (facoltativa, stessa pagina PayPal degli altri progetti dell'autore) subito dopo un aggiornamento. Si può disattivare dalla pagina Info. Per la versione web/PWA vedi sotto.
 - App desktop (Windows/macOS/Linux): l'aggiornamento si scarica, verifica e installa in-app con un clic ("Aggiorna ora"), invece di aprire la pagina delle release. I pacchetti sono firmati digitalmente a questo scopo.
 - App Android/iOS: l'avviso punta al download della release (su Android, direttamente l'APK) — qui l'installazione resta manuale, come già per il resto dell'app.
+- App installabile come PWA (anche su iPhone/iPad, da Safari → "Aggiungi alla schermata Home"), utilizzabile senza connessione. Quando esce una nuova versione viene scaricata in background e l'app propone "Aggiorna ora". Su iPhone/iPad un avviso (una sola volta) spiega come installarla.
+- Su iPhone/iPad gli export (PNG, PDF, video, JSON) si salvano tramite la condivisione di sistema, che permette di scegliere dove ("Salva su File").
+- Nuovo schema predefinito e secondo schema "… ed S1 che attacca sempre da 4".
+- Export video anche in MP4 dove il WebM non è disponibile (Safari).
+- Versione unica: `npm version x.y.z` aggiorna la versione in tutte le build (web, desktop, Android, iOS) e la CI fallisce se una copia non è allineata o non corrisponde al tag della release. Corretta la versione iOS, rimasta a 2.0.
 
 ### Corretto
-- Export (PNG/PDF/video) e "Scarica JSON" nelle app Android/iOS: venivano scritti in una cartella cache temporanea e offerti solo tramite la finestra di condivisione del sistema, quindi se questa veniva chiusa senza scegliere nulla il file andava perso. Ora vengono salvati subito nella cartella Documenti dell'app (visibile da un file manager), con la condivisione offerta in aggiunta.
+- Export (PNG/PDF/video) e "Scarica JSON" nelle app Android/iOS: venivano scritti in una cartella cache temporanea e offerti solo tramite la finestra di condivisione del sistema, quindi se questa veniva chiusa senza scegliere nulla il file andava perso. Ora si apre il selettore di sistema per scegliere la cartella di destinazione; se non è disponibile (versione nativa precedente), il file viene salvato nella cartella Documenti dell'app con la condivisione offerta in aggiunta.
 - App desktop (Tauri): la finestra "Salva con nome" ora si apre di default nella cartella Download e filtra per l'estensione del file, invece di aprirsi senza queste indicazioni.
 
 ## [2.1.0] - 2026-09-19

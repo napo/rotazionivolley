@@ -5,7 +5,8 @@ import { useI18n } from '../i18n/I18nContext';
 import { exportStateAsPng } from './png';
 import { buildPipelinePages, exportPipelinePdf, exportSinglePagePdf, type PipelineSequenceKind } from './pdf';
 import type { Translate } from './sequence';
-import { isVideoExportSupported, recordSequenceAsWebm } from './video';
+import { isVideoExportSupported, recordSequenceAsVideo } from './video';
+import type { SaveOutcome } from './platformSave';
 import './export.css';
 
 interface ExportMenuProps {
@@ -50,6 +51,9 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
   // dialog there to confirm the export for the user (see platformSave.ts),
   // so this stands in for it.
   const [savedNote, setSavedNote] = useState(false);
+  // iPhone/iPad web build only: the export finished after iOS stopped
+  // honouring the original tap, so the share sheet needs a new one.
+  const [pendingShare, setPendingShare] = useState<(() => Promise<SaveOutcome>) | null>(null);
 
   const usesSequence = format === 'pdf-pipeline' || format === 'video';
 
@@ -57,6 +61,7 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
     setBusy(true);
     setError(null);
     setSavedNote(false);
+    setPendingShare(null);
     try {
       const base = `${config.id}-p${setterPosition}-${phaseKey}`;
       const outcome =
@@ -71,13 +76,14 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
                   `${config.id}-sequenza-${sequence}.pdf`,
                   activeLiberoId,
                 )
-              : await recordSequenceAsWebm(
+              : await recordSequenceAsVideo(
                   config,
                   buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
                   `${config.id}-sequenza-${sequence}.webm`,
                   activeLiberoId,
                 );
       setSavedNote(outcome.kind === 'mobile');
+      if (outcome.kind === 'shareReady') setPendingShare(() => outcome.share);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('export.error.generic'));
     } finally {
@@ -147,6 +153,21 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
         {busy ? t('export.submitBusy') : t('export.submit')}
       </button>
       {savedNote && <p className="export-menu__saved">{t('export.saved')}</p>}
+      {pendingShare && (
+        <p className="export-menu__saved">
+          {t('export.shareReady')}{' '}
+          <button
+            type="button"
+            onClick={() => {
+              void pendingShare()
+                .then((outcome) => setPendingShare(outcome.kind === 'shareReady' ? () => outcome.share : null))
+                .catch((err) => setError(err instanceof Error ? err.message : t('export.error.generic')));
+            }}
+          >
+            {t('export.shareSave')}
+          </button>
+        </p>
+      )}
       {error && (
         <p role="alert" className="export-menu__error">
           {error}

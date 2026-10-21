@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useI18n } from '../i18n/I18nContext';
 import { APP_VERSION } from '../version';
-import { isWebPlatform } from '../platform';
+import { isInstalledPwa, isIosDevice, isWebPlatform } from '../platform';
 import { isNativeBuild, setUpdateChecksEnabled, updateChecksEnabled } from '../update/updates';
 import './info.css';
 
@@ -14,6 +14,9 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
   // Only the plain web build needs pointers to the native installers — a
   // desktop/mobile build is itself one of those installers already.
   const [showDownloads] = useState(isWebPlatform);
+  // iPhone/iPad in Safari: there's no native iOS build to download, the
+  // app installs from the browser instead (PWA, see vite.config.ts).
+  const [showIosInstall] = useState(() => isWebPlatform() && isIosDevice() && !isInstalledPwa());
   // Only the installed apps ever check for updates — see update/updates.ts.
   const [showUpdatesToggle] = useState(isNativeBuild);
   const [checksEnabled, setChecksEnabled] = useState(updateChecksEnabled);
@@ -67,6 +70,8 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
             </label>
           </p>
         )}
+
+        {showIosInstall && <p>{t('update.iosInstallHint')}</p>}
 
         {showDownloads && (
           <>

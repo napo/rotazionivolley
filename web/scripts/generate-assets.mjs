@@ -64,7 +64,11 @@ const ICON_CROP = {
   y1: centreY + iconHalfSide,
 };
 
-const FAVICON_SIZES = { 'favicon-32.png': 32, 'favicon-512.png': 512, 'apple-touch-icon.png': 180 };
+const FAVICON_SIZES = { 'favicon-32.png': 32, 'favicon-512.png': 512, 'apple-touch-icon.png': 180, 'pwa-192.png': 192 };
+// PWA "maskable" icon: the OS may crop it to its inner 80% circle, so the
+// court sits inside that safe zone on the court-background colour.
+const MASKABLE_SIZE = 512;
+const MASKABLE_CONTENT = Math.round(MASKABLE_SIZE * 0.78);
 const ANDROID_LEGACY_SIZES = { mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 };
 // Adaptive-icon foreground canvas is 108dp vs. the legacy 72dp icon (1.5x).
 const ANDROID_FOREGROUND_SIZES = { mdpi: 108, hdpi: 162, xhdpi: 216, xxhdpi: 324, xxxhdpi: 432 };
@@ -100,6 +104,15 @@ const iconMaster = cropSquare(ICON_CROP);
 for (const [filename, size] of Object.entries(FAVICON_SIZES)) {
   await iconMaster.clone().resize(size, size, { kernel: 'lanczos3' }).toFile(join(WEB_PUBLIC_DIR, filename));
   console.log(`wrote public/${filename} (${size}x${size})`);
+}
+{
+  const content = await iconMaster.clone().resize(MASKABLE_CONTENT, MASKABLE_CONTENT, { kernel: 'lanczos3' }).toBuffer();
+  const offset = Math.round((MASKABLE_SIZE - MASKABLE_CONTENT) / 2);
+  await sharp({ create: { width: MASKABLE_SIZE, height: MASKABLE_SIZE, channels: 4, background: BACKGROUND_COLOUR } })
+    .composite([{ input: content, left: offset, top: offset }])
+    .png()
+    .toFile(join(WEB_PUBLIC_DIR, 'pwa-maskable-512.png'));
+  console.log(`wrote public/pwa-maskable-512.png (${MASKABLE_SIZE}x${MASKABLE_SIZE})`);
 }
 
 // --- Social preview / OG image (web/public) --------------------------------

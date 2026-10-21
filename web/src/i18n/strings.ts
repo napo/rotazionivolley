@@ -54,7 +54,7 @@ export const strings = {
     'export.format.png': 'PNG',
     'export.format.pdfSingle': 'PDF (pagina singola)',
     'export.format.pdfPipeline': 'PDF (sequenza / pipeline)',
-    'export.format.video': 'Video (sequenza animata, .webm)',
+    'export.format.video': 'Video (sequenza animata)',
     'export.format.videoUnsupported': ' — non supportato su questo dispositivo',
     'export.sequence.title': 'Sequenza da esportare',
     'export.sequence.serveRotation': 'Servizio rotazione P{position}',
@@ -64,6 +64,8 @@ export const strings = {
     'export.submitBusy': 'Esportazione…',
     'export.error.generic': 'Esportazione non riuscita',
     'export.saved': "Salvato nei Documenti dell'app. Puoi anche condividerlo da lì.",
+    'export.shareReady': 'Il file è pronto.',
+    'export.shareSave': 'Salva o condividi',
     'export.header.rotation': '{team} situazione P{position}',
 
     'editor.title': 'Editor schemi',
@@ -136,6 +138,9 @@ export const strings = {
     'update.progress': 'Download: {percent}%',
     'update.installing': 'Installazione in corso…',
     'update.failed': "Aggiornamento non riuscito.",
+    'update.pwaAvailable': "È disponibile una nuova versione dell'app.",
+    'update.iosInstallHint':
+      "Puoi installare l'app su iPhone/iPad: in Safari tocca Condividi e poi \"Aggiungi alla schermata Home\". Funziona anche senza connessione e si aggiorna da sola.",
     'info.updatesCheck': "Controlla gli aggiornamenti all'avvio",
 
     'language.label': 'Lingua',
@@ -187,7 +192,7 @@ export const strings = {
     'export.format.png': 'PNG',
     'export.format.pdfSingle': 'PDF (single page)',
     'export.format.pdfPipeline': 'PDF (sequence / pipeline)',
-    'export.format.video': 'Video (animated sequence, .webm)',
+    'export.format.video': 'Video (animated sequence)',
     'export.format.videoUnsupported': ' — not supported on this device',
     'export.sequence.title': 'Sequence to export',
     'export.sequence.serveRotation': 'Serve rotation P{position}',
@@ -197,6 +202,8 @@ export const strings = {
     'export.submitBusy': 'Exporting…',
     'export.error.generic': 'Export failed',
     'export.saved': "Saved to the app's Documents. You can also share it from there.",
+    'export.shareReady': 'The file is ready.',
+    'export.shareSave': 'Save or share',
     'export.header.rotation': '{team} situation P{position}',
 
     'editor.title': 'Scheme editor',
@@ -269,6 +276,9 @@ export const strings = {
     'update.progress': 'Downloading: {percent}%',
     'update.installing': 'Installing…',
     'update.failed': 'Update failed.',
+    'update.pwaAvailable': 'A new version of the app is available.',
+    'update.iosInstallHint':
+      'You can install the app on iPhone/iPad: in Safari tap Share, then "Add to Home Screen". It also works offline and updates itself.',
     'info.updatesCheck': 'Check for updates at start',
 
     'language.label': 'Language',

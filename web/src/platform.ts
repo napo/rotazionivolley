@@ -10,3 +10,18 @@ import { Capacitor } from '@capacitor/core';
 export function isWebPlatform(): boolean {
   return !isTauri() && !Capacitor.isNativePlatform();
 }
+
+/** iPhone/iPad, including iPadOS which reports itself as a Mac with touch. */
+export function isIosDevice(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/** True when the web build runs as an installed PWA (from the home screen) rather than in a browser tab. */
+export function isInstalledPwa(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia?.('(display-mode: standalone)').matches === true ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}

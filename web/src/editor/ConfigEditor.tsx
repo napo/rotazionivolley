@@ -100,6 +100,9 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
   // there's no OS "save as" dialog there to confirm it for the user (see
   // platformSave.ts), so this stands in for it.
   const [savedNote, setSavedNote] = useState(false);
+  // iPhone/iPad web build only: the share sheet needs a fresh tap (see
+  // SaveOutcome 'shareReady').
+  const [pendingShare, setPendingShare] = useState<(() => Promise<SaveOutcome>) | null>(null);
   // 0 while dragging (instant, so it doesn't fight the live drag motion),
   // bumped only for a libero swap so that move reads as the two players
   // trading places rather than teleporting.
@@ -199,9 +202,13 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
     }
     setErrors([]);
     setSavedNote(false);
+    setPendingShare(null);
     const outcome = action(result.data);
     if (outcome) {
-      void outcome.then((o) => setSavedNote(o.kind === 'mobile'));
+      void outcome.then((o) => {
+        setSavedNote(o.kind === 'mobile');
+        if (o.kind === 'shareReady') setPendingShare(() => o.share);
+      });
     }
   }
 
@@ -361,6 +368,21 @@ export function ConfigEditor({ availableConfigs, initialConfig, onApply, onDelet
             </div>
 
             {savedNote && <p className="config-editor__hint">{t('export.saved')}</p>}
+            {pendingShare && (
+              <p className="config-editor__hint">
+                {t('export.shareReady')}{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    void pendingShare()
+                      .then((o) => setPendingShare(o.kind === 'shareReady' ? () => o.share : null))
+                      .catch(() => setPendingShare(null));
+                  }}
+                >
+                  {t('export.shareSave')}
+                </button>
+              </p>
+            )}
 
             {errors.length > 0 && (
               <ul className="config-editor__error" role="alert">

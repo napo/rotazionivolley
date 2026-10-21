@@ -13,7 +13,8 @@ l'applicazione può essere usata a questo indirizzo [https://napo.github.io/rota
 - **Due palleggiatori**: nell'editor il bollo **P2** trasforma l'opposto in un secondo palleggiatore (le rotazioni restano riferite al primo, P1). Cliccando **O** si torna al modulo con un solo palleggiatore.
 - **Falli di posizione**: in ricezione, un overlay mostra la zona di rotazione di ogni giocatore e con chi può fare fallo di posizione; cliccando un giocatore si vedono le frecce e la spiegazione (es. "deve avere C2 alla sua sinistra"). Regolamento FIVB 2025-2028: vale solo per la squadra in ricezione.
 - **Note**: un commento per ogni rotazione e fase, riportato anche negli export.
-- **Export**: PNG, PDF (pagina singola o sequenza) e video animato `.webm`.
-- **Aggiornamenti**: le app desktop/Android/iOS segnalano quando c'è una versione più recente (su desktop si installa in-app con un clic); si può disattivare dalla pagina Info.
+- **Export**: PNG, PDF (pagina singola o sequenza) e video animato (`.webm`, o `.mp4` su Safari).
+- **Installabile come app (PWA)**: dal browser si può installare l'app sulla schermata Home (su iPhone/iPad: Safari → Condividi → "Aggiungi alla schermata Home"). Funziona anche senza connessione.
+- **Aggiornamenti**: la versione web/PWA scarica le nuove versioni da sola e propone "Aggiorna ora"; le app desktop/Android segnalano quando c'è una versione più recente (su desktop si installa in-app con un clic), e il controllo si può disattivare dalla pagina Info.
 
 ![](https://raw.githubusercontent.com/napo/rotazionivolley/master/demo/rotazionivolley.gif)

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '../i18n/I18nContext';
 import { APP_VERSION } from '../version';
+import { isInstalledPwa, isIosDevice, isWebPlatform } from '../platform';
+import { usePwaUpdate } from './pwaUpdates';
 import {
   checkForUpdate,
   compareVersions,
@@ -12,6 +14,24 @@ import {
 } from './updates';
 import './update.css';
 
+const INSTALL_HINT_DISMISSED = 'rv-install-hint-dismissed';
+
+function installHintDismissed(): boolean {
+  try {
+    return localStorage.getItem(INSTALL_HINT_DISMISSED) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function dismissInstallHint(): void {
+  try {
+    localStorage.setItem(INSTALL_HINT_DISMISSED, '1');
+  } catch {
+    // not persisted: shown again at the next start
+  }
+}
+
 /** Same donation page as the author's other apps (e.g. volleyreportxls) — a plain link, PayPal is contacted only when the user opens it. */
 const DONATION_URL = 'https://paypal.me/MNapolitano570';
 
@@ -22,17 +42,26 @@ const DONATION_URL = 'https://paypal.me/MNapolitano570';
  * updater); on Android/iOS, with a link to get it by hand, since neither
  * Capacitor nor Tauri auto-updates mobile. Right after an update, it also
  * thanks the user once and invites a donation. The web build is always the
- * latest already, so it never shows either one.
+ * latest already, so it never shows the native check — but its service
+ * worker (see update/pwaUpdates.ts) does find new versions, and then this
+ * offers to reload into them. On iPhone/iPad in Safari it also explains,
+ * once, how to install the app from the home screen.
  */
 export function UpdateNotice() {
   const { t } = useI18n();
   const native = isNativeBuild();
+  const installedPwa = isWebPlatform() && isInstalledPwa();
+  const applyPwaUpdate = usePwaUpdate();
+  const [pwaUpdating, setPwaUpdating] = useState(false);
+  const [showInstallHint, setShowInstallHint] = useState(
+    () => isWebPlatform() && isIosDevice() && !isInstalledPwa() && !installHintDismissed(),
+  );
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [installState, setInstallState] = useState<'idle' | 'installing' | 'error'>('idle');
   const [progress, setProgress] = useState<number | null>(null);
   const [justUpdated, setJustUpdated] = useState(() => {
-    if (!native) return false;
+    if (!native && !installedPwa) return false;
     const previous = swapLastVersion(APP_VERSION);
     return previous !== null && compareVersions(APP_VERSION, previous) > 0;
   });
@@ -49,8 +78,6 @@ export function UpdateNotice() {
     };
   }, [native]);
 
-  if (!native) return null;
-
   const donateLink = (
     <a className="update-notice__btn update-notice__btn--secondary" href={DONATION_URL} target="_blank" rel="noreferrer">
       {t('update.donate')}
@@ -66,6 +93,51 @@ export function UpdateNotice() {
         <div className="update-notice__actions">
           {donateLink}
           <button type="button" className="update-notice__btn update-notice__btn--secondary" onClick={() => setJustUpdated(false)}>
+            {t('update.close')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (applyPwaUpdate && !dismissed) {
+    return (
+      <div className="update-notice" role="status" aria-live="polite">
+        <p>{t('update.pwaAvailable')}</p>
+        <div className="update-notice__actions">
+          <button
+            type="button"
+            className="update-notice__btn"
+            disabled={pwaUpdating}
+            onClick={() => {
+              setPwaUpdating(true);
+              // Activates the new version and reloads the page into it.
+              void applyPwaUpdate().catch(() => setPwaUpdating(false));
+            }}
+          >
+            {t('update.updateNow')}
+          </button>
+          <button type="button" className="update-notice__btn update-notice__btn--secondary" onClick={() => setDismissed(true)}>
+            {t('update.later')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (showInstallHint) {
+    return (
+      <div className="update-notice" role="status">
+        <p>{t('update.iosInstallHint')}</p>
+        <div className="update-notice__actions">
+          <button
+            type="button"
+            className="update-notice__btn update-notice__btn--secondary"
+            onClick={() => {
+              dismissInstallHint();
+              setShowInstallHint(false);
+            }}
+          >
             {t('update.close')}
           </button>
         </div>

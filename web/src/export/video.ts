@@ -16,7 +16,8 @@ export function isVideoExportSupported(): boolean {
 }
 
 function pickMimeType(): string {
-  const candidates = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  // WebM first (Chromium, Firefox); MP4 for Safari/iOS, which can't record WebM everywhere.
+  const candidates = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4;codecs=avc1', 'video/mp4'];
   for (const type of candidates) {
     if (MediaRecorder.isTypeSupported(type)) return type;
   }
@@ -30,7 +31,7 @@ function pickMimeType(): string {
  * on-screen animation. Captured from an offscreen canvas via
  * captureStream()+MediaRecorder, since only <canvas> supports captureStream.
  */
-export async function recordSequenceAsWebm(
+export async function recordSequenceAsVideo(
   config: FormationConfig,
   pages: SequencePage[],
   filename: string,
@@ -111,5 +112,8 @@ export async function recordSequenceAsWebm(
   recorder.stop();
   await stopped;
 
-  return saveFile(new Blob(chunks, { type: mimeType || 'video/webm' }), filename);
+  // The recorder may have picked its own format when none was requested.
+  const type = recorder.mimeType || mimeType || 'video/webm';
+  const extension = type.startsWith('video/mp4') ? 'mp4' : 'webm';
+  return saveFile(new Blob(chunks, { type }), filename.replace(/\.[^.]+$/, '') + '.' + extension);
 }
