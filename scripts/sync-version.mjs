@@ -47,10 +47,20 @@ const targets = [
   ['ios/App/App.xcodeproj/project.pbxproj', /CURRENT_PROJECT_VERSION = ([^;]*);/g, buildNumber],
 ];
 
+// Patterns are written for "\n": a Windows checkout (core.autocrlf) has
+// "\r\n", so match on normalized text and restore the file's own line
+// endings when writing.
+const crlfFiles = new Set();
+function readNormalized(file) {
+  const raw = readFileSync(file, 'utf8');
+  if (raw.includes('\r\n')) crlfFiles.add(file);
+  return raw.replace(/\r\n/g, '\n');
+}
+
 const contents = new Map();
 const mismatches = [];
 for (const [file, pattern, value, optional = false] of targets) {
-  let text = contents.get(file) ?? readFileSync(file, 'utf8');
+  let text = contents.get(file) ?? readNormalized(file);
   const found = [...text.matchAll(pattern.global ? pattern : new RegExp(pattern.source, pattern.flags + 'g'))];
   if ((found.length === 0 && !optional) || (!pattern.global && found.length > 1)) {
     throw new Error(`${file}: pattern ${pattern} trovato ${found.length} volte`);
@@ -74,6 +84,6 @@ if (check) {
   }
   console.log(`Versioni allineate: ${version} (build ${buildNumber})`);
 } else {
-  for (const [file, text] of contents) writeFileSync(file, text);
+  for (const [file, text] of contents) writeFileSync(file, crlfFiles.has(file) ? text.replace(/\n/g, '\r\n') : text);
   console.log(`Versione ${version} (build ${buildNumber}) scritta in: ${[...contents.keys()].join(', ')}`);
 }
