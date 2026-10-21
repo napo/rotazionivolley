@@ -130,6 +130,7 @@ function App() {
               phaseKey={state.phaseKey}
               setterPosition={state.setterPosition}
               activeLiberoId={state.activeLiberoId}
+              faultView={faultsOn ? { selectedId: selectedForFaults } : null}
               embedded
             />
           </HeaderDropdown>

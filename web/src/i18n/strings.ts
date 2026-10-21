@@ -71,6 +71,12 @@ export const strings = {
     'export.saved': "Salvato nei Documenti dell'app. Puoi anche condividerlo da lì.",
     'export.shareReady': 'Il file è pronto.',
     'export.shareSave': 'Salva o condividi',
+    'export.faults.all': 'Falli di posizione: tutta la squadra',
+    'export.faults.player': 'Falli di posizione: {player} (zona {zone})',
+    'export.faults.none': 'nessun fallo',
+    'export.faultsNote.png': "La vista dei falli di posizione è attiva: verrà disegnata anche nell'immagine.",
+    'export.faultsNote.video':
+      'La vista dei falli di posizione è attiva: nelle formazioni di ricezione il video mostra i falli di tutta la squadra e poi di ogni giocatore (P, S1, C2, O, S2, C1, con il libero al posto del centrale).',
     'export.header.rotation': '{team} situazione P{position}',
 
     'editor.title': 'Editor schemi',
@@ -118,7 +124,7 @@ export const strings = {
     'info.title': 'Informazioni',
     'info.close': 'Chiudi',
     'info.project': 'Progetto di',
-    'info.builtOn': 'Applicazione costruita su VBRotations di Andy Edwards.',
+    'info.builtOn': 'Applicazione costruita su VBRotations di Andy Edwards (licenza Apache 2.0).',
     'info.sourceLabel': 'Codice sorgente:',
     'info.aiAssisted': "Realizzato con l'aiuto di Claude AI.",
     'info.version': 'Versione {version}',
@@ -223,6 +229,12 @@ export const strings = {
     'export.saved': "Saved to the app's Documents. You can also share it from there.",
     'export.shareReady': 'The file is ready.',
     'export.shareSave': 'Save or share',
+    'export.faults.all': 'Positional faults: whole team',
+    'export.faults.player': 'Positional faults: {player} (zone {zone})',
+    'export.faults.none': 'no faults',
+    'export.faultsNote.png': 'The positional-fault view is on: it will be drawn on the image too.',
+    'export.faultsNote.video':
+      'The positional-fault view is on: in the receive formations the video shows the whole team\'s faults, then each player\'s (P, S1, C2, O, S2, C1, with the libero in place of the middle).',
     'export.header.rotation': '{team} situation P{position}',
 
     'editor.title': 'Scheme editor',
@@ -270,7 +282,7 @@ export const strings = {
     'info.title': 'About',
     'info.close': 'Close',
     'info.project': 'Project by',
-    'info.builtOn': 'Built on VBRotations by Andy Edwards.',
+    'info.builtOn': 'Built on VBRotations by Andy Edwards (Apache License 2.0).',
     'info.sourceLabel': 'Source code:',
     'info.aiAssisted': 'Built with the help of Claude AI.',
     'info.version': 'Version {version}',

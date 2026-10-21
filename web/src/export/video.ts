@@ -1,8 +1,9 @@
-import type { FormationConfig } from '../configs/schema';
+import type { FormationConfig, PlayerDef, RotationPositions } from '../configs/schema';
 import { createOffscreenCanvas, drawFrame, tweenPositions } from '../court/canvasRenderer';
+import { computeFaultOverlay, type FaultOverlayData, type PositionRelation } from '../state/positionalFaults';
 import { resolveDiagramState } from '../state/selectors';
 import { saveFile, type SaveOutcome } from './platformSave';
-import type { SequencePage } from './sequence';
+import type { SequencePage, Translate } from './sequence';
 
 const HOLD_MS = 900;
 const TRANSITION_MS = 500;
@@ -24,18 +25,99 @@ function pickMimeType(): string {
   return '';
 }
 
+/** Extra stills for the positional-fault walk-through (see buildSegments). */
+const FAULT_ALL_MS = 2200;
+const FAULT_PLAYER_MS = 1600;
+
+/** One still of the clip: held for holdMs, then tweened into the next still over transitionMs. */
+interface Segment {
+  players: PlayerDef[];
+  positions: RotationPositions;
+  title: string[];
+  caption?: string;
+  faults?: FaultOverlayData;
+  holdMs: number;
+  transitionMs: number;
+}
+
+function faultCount(t: Translate, relations: PositionRelation[]): string {
+  const count = relations.filter((r) => !r.ok).length;
+  return count === 0 ? t('export.faults.none') : t(count === 1 ? 'faults.summaryOne' : 'faults.summaryMany', { count });
+}
+
+/**
+ * One still per page; with `faultTour`, each reception formation (receiving
+ * side at the service hit, as in the live view) is followed by a still with
+ * the whole team's positional-fault overlay and then one per player in the
+ * order P, S1, C2, O, S2, C1 (the libero in place of the player it
+ * replaces). Stills of the same page share positions, so only the move to
+ * the next page is animated.
+ */
+export function buildSegments(
+  config: FormationConfig,
+  pages: SequencePage[],
+  activeLiberoId: string | null | undefined,
+  faultTour: boolean,
+  t: Translate,
+): Segment[] {
+  const segments: Segment[] = [];
+  pages.forEach((page, index) => {
+    const { players, positions } = resolveDiagramState(config, page.team, page.phaseKey, page.setterPosition, activeLiberoId);
+    const isLastPage = index === pages.length - 1;
+    const still = { players, positions, title: page.titleLines };
+    const pageSegments: Segment[] = [{ ...still, caption: page.comment || undefined, holdMs: HOLD_MS, transitionMs: 0 }];
+
+    // "base" defines the zones, so it can't hold a fault: walk through the reception formation only.
+    const overlay =
+      faultTour && page.phaseKey !== 'base'
+        ? computeFaultOverlay(config, page.team, page.phaseKey, page.setterPosition, activeLiberoId, positions)
+        : null;
+    if (overlay) {
+      const label = (id: string) => players.find((p) => p.id === id)?.shortLabel ?? id;
+      pageSegments.push({
+        ...still,
+        caption: `${t('export.faults.all')} · ${faultCount(t, overlay.relations)}`,
+        faults: { zones: overlay.zones, relations: overlay.relations, selectedId: null },
+        holdMs: FAULT_ALL_MS,
+        transitionMs: 0,
+      });
+      for (const id of overlay.tour) {
+        const own = overlay.relations.filter((r) => r.firstId === id || r.secondId === id);
+        pageSegments.push({
+          ...still,
+          caption: `${t('export.faults.player', { player: label(id), zone: overlay.zones[id]! })} · ${faultCount(t, own)}`,
+          faults: { zones: overlay.zones, relations: overlay.relations, selectedId: id },
+          holdMs: FAULT_PLAYER_MS,
+          transitionMs: 0,
+        });
+      }
+    }
+    if (!isLastPage) pageSegments[pageSegments.length - 1]!.transitionMs = TRANSITION_MS;
+    segments.push(...pageSegments);
+  });
+  return segments;
+}
+
+function drawSegment(ctx: CanvasRenderingContext2D, segment: Segment): void {
+  drawFrame(ctx, segment.players, segment.positions, segment.title, segment.caption, segment.faults);
+}
+
 /**
  * Renders the given sequence of states (same shape used by the PDF pipeline
  * export) as a short animated clip: each state holds for HOLD_MS, then tweens
  * into the next over TRANSITION_MS, using the same easing as the interactive
- * on-screen animation. Captured from an offscreen canvas via
- * captureStream()+MediaRecorder, since only <canvas> supports captureStream.
+ * on-screen animation — plus, with `faultTour`, the positional-fault stills
+ * of each reception formation (see buildSegments). Captured from an
+ * offscreen canvas via captureStream()+MediaRecorder, since only <canvas>
+ * supports captureStream.
  */
 export async function recordSequenceAsVideo(
   config: FormationConfig,
   pages: SequencePage[],
   filename: string,
-  activeLiberoId?: string | null,
+  activeLiberoId: string | null | undefined,
+  t: Translate,
+  faultTour = false,
   scale = 2,
 ): Promise<SaveOutcome> {
   if (!isVideoExportSupported()) {
@@ -46,10 +128,8 @@ export async function recordSequenceAsVideo(
   }
 
   const { canvas, ctx } = createOffscreenCanvas(scale);
-  const frames = pages.map((page) =>
-    resolveDiagramState(config, page.team, page.phaseKey, page.setterPosition, activeLiberoId),
-  );
-  drawFrame(ctx, frames[0].players, frames[0].positions, pages[0].titleLines, pages[0].comment || undefined);
+  const segments = buildSegments(config, pages, activeLiberoId, faultTour, t);
+  drawSegment(ctx, segments[0]!);
 
   const stream = canvas.captureStream(30);
   const mimeType = pickMimeType();
@@ -64,42 +144,34 @@ export async function recordSequenceAsVideo(
 
   recorder.start();
 
-  const segmentDuration = (index: number) => HOLD_MS + (index < pages.length - 1 ? TRANSITION_MS : 0);
-  const totalDuration = pages.reduce((sum, _page, index) => sum + segmentDuration(index), 0);
+  const totalDuration = segments.reduce((sum, segment) => sum + segment.holdMs + segment.transitionMs, 0);
   const startTime = performance.now();
 
   await new Promise<void>((resolve) => {
     function tick() {
       const elapsed = performance.now() - startTime;
       if (elapsed >= totalDuration) {
-        const last = pages.length - 1;
-        drawFrame(ctx, frames[last].players, frames[last].positions, pages[last].titleLines, pages[last].comment || undefined);
+        drawSegment(ctx, segments[segments.length - 1]!);
         resolve();
         return;
       }
 
       let acc = 0;
-      let segmentIndex = 0;
-      for (; segmentIndex < pages.length; segmentIndex++) {
-        const duration = segmentDuration(segmentIndex);
+      let index = 0;
+      for (; index < segments.length - 1; index++) {
+        const duration = segments[index]!.holdMs + segments[index]!.transitionMs;
         if (elapsed < acc + duration) break;
         acc += duration;
       }
 
+      const segment = segments[index]!;
       const withinSegment = elapsed - acc;
-      const isLastSegment = segmentIndex === pages.length - 1;
-      if (withinSegment < HOLD_MS || isLastSegment) {
-        drawFrame(
-          ctx,
-          frames[segmentIndex].players,
-          frames[segmentIndex].positions,
-          pages[segmentIndex].titleLines,
-          pages[segmentIndex].comment || undefined,
-        );
+      if (withinSegment < segment.holdMs || index === segments.length - 1) {
+        drawSegment(ctx, segment);
       } else {
-        const progress = (withinSegment - HOLD_MS) / TRANSITION_MS;
-        const tweened = tweenPositions(frames[segmentIndex].positions, frames[segmentIndex + 1].positions, progress);
-        drawFrame(ctx, frames[segmentIndex].players, tweened);
+        const progress = (withinSegment - segment.holdMs) / segment.transitionMs;
+        const tweened = tweenPositions(segment.positions, segments[index + 1]!.positions, progress);
+        drawFrame(ctx, segment.players, tweened);
       }
 
       requestAnimationFrame(tick);

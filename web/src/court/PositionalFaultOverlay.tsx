@@ -3,14 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Arrow, Circle, Group, Line, Text } from 'react-konva';
 import type { Point } from '../configs/schema';
 import type { PositionRelation, Zone } from '../state/positionalFaults';
-import { PLAYER_RADIUS } from './courtGeometry';
-
-const FAULT_COLOURS = {
-  ok: '#1b7a3a',
-  fault: '#d0021b',
-  badgeFill: '#ffffff',
-  badgeText: '#164863',
-} as const;
+import { FAULT_COLOURS, PLAYER_RADIUS, trimmedSegment } from './courtGeometry';
 
 interface PositionalFaultOverlayProps {
   zones: Record<string, Zone>;
@@ -22,22 +15,12 @@ interface PositionalFaultOverlayProps {
   revealDelayMs?: number;
 }
 
-/** Segment between two marker centres, trimmed so it starts/ends at the circle edges. */
-function trimmed(a: Point, b: Point, gap: number): number[] | null {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.hypot(dx, dy);
-  if (len <= gap * 2) return null;
-  const ux = dx / len;
-  const uy = dy / len;
-  return [a.x + ux * gap, a.y + uy * gap, b.x - ux * gap, b.y - uy * gap];
-}
-
 /**
  * Konva layer content drawn above the players: a zone badge on each player
  * and one segment per adjacent-zone pair (dashed green = order respected,
  * solid thick red = positional fault). Dash vs solid keeps the two states
- * distinguishable without relying on colour.
+ * distinguishable without relying on colour. Exports draw the same thing
+ * with Canvas 2D — see drawFaultOverlay in canvasRenderer.ts.
  */
 export function PositionalFaultOverlay({
   zones,
@@ -73,7 +56,7 @@ export function PositionalFaultOverlay({
       {(selectedRelations ?? relations).map((r) => {
         const fromId = selectedId && r.secondId === selectedId ? r.secondId : r.firstId;
         const toId = fromId === r.firstId ? r.secondId : r.firstId;
-        const points = trimmed(positions[fromId]!, positions[toId]!, gap);
+        const points = trimmedSegment(positions[fromId]!, positions[toId]!, gap);
         if (!points) return null;
         const colour = r.ok ? FAULT_COLOURS.ok : FAULT_COLOURS.fault;
         const common = {

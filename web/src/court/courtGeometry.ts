@@ -1,3 +1,5 @@
+import type { Point } from '../configs/schema';
+
 /**
  * Coordinate system matches the original app's player position data
  * (x roughly 0-450, y roughly 30-475) so the migrated JSON configs need no
@@ -53,3 +55,22 @@ export const COLOURS = {
 } as const;
 
 export const ANIMATION_DURATION_MS = 500;
+
+/** Positional-fault overlay (live Konva view and exports alike). */
+export const FAULT_COLOURS = {
+  ok: '#1b7a3a',
+  fault: '#d0021b',
+  badgeFill: '#ffffff',
+  badgeText: '#164863',
+} as const;
+
+/** Segment between two marker centres, trimmed so it starts/ends at the circle edges. */
+export function trimmedSegment(a: Point, b: Point, gap: number): number[] | null {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len = Math.hypot(dx, dy);
+  if (len <= gap * 2) return null;
+  const ux = dx / len;
+  const uy = dy / len;
+  return [a.x + ux * gap, a.y + uy * gap, b.x - ux * gap, b.y - uy * gap];
+}

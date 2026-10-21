@@ -51,3 +51,9 @@
   font-size: 0.85rem;
   margin-top: 0.5rem;
 }
+
+.export-menu__note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: #555;
+}

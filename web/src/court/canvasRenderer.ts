@@ -1,4 +1,5 @@
 import type { PlayerDef, Point, RotationPositions } from '../configs/schema';
+import type { FaultOverlayData } from '../state/positionalFaults';
 import {
   ATTACK_LINE,
   ATTACK_LINE_TICKS,
@@ -6,7 +7,9 @@ import {
   COLOURS,
   COURT_RECT,
   COURT_VIEWBOX,
+  FAULT_COLOURS,
   PLAYER_RADIUS,
+  trimmedSegment,
 } from './courtGeometry';
 
 /**
@@ -35,6 +38,7 @@ export function drawFrame(
   positions: Record<string, Point>,
   title?: string[],
   caption?: string,
+  faults?: FaultOverlayData,
 ): void {
   const { minX, minY, width, height } = COURT_VIEWBOX;
 
@@ -90,6 +94,8 @@ export function drawFrame(
     ctx.fillText(player.shortLabel, position.x, position.y + 1);
   }
 
+  if (faults) drawFaultOverlay(ctx, positions, faults);
+
   if (title && title.length > 0) {
     ctx.fillStyle = '#1a1a1a';
     ctx.textAlign = 'left';
@@ -109,6 +115,76 @@ export function drawFrame(
     const lineHeight = 22;
     const baseY = minY + height - 12 - (lines.length - 1) * lineHeight;
     lines.forEach((line, i) => ctx.fillText(line, minX + 10, baseY + i * lineHeight));
+  }
+}
+
+/**
+ * Canvas 2D twin of court/PositionalFaultOverlay (the live Konva view): a
+ * segment per adjacent-zone pair (dashed green = ok, thick red = fault), or
+ * with a player selected only their pairs as arrows towards the partners,
+ * plus each player's zone badge.
+ */
+function drawFaultOverlay(ctx: CanvasRenderingContext2D, positions: Record<string, Point>, faults: FaultOverlayData): void {
+  const { zones, relations, selectedId } = faults;
+  const shown = selectedId ? relations.filter((r) => r.firstId === selectedId || r.secondId === selectedId) : relations;
+  const gap = PLAYER_RADIUS + 6;
+
+  for (const r of shown) {
+    const fromId = selectedId && r.secondId === selectedId ? r.secondId : r.firstId;
+    const toId = fromId === r.firstId ? r.secondId : r.firstId;
+    const from = positions[fromId];
+    const to = positions[toId];
+    const points = from && to ? trimmedSegment(from, to, gap) : null;
+    if (!points) continue;
+    const [x1, y1, x2, y2] = points as [number, number, number, number];
+    const colour = r.ok ? FAULT_COLOURS.ok : FAULT_COLOURS.fault;
+
+    ctx.save();
+    ctx.strokeStyle = colour;
+    ctx.fillStyle = colour;
+    ctx.lineWidth = r.ok ? 4 : 7;
+    ctx.lineCap = 'round';
+    ctx.setLineDash(r.ok ? [10, 8] : []);
+    const pointer = 16;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    // With an arrowhead, stop the shaft at its base so the round cap doesn't poke through the tip.
+    const endX = selectedId ? x2 - Math.cos(angle) * pointer : x2;
+    const endY = selectedId ? y2 - Math.sin(angle) * pointer : y2;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+    if (selectedId) {
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - Math.cos(angle) * pointer - Math.sin(angle) * (pointer / 2), y2 - Math.sin(angle) * pointer + Math.cos(angle) * (pointer / 2));
+      ctx.lineTo(x2 - Math.cos(angle) * pointer + Math.sin(angle) * (pointer / 2), y2 - Math.sin(angle) * pointer - Math.cos(angle) * (pointer / 2));
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  for (const [id, zone] of Object.entries(zones)) {
+    const p = positions[id];
+    if (!p) continue;
+    const bx = p.x + PLAYER_RADIUS * 0.8;
+    const by = p.y - PLAYER_RADIUS * 0.8;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(bx, by, 13, 0, Math.PI * 2);
+    ctx.fillStyle = FAULT_COLOURS.badgeFill;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = FAULT_COLOURS.badgeText;
+    ctx.stroke();
+    ctx.fillStyle = FAULT_COLOURS.badgeText;
+    ctx.font = 'bold 15px Verdana, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(zone), bx, by + 1);
+    ctx.restore();
   }
 }
 

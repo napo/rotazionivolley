@@ -1,4 +1,5 @@
 import type { FormationConfig, LiberoSwap, PhaseDef, Point, SetterPosition } from '../configs/schema';
+import { resolveActiveLiberoSwap } from './selectors';
 
 /**
  * Positional faults (FIVB rule 7.4, 2025-2028 edition): at the service hit
@@ -102,4 +103,48 @@ export function checkPositionalFaults(
 export function getPositionalCheckPhases(phases: Record<string, PhaseDef>): string[] {
   const firstReceive = Object.entries(phases).find(([, def]) => def.team === 'receive')?.[0];
   return ['base', ...(firstReceive ? [firstReceive] : [])].filter((key) => phases[key]);
+}
+
+export interface FaultOverlayData {
+  zones: Record<string, Zone>;
+  relations: PositionRelation[];
+  /** Single-player view for this id (arrows to their partners), or the whole formation when null. */
+  selectedId: string | null;
+}
+
+/**
+ * Zones and checked pairs for a diagram as exported (team, phase, rotation,
+ * libero choice) plus the video walk-through order (see faultTourIds), or
+ * null where the check doesn't apply — the same rule as
+ * the live view: receiving side, at the service hit.
+ */
+export function computeFaultOverlay(
+  config: FormationConfig,
+  team: 'serve' | 'receive',
+  phaseKey: string,
+  setterPosition: SetterPosition,
+  activeLiberoId: string | null | undefined,
+  positions: Record<string, Point>,
+): (Omit<FaultOverlayData, 'selectedId'> & { tour: string[] }) | null {
+  if (team !== 'receive' || !getPositionalCheckPhases(config.phases).includes(phaseKey)) return null;
+  const swap = resolveActiveLiberoSwap(config, team, setterPosition, activeLiberoId);
+  const zones = getRotationZones(config, setterPosition, swap);
+  const relations = checkPositionalFaults(zones, positions);
+  return relations.length > 0 ? { zones, relations, tour: faultTourIds(zones, swap) } : null;
+}
+
+/** Player order of the video's single-player walk-through. */
+const FAULT_TOUR_ORDER = ['P', 'S1', 'C2', 'O', 'S2', 'C1'];
+
+/**
+ * Who the video's walk-through shows, one at a time: P, S1, C2, O, S2, C1,
+ * with a libero on court taking the place of the player it replaces. Players
+ * of a custom scheme with other ids follow in zone order.
+ */
+export function faultTourIds(zones: Record<string, Zone>, swap?: LiberoSwap): string[] {
+  const ordered = FAULT_TOUR_ORDER.map((id) => (swap?.replaces === id ? swap.libero : id)).filter((id) => zones[id] !== undefined);
+  const rest = Object.keys(zones)
+    .filter((id) => !ordered.includes(id))
+    .sort((a, b) => zones[a]! - zones[b]!);
+  return [...ordered, ...rest];
 }

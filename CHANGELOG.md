@@ -6,7 +6,11 @@ Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
 ### Aggiunto
 - Falli di posizione: pulsanti per scegliere tra la vista di un singolo giocatore (solo i suoi possibili falli) e "Tutta la formazione"; un avviso segnala sempre i falli presenti, anche con l'overlay nascosto. Nell'editor i falli creati trascinando i giocatori nella formazione di ricezione vengono segnalati subito, con l'overlay sul campo. Nuovo passo del tutorial dedicato ai falli.
+- Export con i falli di posizione: se la vista dei falli è attiva, il PNG li disegna come a schermo (tutta la squadra o il giocatore scelto); il video, nelle formazioni di ricezione, aggiunge un fotogramma con i falli di tutta la squadra e poi uno per giocatore nell'ordine P, S1, C2, O, S2, C1 (con il libero al posto del centrale che sostituisce).
 - Pagina Info: sezione "Sostieni lo sviluppo" con la donazione volontaria tramite PayPal (stesso approccio di analisirefertogara). L'app la ricorda solo negli avvisi di aggiornamento, ora anche in quello della versione web/PWA.
+
+### Modificato
+- Licenza: il progetto passa da Apache 2.0 a GNU Affero General Public License v3.0 or later (`AGPL-3.0-or-later`). Le parti derivate da VBRotations conservano l'attribuzione Apache 2.0.
 
 ### Corretto
 - App desktop: i link esterni (GitHub, donazione, download) ora si aprono nel browser di sistema.

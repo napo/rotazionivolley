@@ -15,6 +15,8 @@ interface ExportMenuProps {
   phaseKey: string;
   setterPosition: SetterPosition;
   activeLiberoId?: string | null;
+  /** The positional-fault view as shown on screen (null when off): drawn on the PNG, and walked through in the video. */
+  faultView?: { selectedId: string | null } | null;
   /** When embedded in a dropdown (e.g. the header), skip the panel chrome and title — the trigger button already labels it. */
   embedded?: boolean;
 }
@@ -41,7 +43,15 @@ function sequenceLabel(kind: PipelineSequenceKind, t: Translate, setterPosition:
 
 const videoSupported = isVideoExportSupported();
 
-export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiberoId = null, embedded = false }: ExportMenuProps) {
+export function ExportMenu({
+  config,
+  team,
+  phaseKey,
+  setterPosition,
+  activeLiberoId = null,
+  faultView = null,
+  embedded = false,
+}: ExportMenuProps) {
   const { t } = useI18n();
   const [format, setFormat] = useState<Format>('png');
   const [sequence, setSequence] = useState<PipelineSequenceKind>('serveRotation');
@@ -66,7 +76,7 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
       const base = `${config.id}-p${setterPosition}-${phaseKey}`;
       const outcome =
         format === 'png'
-          ? await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t)
+          ? await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t, faultView)
           : format === 'pdf-single'
             ? await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t)
             : format === 'pdf-pipeline'
@@ -81,6 +91,8 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
                   buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
                   `${config.id}-sequenza-${sequence}.webm`,
                   activeLiberoId,
+                  t,
+                  faultView !== null,
                 );
       setSavedNote(outcome.kind === 'mobile');
       if (outcome.kind === 'shareReady') setPendingShare(() => outcome.share);
@@ -147,6 +159,10 @@ export function ExportMenu({ config, team, phaseKey, setterPosition, activeLiber
             </label>
           ))}
         </fieldset>
+      )}
+
+      {faultView && (format === 'png' || format === 'video') && (
+        <p className="export-menu__note">{t(format === 'png' ? 'export.faultsNote.png' : 'export.faultsNote.video')}</p>
       )}
 
       <button type="button" className="export-menu__submit" onClick={handleExport} disabled={busy}>
