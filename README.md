@@ -19,3 +19,12 @@ l'applicazione può essere usata a questo indirizzo [https://napo.github.io/rota
 - **Aggiornamenti**: la versione web/PWA scarica le nuove versioni da sola e propone "Aggiorna ora"; le app desktop/Android segnalano quando c'è una versione più recente (su desktop si installa in-app con un clic), e il controllo si può disattivare dalla pagina Info.
 
 ![](https://raw.githubusercontent.com/napo/rotazionivolley/master/demo/rotazionivolley.gif)
+
+## Licenza
+
+Il software è distribuito con licenza [GNU Affero General Public License v3.0 or later](LICENSE) (SPDX `AGPL-3.0-or-later`): puoi usarlo, studiarlo, modificarlo e ridistribuirlo, anche in versione modificata, a condizione di rilasciare con la stessa licenza il codice sorgente delle modifiche. La condizione vale anche quando una versione modificata viene resa disponibile agli utenti attraverso una rete, per esempio come sito web: in quel caso gli utenti devono poter ottenere il codice sorgente. Il software è fornito senza alcuna garanzia.
+
+Fino alla versione 2.2.0 il progetto era distribuito con licenza Apache 2.0; le versioni già pubblicate restano disponibili con quella licenza.
+
+Il progetto nasce da [VBRotations](https://github.com/monkeysppp/VBRotations) di Andy Edwards, distribuito con licenza Apache 2.0: le parti che ne derivano (la versione originale in `index.html`, `js/` e `css/` e le posizioni dei giocatori dello schema di ricezione) conservano l'attribuzione e le condizioni della licenza Apache 2.0, compatibile con la AGPL v3. Snap.svg (`js/snap.svg-min.js`) è distribuito con licenza Apache 2.0. Il logotipo PayPal del pulsante per le donazioni (`web/src/info/paypal.svg`) viene dalle icone di pagamento di [Tabler](https://github.com/tabler/tabler-payments) (licenza MIT) ed è incluso nell'applicazione, non caricato da PayPal; PayPal è un marchio di PayPal, Inc.
+

@@ -52,7 +52,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
         <p>
           {t('info.licenseLabel')}{' '}
           <ExternalLink href={`${SOURCE_REPOSITORY_URL}/blob/master/LICENSE`}>
-            Apache License 2.0
+            GNU Affero General Public License v3.0 or later
           </ExternalLink>
         </p>
 
