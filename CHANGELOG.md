@@ -2,7 +2,7 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
-## [Non rilasciato]
+## [2.2.0] - 2026-10-22
 
 ### Aggiunto
 - Falli di posizione: in Ricezione (fasi "Base" e "Ricezione") il pulsante "Mostra" sotto il campo disegna un overlay con la zona di rotazione di ogni giocatore e le coppie adiacenti da rispettare (tratteggio verde = ok, linea rossa = fallo). Cliccando un giocatore compaiono le frecce verso chi deve avere davanti/dietro/a sinistra/a destra, con la spiegazione. Segue il regolamento FIVB 2025-2028: la squadra al servizio è libera.
