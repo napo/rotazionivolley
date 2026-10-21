@@ -2,7 +2,7 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
-## [Non rilasciato]
+## [2.3.0] - 2026-10-22
 
 ### Aggiunto
 - Falli di posizione: pulsanti per scegliere tra la vista di un singolo giocatore (solo i suoi possibili falli) e "Tutta la formazione"; un avviso segnala sempre i falli presenti, anche con l'overlay nascosto. Nell'editor i falli creati trascinando i giocatori nella formazione di ricezione vengono segnalati subito, con l'overlay sul campo. Nuovo passo del tutorial dedicato ai falli.
