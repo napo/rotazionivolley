@@ -64,6 +64,13 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Check versions are aligned
+        # Every copy of the version must match package.json (and, on a
+        # release, the release tag) — see scripts/sync-version.mjs.
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node scripts/sync-version.mjs --check ${RELEASE_TAG:+--tag "$RELEASE_TAG"}
+
       - name: Build Tauri app
         run: npx tauri build
         env:

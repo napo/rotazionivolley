@@ -1,5 +1,6 @@
 {
   "name": "rotazionivolley",
+  "version": "2.1.0",
   "private": true,
   "workspaces": [
     "web"
@@ -16,6 +17,9 @@
     "tauri:build": "tauri build",
     "cap:sync": "cap sync",
     "cap:android": "cap open android",
-    "cap:ios": "cap open ios"
+    "cap:ios": "cap open ios",
+    "version:sync": "node scripts/sync-version.mjs",
+    "version:check": "node scripts/sync-version.mjs --check",
+    "version": "node scripts/sync-version.mjs && git add web/package.json web/src/version.ts package-lock.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock android/app/build.gradle ios/App/App.xcodeproj/project.pbxproj"
   }
 }

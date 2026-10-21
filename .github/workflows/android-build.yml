@@ -42,6 +42,13 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Check versions are aligned
+        # Every copy of the version must match package.json (and, on a
+        # release, the release tag) — see scripts/sync-version.mjs.
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node scripts/sync-version.mjs --check ${RELEASE_TAG:+--tag "$RELEASE_TAG"}
+
       - name: Build web assets
         run: npm run build --workspace web
 
@@ -80,7 +87,7 @@ jobs:
       # version, so name the file like the desktop installers.
       - name: Rename APK
         run: |
-          version=$(node -p "require('./web/package.json').version")
+          version=$(node -p "require('./package.json').version")
           mkdir -p dist
           for apk in android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/debug/app-debug.apk; do
             if [ -f "$apk" ]; then

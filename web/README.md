@@ -62,6 +62,28 @@ Requisiti per compilare da sorgente, per piattaforma:
 | Android (Capacitor) | Android SDK + JDK 21 |
 | iOS (Capacitor) | macOS + Xcode (non compilabile su Linux/Windows) |
 
+### Versione
+
+L'unica fonte della versione è il campo `version` del `package.json` nella root. Per
+una nuova versione:
+
+```bash
+npm version 2.2.0        # oppure: npm version patch | minor | major
+git push --follow-tags
+```
+
+`npm version` aggiorna la root, poi `scripts/sync-version.mjs` copia la versione in
+`web/package.json`, `web/src/version.ts`, `package-lock.json`, Tauri
+(`tauri.conf.json`, `Cargo.toml`, `Cargo.lock`), Android (`versionName`/`versionCode`)
+e iOS (`MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`), e crea commit e tag `v2.2.0`.
+I numeri di build Android/iOS sono derivati dalla versione
+(`major*10000 + minor*100 + patch`, quindi crescono sempre). Il tag della release
+GitHub deve essere `v` + la versione.
+
+`npm run version:check` verifica l'allineamento (anche contro il tag della release): è
+eseguito da tutti i workflow, che falliscono se una copia è rimasta indietro.
+`npm run version:sync` riallinea a mano.
+
 ### Build in CI (GitHub Actions)
 
 - `.github/workflows/ci.yml` — typecheck, build, unit test ed e2e ad ogni push/PR.
