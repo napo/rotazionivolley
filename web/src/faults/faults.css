@@ -1,0 +1,85 @@
+.fault-panel {
+  margin-top: 1rem;
+}
+
+.fault-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fault-panel__header .panel__title {
+  margin: 0;
+}
+
+.fault-panel__toggle {
+  padding: 0.4rem 0.9rem;
+  border: 2px solid #164863;
+  border-radius: 6px;
+  background: #fff;
+  color: #164863;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.fault-panel__toggle.is-active {
+  background: #164863;
+  color: #fff;
+}
+
+.fault-panel__toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fault-panel__heading {
+  margin: 0.75rem 0 0.25rem;
+  font-weight: 700;
+}
+
+.fault-panel__summary {
+  margin: 0.75rem 0 0.25rem;
+  font-weight: 600;
+}
+
+.fault-panel__list {
+  list-style: none;
+  margin: 0.25rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.fault-panel__list li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.fault-panel__mark {
+  font-weight: 700;
+  width: 1em;
+}
+
+.is-ok,
+.is-ok .fault-panel__mark {
+  color: #1b7a3a;
+}
+
+.is-fault,
+.is-fault .fault-panel__mark {
+  color: #d0021b;
+}
+
+.fault-panel__list li.is-ok > span:last-child {
+  color: #1a1a1a;
+}
+
+.fault-panel__note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: #555;
+}

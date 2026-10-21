@@ -18,6 +18,9 @@ import { useI18n } from './i18n/I18nContext';
 import { builtInConfigs, defaultConfig } from './configs';
 import { getComment, getPositions, resolveActiveLiberoSwap } from './state/selectors';
 import { useAppState } from './state/AppStateContext';
+import { checkPositionalFaults, getPositionalCheckPhases, getRotationZones } from './state/positionalFaults';
+import { PositionalFaultOverlay } from './court/PositionalFaultOverlay';
+import { PositionalFaultPanel } from './faults/PositionalFaultPanel';
 import './App.css';
 
 function App() {
@@ -28,6 +31,7 @@ function App() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [view, setView] = useState<'viewer' | 'editor'>('viewer');
   const [editTarget, setEditTarget] = useState<FormationConfig | undefined>(undefined);
+  const [faultsOn, setFaultsOn] = useState(false);
   // A custom entry overrides a built-in with the same id (e.g. a built-in
   // config with session-only comments layered on top — see setComment).
   const allConfigs = [...builtInConfigs.filter((c) => !customConfigs.some((cc) => cc.id === c.id)), ...customConfigs];
@@ -72,6 +76,25 @@ function App() {
   const cellPositions = getPositions(config, state.phaseKey, state.setterPosition);
   const activeSwap = resolveActiveLiberoSwap(config, state.team, state.setterPosition, state.activeLiberoId);
   const { players, positions } = computeBenchDisplay(config, cellPositions, activeSwap);
+
+  // Positional faults: receiving side only (FIVB 2025-2028), at the service
+  // hit — i.e. "base" and the reception formation, not later phases.
+  const checkPhases = getPositionalCheckPhases(config.phases);
+  const faultsUnavailable =
+    state.team !== 'receive'
+      ? t('faults.unavailableServe')
+      : !checkPhases.includes(state.phaseKey)
+        ? t('faults.unavailablePhase', {
+            phases: checkPhases.map((k) => `"${config.phases[k]?.label ?? k}"`).join(', '),
+          })
+        : null;
+  const zones = faultsUnavailable ? {} : getRotationZones(config, state.setterPosition, activeSwap);
+  const relations = checkPositionalFaults(zones, positions);
+  const showFaults = faultsOn && !faultsUnavailable && relations.length > 0;
+  const selectedForFaults =
+    showFaults && state.highlightedPlayerId && zones[state.highlightedPlayerId] !== undefined
+      ? state.highlightedPlayerId
+      : null;
 
   return (
     <div className="app">
@@ -126,6 +149,26 @@ function App() {
             onTogglePlayer={(playerId) => dispatch({ type: 'TOGGLE_HIGHLIGHT', playerId })}
             ariaLabel={`${config.name}, ${config.phases[state.phaseKey]?.label ?? state.phaseKey}, P${state.setterPosition}`}
             apiRef={courtStageApiRef}
+            overlay={
+              showFaults ? (
+                <PositionalFaultOverlay
+                  zones={zones}
+                  positions={positions}
+                  relations={relations}
+                  selectedId={selectedForFaults}
+                  revealDelayMs={ANIMATION_DURATION_MS}
+                />
+              ) : null
+            }
+          />
+          <PositionalFaultPanel
+            unavailableReason={faultsUnavailable}
+            enabled={faultsOn}
+            onToggle={() => setFaultsOn((on) => !on)}
+            players={players}
+            zones={zones}
+            relations={relations}
+            selectedId={selectedForFaults}
           />
           <CommentPanel
             value={getComment(config, state.phaseKey, state.setterPosition)}
