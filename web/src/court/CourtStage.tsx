@@ -1,5 +1,5 @@
 import type Konva from 'konva';
-import { useEffect, useRef, useState, type MutableRefObject } from 'react';
+import { useEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { Layer, Stage } from 'react-konva';
 import type { PlayerDef, Point } from '../configs/schema';
 import { CourtBackground } from './CourtBackground';
@@ -31,6 +31,8 @@ interface CourtStageProps {
   ariaLabel: string;
   /** Filled in with a live API object once the stage mounts; cleared on unmount. */
   apiRef?: MutableRefObject<CourtStageApi | null>;
+  /** Extra Konva content drawn above the players, in court coordinates (e.g. the positional-fault overlay). */
+  overlay?: ReactNode;
 }
 
 export function CourtStage({
@@ -44,6 +46,7 @@ export function CourtStage({
   nonDraggableIds,
   ariaLabel,
   apiRef,
+  overlay,
 }: CourtStageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
@@ -110,6 +113,7 @@ export function CourtStage({
               />
             );
           })}
+          {overlay}
         </Layer>
       </Stage>
     </div>

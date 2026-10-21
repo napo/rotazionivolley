@@ -27,6 +27,28 @@ export const strings = {
     'comment.title': 'Commento',
     'comment.placeholder': 'Aggiungi una nota per questa rotazione e fase (verrà usata come sottotitolo in PDF e video)…',
 
+    'faults.title': 'Falli di posizione',
+    'faults.show': 'Mostra',
+    'faults.hide': 'Nascondi',
+    'faults.unavailableServe':
+      'Con il regolamento FIVB 2025-2028 la squadra al servizio può disporsi liberamente: i falli di posizione valgono solo per chi riceve. Seleziona una rotazione in Ricezione.',
+    'faults.unavailablePhase': 'Il controllo vale al momento del servizio: disponibile nelle fasi {phases}.',
+    'faults.hint':
+      'Il numero accanto a ogni giocatore è la sua zona di rotazione. Clicca un giocatore per vedere con chi può fare fallo di posizione.',
+    'faults.rule':
+      'Si confrontano solo le zone adiacenti: 4-5, 3-6, 2-1 (avanti/dietro) e 4-3-2, 5-6-1 (sinistra/destra). In campo contano i piedi; qui si usa il centro del bollino.',
+    'faults.summaryOk': 'Nessun fallo di posizione in questa formazione.',
+    'faults.summaryOne': '1 fallo di posizione',
+    'faults.summaryMany': '{count} falli di posizione',
+    'faults.pairFrontBack': '{first} (zona {firstZone}) deve stare più vicino alla rete di {second} (zona {secondZone})',
+    'faults.pairLeftRight': '{first} (zona {firstZone}) deve stare più a sinistra di {second} (zona {secondZone})',
+    'faults.playerHeading': '{player} — zona {zone}',
+    'faults.needsBehind': 'deve avere {other} (zona {zone}) dietro di sé, più lontano dalla rete',
+    'faults.needsInFront': 'deve avere {other} (zona {zone}) davanti a sé, più vicino alla rete',
+    'faults.needsLeft': 'deve avere {other} (zona {zone}) alla sua sinistra',
+    'faults.needsRight': 'deve avere {other} (zona {zone}) alla sua destra',
+    'faults.faultNow': 'ora è fallo',
+
     'export.title': 'Esporta',
     'export.format': 'Formato',
     'export.format.png': 'PNG',
@@ -130,6 +152,28 @@ export const strings = {
 
     'phase.ariaLabel': 'Phase of play',
     'phase.title': 'Action',
+
+    'faults.title': 'Positional faults',
+    'faults.show': 'Show',
+    'faults.hide': 'Hide',
+    'faults.unavailableServe':
+      'Under the FIVB 2025-2028 rules the serving team may line up freely: positional faults apply only to the receiving team. Pick a Receive rotation.',
+    'faults.unavailablePhase': 'The check applies at the service hit: available in the {phases} phases.',
+    'faults.hint':
+      "The number next to each player is their rotational zone. Click a player to see who they can commit a positional fault with.",
+    'faults.rule':
+      'Only adjacent zones are compared: 4-5, 3-6, 2-1 (front/back) and 4-3-2, 5-6-1 (left/right). On court the feet count; here the marker centre is used.',
+    'faults.summaryOk': 'No positional faults in this formation.',
+    'faults.summaryOne': '1 positional fault',
+    'faults.summaryMany': '{count} positional faults',
+    'faults.pairFrontBack': '{first} (zone {firstZone}) must be closer to the net than {second} (zone {secondZone})',
+    'faults.pairLeftRight': '{first} (zone {firstZone}) must be further left than {second} (zone {secondZone})',
+    'faults.playerHeading': '{player} — zone {zone}',
+    'faults.needsBehind': 'must have {other} (zone {zone}) behind, further from the net',
+    'faults.needsInFront': 'must have {other} (zone {zone}) in front, closer to the net',
+    'faults.needsLeft': 'must have {other} (zone {zone}) on their left',
+    'faults.needsRight': 'must have {other} (zone {zone}) on their right',
+    'faults.faultNow': 'fault now',
 
     'configPicker.edit': 'Edit {name}',
     'configPicker.delete': 'Delete {name}',
