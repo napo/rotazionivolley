@@ -66,3 +66,29 @@
   font-size: 0.85rem;
   color: #666;
 }
+
+/* White, so the PayPal wordmark keeps its colours */
+.info-support__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  padding: 0.45rem 0.8rem;
+  background: #fff;
+  color: #1f2933;
+  border: 1px solid #c9d2dc;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.info-support__button:hover {
+  background: #f2f6fa;
+  color: #00457c;
+  border-color: #0079c1;
+}
+
+.info-support__button img {
+  display: block;
+  flex: none;
+}

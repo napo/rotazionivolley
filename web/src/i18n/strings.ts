@@ -139,6 +139,13 @@ export const strings = {
     'update.installing': 'Installazione in corso…',
     'update.failed': "Aggiornamento non riuscito.",
     'update.pwaAvailable': "È disponibile una nuova versione dell'app.",
+    'support.title': 'Sostieni lo sviluppo',
+    'support.openSource': 'Rotazioni Volley è sviluppato e mantenuto come progetto open source.',
+    'support.invite':
+      'Se lo trovi utile e vuoi contribuire alle spese e al tempo necessario per continuare a svilupparlo, puoi fare una donazione volontaria tramite PayPal.',
+    'support.button': 'Sostieni Rotazioni Volley con PayPal',
+    'support.note':
+      'La donazione è completamente facoltativa e non sblocca funzionalità aggiuntive. Il link apre il sito di PayPal: finché non lo scegli, questa pagina non contatta PayPal.',
     'update.iosInstallHint':
       "Puoi installare l'app su iPhone/iPad: in Safari tocca Condividi e poi \"Aggiungi alla schermata Home\". Funziona anche senza connessione e si aggiorna da sola.",
     'info.updatesCheck': "Controlla gli aggiornamenti all'avvio",
@@ -277,6 +284,13 @@ export const strings = {
     'update.installing': 'Installing…',
     'update.failed': 'Update failed.',
     'update.pwaAvailable': 'A new version of the app is available.',
+    'support.title': 'Support development',
+    'support.openSource': 'Rotazioni Volley is developed and maintained as an open source project.',
+    'support.invite':
+      'If you find it useful and want to help with the costs and time needed to keep developing it, you can make a voluntary donation through PayPal.',
+    'support.button': 'Support Rotazioni Volley with PayPal',
+    'support.note':
+      'The donation is entirely optional and does not unlock any extra features. The link opens the PayPal website: until you choose it, this page does not contact PayPal.',
     'update.iosInstallHint':
       'You can install the app on iPhone/iPad: in Safari tap Share, then "Add to Home Screen". It also works offline and updates itself.',
     'info.updatesCheck': 'Check for updates at start',

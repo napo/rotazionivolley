@@ -3,6 +3,8 @@ import { useI18n } from '../i18n/I18nContext';
 import { APP_VERSION } from '../version';
 import { isInstalledPwa, isIosDevice, isWebPlatform } from '../platform';
 import { usePwaUpdate } from './pwaUpdates';
+import { ExternalLink } from '../ExternalLink';
+import { PAYPAL_DONATION_URL } from '../links';
 import {
   checkForUpdate,
   compareVersions,
@@ -32,20 +34,21 @@ function dismissInstallHint(): void {
   }
 }
 
-/** Same donation page as the author's other apps (e.g. volleyreportxls) — a plain link, PayPal is contacted only when the user opens it. */
-const DONATION_URL = 'https://paypal.me/MNapolitano570';
-
 /**
  * Banner shown only in the installed apps (desktop/Android/iOS — see
  * isNativeBuild): tells the user a newer release exists — on desktop, with a
  * button that downloads, verifies and installs it in place (Tauri's
  * updater); on Android/iOS, with a link to get it by hand, since neither
  * Capacitor nor Tauri auto-updates mobile. Right after an update, it also
- * thanks the user once and invites a donation. The web build is always the
- * latest already, so it never shows the native check — but its service
- * worker (see update/pwaUpdates.ts) does find new versions, and then this
- * offers to reload into them. On iPhone/iPad in Safari it also explains,
- * once, how to install the app from the home screen.
+ * thanks the user once. The web build is always the latest already, so it
+ * never shows the native check — but its service worker (see
+ * update/pwaUpdates.ts) does find new versions, and then this offers to
+ * reload into them. On iPhone/iPad in Safari it also explains, once, how to
+ * install the app from the home screen.
+ *
+ * Donations: every update banner (available, or just installed) carries the
+ * donation link — the only times the app brings it up on its own; otherwise
+ * it's just in the Info page (SupportSection), never pushed.
  */
 export function UpdateNotice() {
   const { t } = useI18n();
@@ -79,9 +82,9 @@ export function UpdateNotice() {
   }, [native]);
 
   const donateLink = (
-    <a className="update-notice__btn update-notice__btn--secondary" href={DONATION_URL} target="_blank" rel="noreferrer">
+    <ExternalLink className="update-notice__btn update-notice__btn--secondary" href={PAYPAL_DONATION_URL}>
       {t('update.donate')}
-    </a>
+    </ExternalLink>
   );
 
   if (justUpdated) {
@@ -117,6 +120,7 @@ export function UpdateNotice() {
           >
             {t('update.updateNow')}
           </button>
+          {donateLink}
           <button type="button" className="update-notice__btn update-notice__btn--secondary" onClick={() => setDismissed(true)}>
             {t('update.later')}
           </button>
@@ -175,9 +179,9 @@ export function UpdateNotice() {
             {t('update.updateNow')}
           </button>
         ) : (
-          <a className="update-notice__btn" href={update.url} target="_blank" rel="noreferrer">
+          <ExternalLink className="update-notice__btn" href={update.url}>
             {t('update.download')}
-          </a>
+          </ExternalLink>
         )}
         {donateLink}
         <button

@@ -3,6 +3,9 @@ import { useI18n } from '../i18n/I18nContext';
 import { APP_VERSION } from '../version';
 import { isInstalledPwa, isIosDevice, isWebPlatform } from '../platform';
 import { isNativeBuild, setUpdateChecksEnabled, updateChecksEnabled } from '../update/updates';
+import { ExternalLink } from '../ExternalLink';
+import { PAYPAL_DONATION_URL, SOURCE_REPOSITORY_URL } from '../links';
+import paypalLogo from './paypal.svg';
 import './info.css';
 
 interface InfoPanelProps {
@@ -33,24 +36,24 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
 
         <p>
           {t('info.project')}{' '}
-          <a href="https://github.com/napo" target="_blank" rel="noreferrer">
+          <ExternalLink href="https://github.com/napo">
             Maurizio Napolitano
-          </a>
+          </ExternalLink>
         </p>
         <p>{t('info.builtOn')}</p>
         <p>
           {t('info.sourceLabel')}{' '}
-          <a href="https://github.com/napo/rotazionivolley" target="_blank" rel="noreferrer">
-            https://github.com/napo/rotazionivolley
-          </a>
+          <ExternalLink href={SOURCE_REPOSITORY_URL}>
+            {SOURCE_REPOSITORY_URL}
+          </ExternalLink>
         </p>
         <p>{t('info.aiAssisted')}</p>
         <p>{t('info.version', { version: APP_VERSION })}</p>
         <p>
           {t('info.licenseLabel')}{' '}
-          <a href="https://github.com/napo/rotazionivolley/blob/master/LICENSE" target="_blank" rel="noreferrer">
+          <ExternalLink href={`${SOURCE_REPOSITORY_URL}/blob/master/LICENSE`}>
             Apache License 2.0
-          </a>
+          </ExternalLink>
         </p>
 
         <p>{t('info.schemesLocal')}</p>
@@ -77,15 +80,42 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
           <>
             <p>
               {t('info.downloads.intro')}{' '}
-              <a href="https://github.com/napo/rotazionivolley/releases" target="_blank" rel="noreferrer">
+              <ExternalLink href={`${SOURCE_REPOSITORY_URL}/releases`}>
                 GitHub Releases
-              </a>
+              </ExternalLink>
             </p>
             <p className="info-overlay__note">{t('info.downloads.macNotarizationNote')}</p>
             <p className="info-overlay__note">{t('info.downloads.androidSideloadNote')}</p>
           </>
         )}
+
+        <SupportSection />
       </div>
     </div>
+  );
+}
+
+/**
+ * "Sostieni lo sviluppo": the one place the donation is offered without an
+ * update having just happened — informative, never pushy (same wording and
+ * stance as the author's analisirefertogara). The PayPal button is a plain
+ * link with the wordmark stored in the app: nothing is requested from PayPal
+ * until the user opens it.
+ */
+export function SupportSection() {
+  const { t } = useI18n();
+  return (
+    <section className="info-support" aria-labelledby="info-support-title">
+      <h3 id="info-support-title">{t('support.title')}</h3>
+      <p>{t('support.openSource')}</p>
+      <p>{t('support.invite')}</p>
+      <p>
+        <ExternalLink href={PAYPAL_DONATION_URL} className="info-support__button">
+          <img src={paypalLogo} alt="" width="64" height="16" />
+          <span>{t('support.button')}</span>
+        </ExternalLink>
+      </p>
+      <p className="info-overlay__note">{t('support.note')}</p>
+    </section>
   );
 }

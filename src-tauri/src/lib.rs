@@ -3,6 +3,10 @@ pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_dialog::init())
+    // External links (GitHub, PayPal donation): the webview doesn't open
+    // target="_blank" links, so web/src/ExternalLink.tsx hands them to the
+    // system browser through this plugin.
+    .plugin(tauri_plugin_opener::init())
     // Automatic updates (checked and installed only after the user confirms
     // in the app, see web/src/update) — desktop only, the updater plugin
     // doesn't support mobile.
