@@ -1,7 +1,8 @@
 import ricezioneA3Raw from './ricezione-a-3.json';
+import ricezioneA3S1Da4Raw from './ricezione-a-3-s1-attacco-da-4.json';
 import { parseFormationConfig, type FormationConfig } from './schema';
 
-const builtInRaw: unknown[] = [ricezioneA3Raw];
+const builtInRaw: unknown[] = [ricezioneA3Raw, ricezioneA3S1Da4Raw];
 
 export const builtInConfigs: FormationConfig[] = builtInRaw.map(parseFormationConfig);
 
