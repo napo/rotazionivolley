@@ -2,6 +2,15 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [2.4.0] - 2026-10-23
+
+### Aggiunto
+- Competenze di ricezione: nella formazione di ricezione il campo si può dividere in una zona colorata per ogni ricevitore, con una fascia più scura lungo i confini per indicare chi prende la palla che cade lì (lati sinistra/destra/avanti/dietro dal punto di vista del giocatore). Le zone si modificano trascinando i vertici condivisi, aggiungendo o togliendo vertici e zone; i conflitti (nessuno o entrambi competenti su un confine) vengono segnalati, e si possono ripristinare le zone di partenza. Gli schemi predefiniti includono già le loro competenze; per gli altri vengono ricavate dalle posizioni dei giocatori.
+- Export: PNG e PDF a pagina singola includono quello che si vede sul campo (falli di posizione e/o competenze). PDF a più pagine e video hanno le caselle "Includi" per aggiungere, dopo ogni formazione di ricezione della sequenza, i falli di posizione (tutta la squadra, poi un giocatore alla volta) e le competenze di ricezione.
+
+### Modificato
+- Falli di posizione e competenze di ricezione sono ora due schede di un pannello di strumenti sotto il campo, disponibile nella fase Ricezione delle rotazioni in ricezione; un clic sulla scheda la mostra sul campo, un nuovo clic la chiude. Un bollino rosso sulla scheda segnala i falli presenti. Aggiornato il passo del tutorial.
+
 ## [2.3.0] - 2026-10-22
 
 ### Aggiunto
