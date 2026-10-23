@@ -63,7 +63,7 @@ describe('schemi inclusi', () => {
     '%s: la formazione di ricezione non ha falli di posizione in nessuna rotazione',
     (_name, config) => {
       const phases = getPositionalCheckPhases(config.phases);
-      expect(phases).toEqual(['base', 'receiveReceive']);
+      expect(phases).toEqual(['receiveReceive']);
       for (const sp of SETTER_POSITIONS) {
         const swap = resolveActiveLiberoSwap(config, 'receive', sp);
         const zones = getRotationZones(config, sp, swap);

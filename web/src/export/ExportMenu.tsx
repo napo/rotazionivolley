@@ -2,10 +2,12 @@ import { useState } from 'react';
 import type { FormationConfig, SetterPosition } from '../configs/schema';
 import type { Team } from '../state/AppStateContext';
 import { useI18n } from '../i18n/I18nContext';
-import { exportStateAsPng } from './png';
+import { exportStateAsPng, NO_OVERLAYS, type ScreenOverlays } from './png';
 import { buildPipelinePages, exportPipelinePdf, exportSinglePagePdf, type PipelineSequenceKind } from './pdf';
 import type { Translate } from './sequence';
 import { isVideoExportSupported, recordSequenceAsVideo } from './video';
+import type { OverlayChoice } from './stills';
+import { getReceptionPhase } from '../state/receptionZones';
 import type { SaveOutcome } from './platformSave';
 import './export.css';
 
@@ -15,8 +17,12 @@ interface ExportMenuProps {
   phaseKey: string;
   setterPosition: SetterPosition;
   activeLiberoId?: string | null;
-  /** The positional-fault view as shown on screen (null when off): drawn on the PNG, and walked through in the video. */
-  faultView?: { selectedId: string | null } | null;
+  /**
+   * What's drawn on the court on screen (fault view, competence map):
+   * single-image exports (PNG, single-page PDF) take it as is; sequence
+   * exports start with their "include" boxes ticked to match it.
+   */
+  screen?: ScreenOverlays;
   /** When embedded in a dropdown (e.g. the header), skip the panel chrome and title — the trigger button already labels it. */
   embedded?: boolean;
 }
@@ -49,12 +55,14 @@ export function ExportMenu({
   phaseKey,
   setterPosition,
   activeLiberoId = null,
-  faultView = null,
+  screen = NO_OVERLAYS,
   embedded = false,
 }: ExportMenuProps) {
   const { t } = useI18n();
   const [format, setFormat] = useState<Format>('png');
   const [sequence, setSequence] = useState<PipelineSequenceKind>('serveRotation');
+  // The menu mounts when its dropdown opens, so these start from what's on screen right then.
+  const [include, setInclude] = useState<OverlayChoice>(() => ({ faults: screen.faults !== null, zones: screen.zones }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Only ever set on a mobile build (Capacitor): there's no OS "save as"
@@ -66,6 +74,15 @@ export function ExportMenu({
   const [pendingShare, setPendingShare] = useState<(() => Promise<SaveOutcome>) | null>(null);
 
   const usesSequence = format === 'pdf-pipeline' || format === 'video';
+  // Faults and competences only exist in a reception formation: offer them
+  // only for a sequence that has one (not "serve rotation Px").
+  const receptionPhase = getReceptionPhase(config.phases);
+  const sequenceHasReception =
+    usesSequence &&
+    buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t).some(
+      (page) => page.team === 'receive' && page.phaseKey === receptionPhase,
+    );
+  const sequenceInclude: OverlayChoice = sequenceHasReception ? include : { faults: false, zones: false };
 
   async function handleExport() {
     setBusy(true);
@@ -76,15 +93,17 @@ export function ExportMenu({
       const base = `${config.id}-p${setterPosition}-${phaseKey}`;
       const outcome =
         format === 'png'
-          ? await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t, faultView)
+          ? await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t, screen)
           : format === 'pdf-single'
-            ? await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t)
+            ? await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t, screen)
             : format === 'pdf-pipeline'
               ? await exportPipelinePdf(
                   config,
                   buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
                   `${config.id}-sequenza-${sequence}.pdf`,
                   activeLiberoId,
+                  t,
+                  sequenceInclude,
                 )
               : await recordSequenceAsVideo(
                   config,
@@ -92,7 +111,7 @@ export function ExportMenu({
                   `${config.id}-sequenza-${sequence}.webm`,
                   activeLiberoId,
                   t,
-                  faultView !== null,
+                  sequenceInclude,
                 );
       setSavedNote(outcome.kind === 'mobile');
       if (outcome.kind === 'shareReady') setPendingShare(() => outcome.share);
@@ -161,8 +180,37 @@ export function ExportMenu({
         </fieldset>
       )}
 
-      {faultView && (format === 'png' || format === 'video') && (
-        <p className="export-menu__note">{t(format === 'png' ? 'export.faultsNote.png' : 'export.faultsNote.video')}</p>
+      {usesSequence ? (
+        sequenceHasReception && (
+          <fieldset className="export-menu__group">
+            <legend>{t('export.include.title')}</legend>
+            <label>
+              <input
+                type="checkbox"
+                checked={include.faults}
+                onChange={(e) => setInclude((prev) => ({ ...prev, faults: e.target.checked }))}
+              />
+              {t('export.include.faults')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={include.zones}
+                onChange={(e) => setInclude((prev) => ({ ...prev, zones: e.target.checked }))}
+              />
+              {t('export.include.zones')}
+            </label>
+            <p className="export-menu__note">{t('export.include.note')}</p>
+          </fieldset>
+        )
+      ) : (
+        (screen.faults || screen.zones) && (
+          <p className="export-menu__note">
+            {t('export.screenNote', {
+              items: [screen.faults && t('faults.title'), screen.zones && t('zones.title')].filter(Boolean).join(', '),
+            })}
+          </p>
+        )
       )}
 
       <button type="button" className="export-menu__submit" onClick={handleExport} disabled={busy}>

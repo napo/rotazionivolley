@@ -95,14 +95,15 @@ export function checkPositionalFaults(
 }
 
 /**
- * Phases where the check makes sense for the receiving side: "base" and the
- * first receive-only phase (the reception formation at the service hit).
- * Later phases (set, attack, ...) happen after the serve, when everyone is
- * free to move.
+ * Phases where the check makes sense for the receiving side: the first
+ * receive-only phase, i.e. the reception formation at the service hit.
+ * Not "base", which defines the zones themselves (so it can never hold a
+ * fault), nor later phases (set, attack, ...), which happen after the serve,
+ * when everyone is free to move.
  */
 export function getPositionalCheckPhases(phases: Record<string, PhaseDef>): string[] {
   const firstReceive = Object.entries(phases).find(([, def]) => def.team === 'receive')?.[0];
-  return ['base', ...(firstReceive ? [firstReceive] : [])].filter((key) => phases[key]);
+  return firstReceive ? [firstReceive] : [];
 }
 
 export interface FaultOverlayData {

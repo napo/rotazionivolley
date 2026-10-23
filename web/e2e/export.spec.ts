@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { exportSubmit, openExportMenu } from './testUtils';
+import { exportSubmit, openCourtTool, openExportMenu, selectReceiveRotation } from './testUtils';
 
 test.describe('Export', () => {
   test('esporta PNG', async ({ page }) => {
@@ -59,6 +59,50 @@ test.describe('Export', () => {
     const pageCount = countPdfPages(buffer);
     // 7 phases x 6 rotations for the default ricezione-a-3 config.
     expect(pageCount).toBe(42);
+  });
+
+  test('il PDF in sequenza aggiunge competenze e falli (tutta la squadra, poi un giocatore alla volta)', async ({ page }) => {
+    await page.goto('/');
+    await selectReceiveRotation(page, 'P1');
+    await page.locator('[data-tutorial="phase"]').getByRole('button', { name: 'Ricezione' }).click();
+    await openCourtTool(page, 'Competenze di ricezione');
+
+    await openExportMenu(page);
+    await page.getByLabel('PDF (sequenza / pipeline)').check();
+    await page.getByLabel('Ricezione rotazione P1').check();
+    // Ticked to match the screen: the competence map is open, the fault view isn't.
+    const menu = page.locator('.export-menu');
+    await expect(menu.getByLabel('Competenze di ricezione')).toBeChecked();
+    await expect(menu.getByLabel(/Falli di posizione: tutta la squadra/)).not.toBeChecked();
+    await menu.getByLabel(/Falli di posizione: tutta la squadra/).check();
+
+    const [download] = await Promise.all([page.waitForEvent('download'), exportSubmit(page).click()]);
+    const pageCount = countPdfPages(await download.createReadStream().then(streamToBuffer));
+    // 5 receive phases + 1 competence map + faults (whole team + P, S1, C2, O, S2, L1) of the reception formation.
+    expect(pageCount).toBe(5 + 1 + 7);
+  });
+
+  test('le caselle di falli e competenze compaiono solo per una sequenza con la ricezione', async ({ page }) => {
+    await page.goto('/');
+    await openExportMenu(page);
+    await page.getByLabel('PDF (sequenza / pipeline)').check();
+    const menu = page.locator('.export-menu');
+    await page.getByLabel('Servizio rotazione P2').check();
+    await expect(menu).not.toContainText('Falli di posizione');
+    await page.getByLabel('Ricezione rotazione P2').check();
+    await expect(menu.getByLabel(/Falli di posizione: tutta la squadra/)).toBeVisible();
+    await page.getByLabel('Tutte le fasi').check();
+    await expect(menu.getByLabel(/Falli di posizione: tutta la squadra/)).toBeVisible();
+  });
+
+  test('PNG e PDF a pagina singola esportano quello che si vede sul campo', async ({ page }) => {
+    await page.goto('/');
+    await selectReceiveRotation(page, 'P1');
+    await page.locator('[data-tutorial="phase"]').getByRole('button', { name: 'Ricezione' }).click();
+    await openCourtTool(page, 'Competenze di ricezione');
+    await openExportMenu(page);
+    await expect(page.locator('.export-menu__note')).toContainText('Competenze di ricezione');
+    await expect(page.locator('.export-menu').getByLabel('Competenze di ricezione')).toHaveCount(0);
   });
 });
 

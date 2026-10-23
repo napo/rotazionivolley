@@ -52,9 +52,22 @@ export const COLOURS = {
   playerHighlight: '#ffb300',
   playerLabel: '#eeeeee',
   playerLabelHighlighted: '#1a1a1a',
+  /** Court markings redrawn over the reception zones. */
+  zoneLine: '#1a1a1a',
 } as const;
 
 export const ANIMATION_DURATION_MS = 500;
+
+/** Reception competence map styling (live Konva view and exports alike). */
+export const ZONE_STYLE = {
+  fillOpacity: 0.25,
+  /** Full width of a claimed border's band; only the owner's half shows (clipped to their area). */
+  bandWidth: 28,
+  bandOpacity: 0.8,
+  borderWidth: 1.5,
+  borderOpacity: 0.7,
+  courtLineWidth: 3,
+} as const;
 
 /** Positional-fault overlay (live Konva view and exports alike). */
 export const FAULT_COLOURS = {

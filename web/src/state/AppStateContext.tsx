@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { defaultConfig, getConfigById } from '../configs';
-import { safeParseFormationConfig, type FormationConfig, type SetterPosition } from '../configs/schema';
+import { safeParseFormationConfig, type FormationConfig, type ReceptionZones, type SetterPosition } from '../configs/schema';
 import { withComment } from './selectors';
+import { withReceptionZones } from './receptionZones';
 
 export type Team = 'serve' | 'receive';
 
@@ -71,6 +72,8 @@ interface AppStateContextValue {
   removeCustomConfig: (configId: string) => void;
   /** Sets the comment for the given (phase, rotation) on the active config. */
   setComment: (phaseKey: string, setterPosition: SetterPosition, text: string) => void;
+  /** Sets (or, with undefined, clears) the reception competence map for a rotation of the active config. */
+  setReceptionZones: (setterPosition: SetterPosition, zones: ReceptionZones | undefined) => void;
 }
 
 const CUSTOM_CONFIGS_KEY = 'rv-custom-configs';
@@ -126,9 +129,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [config, addCustomConfig],
   );
 
+  const setReceptionZones = useCallback(
+    (setterPosition: SetterPosition, zones: ReceptionZones | undefined) => {
+      addCustomConfig(withReceptionZones(config, setterPosition, zones));
+    },
+    [config, addCustomConfig],
+  );
+
   const value = useMemo(
-    () => ({ state, dispatch, config, customConfigs, addCustomConfig, removeCustomConfig, setComment }),
-    [state, config, customConfigs, addCustomConfig, removeCustomConfig, setComment],
+    () => ({ state, dispatch, config, customConfigs, addCustomConfig, removeCustomConfig, setComment, setReceptionZones }),
+    [state, config, customConfigs, addCustomConfig, removeCustomConfig, setComment, setReceptionZones],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

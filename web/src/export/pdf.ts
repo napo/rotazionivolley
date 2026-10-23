@@ -4,8 +4,12 @@ import type { Team } from '../state/AppStateContext';
 import { createOffscreenCanvas, drawFrame, TITLE_LEFT_INSET, TITLE_LINE_HEIGHT, TITLE_TOP_INSET } from '../court/canvasRenderer';
 import { COURT_VIEWBOX } from '../court/courtGeometry';
 import { getComment, resolveDiagramState } from '../state/selectors';
+import type { FaultOverlayData } from '../state/positionalFaults';
+import type { PlayerDef, ReceptionZones, RotationPositions } from '../configs/schema';
 import { saveFile, type SaveOutcome } from './platformSave';
+import { resolveScreenOverlays, type ScreenOverlays } from './png';
 import { buildSingleDiagramTitle, type SequencePage, type Translate } from './sequence';
+import { buildStills, type OverlayChoice } from './stills';
 
 export type { PipelineSequenceKind, SequencePage, CurrentSelection } from './sequence';
 export { buildPipelinePages } from './sequence';
@@ -31,16 +35,14 @@ function renderPage(
   pdf: jsPDF,
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
-  config: FormationConfig,
-  team: Team,
-  phaseKey: string,
-  setterPosition: SetterPosition,
-  activeLiberoId: string | null | undefined,
+  players: PlayerDef[],
+  positions: RotationPositions,
   titleLines: string[],
   comment?: string,
+  faults?: FaultOverlayData,
+  zones?: ReceptionZones,
 ): void {
-  const { players, positions } = resolveDiagramState(config, team, phaseKey, setterPosition, activeLiberoId);
-  drawFrame(ctx, players, positions);
+  drawFrame(ctx, players, positions, undefined, undefined, faults, zones);
 
   pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, PAGE_WIDTH, PAGE_HEIGHT);
 
@@ -69,20 +71,33 @@ export async function exportSinglePagePdf(
   filename: string,
   activeLiberoId: string | null | undefined,
   t: Translate,
+  /** What's drawn on the court on screen besides the players — exported as is. */
+  screen?: ScreenOverlays,
 ): Promise<SaveOutcome> {
   const pdf = newDocument();
   const { canvas, ctx } = createOffscreenCanvas(RASTER_SCALE);
   const title = buildSingleDiagramTitle(config, team, phaseKey, setterPosition, t);
   const comment = getComment(config, phaseKey, setterPosition);
-  renderPage(pdf, canvas, ctx, config, team, phaseKey, setterPosition, activeLiberoId, title, comment || undefined);
+  const { players, positions } = resolveDiagramState(config, team, phaseKey, setterPosition, activeLiberoId);
+  const { faults, zones } = screen
+    ? resolveScreenOverlays(config, team, phaseKey, setterPosition, activeLiberoId, players, positions, screen)
+    : {};
+  renderPage(pdf, canvas, ctx, players, positions, title, comment || undefined, faults, zones);
   return saveFile(pdf.output('blob'), filename);
 }
 
+/**
+ * One page per still of the sequence (see buildStills): each formation,
+ * then — as chosen in `include` — its competence map and positional-fault
+ * pages, with what they show as the page's caption.
+ */
 export async function exportPipelinePdf(
   config: FormationConfig,
   pages: SequencePage[],
   filename: string,
-  activeLiberoId?: string | null,
+  activeLiberoId: string | null | undefined,
+  t: Translate,
+  include: OverlayChoice = { faults: false, zones: false },
 ): Promise<SaveOutcome> {
   if (pages.length === 0) {
     throw new Error('La sequenza da esportare è vuota');
@@ -90,23 +105,13 @@ export async function exportPipelinePdf(
 
   const pdf = newDocument();
   const { canvas, ctx } = createOffscreenCanvas(RASTER_SCALE);
-  for (let i = 0; i < pages.length; i++) {
-    if (i > 0) {
-      pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT], ORIENTATION);
-    }
-    const page = pages[i];
-    renderPage(
-      pdf,
-      canvas,
-      ctx,
-      config,
-      page.team,
-      page.phaseKey,
-      page.setterPosition,
-      activeLiberoId,
-      page.titleLines,
-      page.comment || undefined,
-    );
-  }
+  buildStills(config, pages, activeLiberoId, include, t)
+    .flat()
+    .forEach((still, i) => {
+      if (i > 0) {
+        pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT], ORIENTATION);
+      }
+      renderPage(pdf, canvas, ctx, still.players, still.positions, still.title, still.caption, still.faults, still.zones);
+    });
   return saveFile(pdf.output('blob'), filename);
 }

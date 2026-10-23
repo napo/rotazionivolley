@@ -18,23 +18,44 @@ export function CourtBackground() {
         width={COURT_RECT.width}
         height={COURT_RECT.height}
         fill={COLOURS.court}
-        stroke={COLOURS.line}
-        strokeWidth={4}
         shadowColor="rgba(20, 40, 60, 0.35)"
         shadowBlur={16}
         shadowOffsetY={4}
         listening={false}
       />
+      <CourtLines colour={COLOURS.line} />
+    </>
+  );
+}
+
+/**
+ * The court's markings — boundary, centre line, dashed attack line and its
+ * dashed ticks outside the court. Drawn white on the bare court, and again
+ * on top of a translucent overlay (e.g. the reception zones) in a colour
+ * that stays readable through it.
+ */
+export function CourtLines({ colour, strokeWidth = 4 }: { colour: string; strokeWidth?: number }) {
+  return (
+    <>
+      <Rect
+        x={COURT_RECT.x}
+        y={COURT_RECT.y}
+        width={COURT_RECT.width}
+        height={COURT_RECT.height}
+        stroke={colour}
+        strokeWidth={strokeWidth}
+        listening={false}
+      />
       <Line
         points={[CENTRE_LINE.x1, CENTRE_LINE.y1, CENTRE_LINE.x2, CENTRE_LINE.y2]}
-        stroke={COLOURS.line}
-        strokeWidth={4}
+        stroke={colour}
+        strokeWidth={strokeWidth}
         listening={false}
       />
       <Line
         points={[ATTACK_LINE.x1, ATTACK_LINE.y1, ATTACK_LINE.x2, ATTACK_LINE.y2]}
-        stroke={COLOURS.line}
-        strokeWidth={4}
+        stroke={colour}
+        strokeWidth={strokeWidth}
         dash={[9, 9]}
         listening={false}
       />
@@ -42,8 +63,8 @@ export function CourtBackground() {
         <Line
           key={i}
           points={[tick.x1, tick.y1, tick.x2, tick.y2]}
-          stroke={COLOURS.line}
-          strokeWidth={4}
+          stroke={colour}
+          strokeWidth={strokeWidth}
           dash={[9, 9]}
           listening={false}
         />

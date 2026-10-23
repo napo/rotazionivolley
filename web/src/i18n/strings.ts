@@ -28,11 +28,6 @@ export const strings = {
     'comment.placeholder': 'Aggiungi una nota per questa rotazione e fase (verrà usata come sottotitolo in PDF e video)…',
 
     'faults.title': 'Falli di posizione',
-    'faults.show': 'Mostra',
-    'faults.hide': 'Nascondi',
-    'faults.unavailableServe':
-      'Con il regolamento FIVB 2025-2028 la squadra al servizio può disporsi liberamente: i falli di posizione valgono solo per chi riceve. Seleziona una rotazione in Ricezione.',
-    'faults.unavailablePhase': 'Il controllo vale al momento del servizio: disponibile nelle fasi {phases}.',
     'faults.hint':
       'Il numero accanto a ogni giocatore è la sua zona di rotazione. Scegli un giocatore (qui sopra o cliccandolo in campo) per vedere solo i suoi possibili falli; "Tutta la formazione" torna alla vista completa.',
     'faults.rule':
@@ -48,11 +43,34 @@ export const strings = {
     'faults.needsLeft': 'deve avere {other} (zona {zone}) alla sua sinistra',
     'faults.needsRight': 'deve avere {other} (zona {zone}) alla sua destra',
     'faults.faultNow': 'ora è fallo',
-    'faults.alertShowHint': 'premi "Mostra" per vedere dove',
     'faults.viewLabel': 'Vista dei falli di posizione',
     'faults.viewAll': 'Tutta la formazione',
     'faults.viewPlayer': 'Solo i possibili falli di {player} (zona {zone})',
     'faults.editorAlert': 'Attenzione: in questa formazione di ricezione ci sono falli di posizione:',
+
+    'tools.ariaLabel': 'Strumenti per la formazione di ricezione',
+    'tools.hint': 'Scegli una scheda per vederla disegnata sul campo; un nuovo clic la chiude.',
+
+    'zones.title': 'Competenze di ricezione',
+    'zones.edit': 'Modifica',
+    'zones.editDone': 'Fine',
+    'zones.colour': 'Colore della zona di {player}',
+    'zones.sidesLabel': 'Lati di competenza di {player}',
+    'zones.side.left': 'Sinistra',
+    'zones.side.right': 'Destra',
+    'zones.side.front': 'Avanti',
+    'zones.side.back': 'Dietro',
+    'zones.borderOwner': 'tra {a} e {b}: palla di {owner}',
+    'zones.borderNobody': 'tra {a} e {b}: nessuno ha la competenza',
+    'zones.borderBoth': 'tra {a} e {b}: la rivendicano entrambi',
+    'zones.remove': 'Togli la zona di {player}',
+    'zones.addLabel': 'Dai una zona a:',
+    'zones.add': 'Dai una zona a {player}',
+    'zones.editHint':
+      'Trascina i vertici bianchi: i confini condivisi si spostano insieme a tutte le zone che li toccano. Il "+" su un confine aggiunge un vertice, il doppio clic su un vertice lo toglie. Aggiungere o togliere una zona ricalcola le aree dalle posizioni dei giocatori.',
+    'zones.hint':
+      'Ogni colore è la zona di un ricevitore; la fascia più scura lungo un confine indica chi prende la palla che cade lì. I lati sono dal punto di vista del giocatore, rivolto verso la rete.',
+    'zones.reset': 'Ripristina le zone di partenza',
 
     'export.title': 'Esporta',
     'export.format': 'Formato',
@@ -74,9 +92,11 @@ export const strings = {
     'export.faults.all': 'Falli di posizione: tutta la squadra',
     'export.faults.player': 'Falli di posizione: {player} (zona {zone})',
     'export.faults.none': 'nessun fallo',
-    'export.faultsNote.png': "La vista dei falli di posizione è attiva: verrà disegnata anche nell'immagine.",
-    'export.faultsNote.video':
-      'La vista dei falli di posizione è attiva: nelle formazioni di ricezione il video mostra i falli di tutta la squadra e poi di ogni giocatore (P, S1, C2, O, S2, C1, con il libero al posto del centrale).',
+    'export.include.title': 'Includi',
+    'export.include.faults': 'Falli di posizione: tutta la squadra, poi un giocatore alla volta',
+    'export.include.zones': 'Competenze di ricezione',
+    'export.include.note': 'Si aggiungono dopo ogni formazione di ricezione della sequenza.',
+    'export.screenNote': 'Si esporta quello che vedi sul campo, compresi: {items}.',
     'export.header.rotation': '{team} situazione P{position}',
 
     'editor.title': 'Editor schemi',
@@ -119,7 +139,7 @@ export const strings = {
     'tutorial.step6':
       'Da qui si selezionano le situazioni\ndi gioco (base, servizio, ricezione,\nalzata, attacco, cambio).\nI giocatori si muoveranno nel\ncampo di conseguenza.',
     'tutorial.step7':
-      'Falli di posizione: in ricezione\n(fasi Base e Ricezione) "Mostra"\ndisegna zone e coppie da rispettare.\nScegli un giocatore per vedere solo\ni suoi possibili falli, oppure\n"Tutta la formazione".\nSe c\'è un fallo compare un avviso rosso.',
+      'Nella fase Ricezione di una rotazione\nin ricezione, la scheda\n"Falli di posizione" disegna zone e\ncoppie da rispettare.\nScegli un giocatore per vedere solo\ni suoi possibili falli, oppure\n"Tutta la formazione".\nSe c\'è un fallo la scheda mostra\nun bollino rosso.\nLa scheda "Competenze di ricezione"\nmostra chi copre quale zona.',
 
     'info.title': 'Informazioni',
     'info.close': 'Chiudi',
@@ -179,11 +199,6 @@ export const strings = {
     'phase.title': 'Action',
 
     'faults.title': 'Positional faults',
-    'faults.show': 'Show',
-    'faults.hide': 'Hide',
-    'faults.unavailableServe':
-      'Under the FIVB 2025-2028 rules the serving team may line up freely: positional faults apply only to the receiving team. Pick a Receive rotation.',
-    'faults.unavailablePhase': 'The check applies at the service hit: available in the {phases} phases.',
     'faults.hint':
       'The number next to each player is their rotational zone. Pick a player (above, or by clicking them on court) to see only their possible faults; "Whole formation" goes back to the full view.',
     'faults.rule':
@@ -199,11 +214,34 @@ export const strings = {
     'faults.needsLeft': 'must have {other} (zone {zone}) on their left',
     'faults.needsRight': 'must have {other} (zone {zone}) on their right',
     'faults.faultNow': 'fault now',
-    'faults.alertShowHint': 'press "Show" to see where',
     'faults.viewLabel': 'Positional fault view',
     'faults.viewAll': 'Whole formation',
     'faults.viewPlayer': 'Only the possible faults of {player} (zone {zone})',
     'faults.editorAlert': 'Warning: this receive formation has positional faults:',
+
+    'tools.ariaLabel': 'Receive formation tools',
+    'tools.hint': 'Pick a tab to see it drawn on the court; click it again to close it.',
+
+    'zones.title': 'Reception responsibilities',
+    'zones.edit': 'Edit',
+    'zones.editDone': 'Done',
+    'zones.colour': "Colour of {player}'s zone",
+    'zones.sidesLabel': "{player}'s responsibility sides",
+    'zones.side.left': 'Left',
+    'zones.side.right': 'Right',
+    'zones.side.front': 'Front',
+    'zones.side.back': 'Back',
+    'zones.borderOwner': 'between {a} and {b}: {owner} takes it',
+    'zones.borderNobody': 'between {a} and {b}: nobody is responsible',
+    'zones.borderBoth': 'between {a} and {b}: both claim it',
+    'zones.remove': "Remove {player}'s zone",
+    'zones.addLabel': 'Give a zone to:',
+    'zones.add': 'Give a zone to {player}',
+    'zones.editHint':
+      "Drag the white vertices: shared borders move together with every zone touching them. The \"+\" on a border adds a vertex, double-clicking a vertex removes it. Adding or removing a zone recomputes the areas from the players' positions.",
+    'zones.hint':
+      "Each colour is one receiver's zone; the darker band along a border shows who takes the ball landing there. Sides are from the player's point of view, facing the net.",
+    'zones.reset': 'Reset to the starting zones',
 
     'configPicker.edit': 'Edit {name}',
     'configPicker.delete': 'Delete {name}',
@@ -232,9 +270,11 @@ export const strings = {
     'export.faults.all': 'Positional faults: whole team',
     'export.faults.player': 'Positional faults: {player} (zone {zone})',
     'export.faults.none': 'no faults',
-    'export.faultsNote.png': 'The positional-fault view is on: it will be drawn on the image too.',
-    'export.faultsNote.video':
-      'The positional-fault view is on: in the receive formations the video shows the whole team\'s faults, then each player\'s (P, S1, C2, O, S2, C1, with the libero in place of the middle).',
+    'export.include.title': 'Include',
+    'export.include.faults': 'Positional faults: whole team, then one player at a time',
+    'export.include.zones': 'Reception responsibilities',
+    'export.include.note': 'Added after each receive formation of the sequence.',
+    'export.screenNote': 'What you see on the court is exported, including: {items}.',
     'export.header.rotation': '{team} situation P{position}',
 
     'editor.title': 'Scheme editor',
@@ -277,7 +317,7 @@ export const strings = {
     'tutorial.step6':
       'From here you pick the phase of\nplay (base, serve, receive, set,\nattack, switch). Players move on\nthe court accordingly.',
     'tutorial.step7':
-      'Positional faults: when receiving\n(Base and Receive phases) "Show"\ndraws the zones and pairs to respect.\nPick a player to see only their\npossible faults, or\n"Whole formation".\nA red warning appears on any fault.',
+      'In the Receive phase of a receive\nrotation, the "Positional faults"\ntab draws the zones and pairs\nto respect.\nPick a player to see only their\npossible faults, or\n"Whole formation".\nOn any fault the tab shows a red badge.\nThe "Reception responsibilities"\ntab shows who covers which zone.',
 
     'info.title': 'About',
     'info.close': 'Close',

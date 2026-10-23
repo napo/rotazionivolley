@@ -68,6 +68,32 @@ export type LiberoSwap = z.infer<typeof LiberoSwapSchema>;
 export const LiberoSwapsSchema = z.record(z.string(), z.record(z.string(), LiberoSwapSchema));
 export type LiberoSwaps = z.infer<typeof LiberoSwapsSchema>;
 
+/**
+ * Reception competence map for one rotation (receive side, reception
+ * phase): a planar partition of the court into one polygon per receiver.
+ * Polygons reference shared vertex ids rather than holding their own
+ * coordinates, so dragging a vertex moves every area that touches it and
+ * neighbouring areas can never drift apart. `competence` lists the sides
+ * (from the player's point of view, facing the net) whose shared borders
+ * are that player's ball — drawn as a darker band inside their area.
+ */
+export const CompetenceSideSchema = z.enum(['left', 'right', 'front', 'back']);
+export type CompetenceSide = z.infer<typeof CompetenceSideSchema>;
+
+export const ReceptionAreaSchema = z.object({
+  playerId: z.string().min(1),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  vertices: z.array(z.string().min(1)).min(3),
+  competence: z.array(CompetenceSideSchema).default([]),
+});
+export type ReceptionArea = z.infer<typeof ReceptionAreaSchema>;
+
+export const ReceptionZonesSchema = z.object({
+  vertices: z.record(z.string(), PointSchema),
+  areas: z.array(ReceptionAreaSchema),
+});
+export type ReceptionZones = z.infer<typeof ReceptionZonesSchema>;
+
 export const FormationConfigSchema = z
   .object({
     id: z.string().min(1),
@@ -97,6 +123,13 @@ export const FormationConfigSchema = z
      * usable as a subtitle/caption in PDF pipeline and video exports.
      */
     comments: z.record(z.string(), z.record(z.string(), z.string())).optional().default({}),
+    /**
+     * Reception competence maps, sparse/optional — setterPosition ("1".."6")
+     * -> zones, for the receive side's reception phase only. No entry means
+     * the viewer derives a default map from the players' positions (see
+     * state/receptionZones.ts).
+     */
+    receptionZones: z.record(z.string(), ReceptionZonesSchema).optional().default({}),
   })
   .superRefine((config, ctx) => {
     const playerIds = config.players.map((p) => p.id);
@@ -167,6 +200,28 @@ export const FormationConfigSchema = z
           });
         }
       }
+    }
+
+    const allPlayerIds = [...playerIds, ...liberoIds];
+    for (const [setterKey, zones] of Object.entries(config.receptionZones)) {
+      zones.areas.forEach((area, i) => {
+        if (!allPlayerIds.includes(area.playerId)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `receptionZones: "${area.playerId}" non è un giocatore dichiarato`,
+            path: ['receptionZones', setterKey, 'areas', i, 'playerId'],
+          });
+        }
+        for (const vertexId of area.vertices) {
+          if (!zones.vertices[vertexId]) {
+            ctx.addIssue({
+              code: 'custom',
+              message: `receptionZones: vertice "${vertexId}" mancante`,
+              path: ['receptionZones', setterKey, 'areas', i, 'vertices'],
+            });
+          }
+        }
+      });
     }
   });
 

@@ -10,11 +10,11 @@ describe('video: fotogrammi dei falli di posizione', () => {
   const pages = buildPipelinePages(defaultConfig, { team: 'receive', phaseKey: 'base', setterPosition: 2 }, 'receiveRotation', t);
 
   it('senza la vista dei falli c’è un fotogramma per fase', () => {
-    expect(buildSegments(defaultConfig, pages, null, false, t)).toHaveLength(pages.length);
+    expect(buildSegments(defaultConfig, pages, null, { faults: false, zones: false }, t)).toHaveLength(pages.length);
   });
 
   it('nella formazione di ricezione: tutta la squadra, poi P, S1, C2, O, S2 e il libero al posto di C1', () => {
-    const segments = buildSegments(defaultConfig, pages, null, true, t);
+    const segments = buildSegments(defaultConfig, pages, null, { faults: true, zones: false }, t);
     const receiveIndex = pages.findIndex((p) => p.phaseKey === 'receiveReceive');
     const faultStills = segments.filter((s) => s.faults);
 
@@ -29,8 +29,19 @@ describe('video: fotogrammi dei falli di posizione', () => {
   });
 
   it('la fase base non ha il giro dei falli (le zone si ricavano proprio da lì)', () => {
-    const segments = buildSegments(defaultConfig, pages, null, true, t);
+    const segments = buildSegments(defaultConfig, pages, null, { faults: true, zones: false }, t);
     const baseTitle = pages.find((p) => p.phaseKey === 'base')!.titleLines;
     expect(segments.filter((s) => s.title === baseTitle && s.faults)).toEqual([]);
+  });
+
+  it('con le competenze: un fotogramma con le zone subito dopo la formazione di ricezione, prima dei falli', () => {
+    const segments = buildSegments(defaultConfig, pages, null, { faults: true, zones: true }, t);
+    const receiveIndex = pages.findIndex((p) => p.phaseKey === 'receiveReceive');
+
+    expect(segments).toHaveLength(pages.length + 1 + 7);
+    expect(segments.slice(receiveIndex, receiveIndex + 3).map((s) => s.kind)).toEqual(['page', 'zones', 'faultsAll']);
+    const zonesStill = segments[receiveIndex + 1]!;
+    expect(zonesStill.zones).toEqual(defaultConfig.receptionZones['2']);
+    expect(segments.filter((s) => s.zones)).toHaveLength(1);
   });
 });

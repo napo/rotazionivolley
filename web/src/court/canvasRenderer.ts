@@ -1,5 +1,6 @@
-import type { PlayerDef, Point, RotationPositions } from '../configs/schema';
+import type { PlayerDef, Point, ReceptionZones, RotationPositions } from '../configs/schema';
 import type { FaultOverlayData } from '../state/positionalFaults';
+import { areaPoints, darken, getCompetenceEdges } from '../state/receptionZones';
 import {
   ATTACK_LINE,
   ATTACK_LINE_TICKS,
@@ -10,6 +11,7 @@ import {
   FAULT_COLOURS,
   PLAYER_RADIUS,
   trimmedSegment,
+  ZONE_STYLE,
 } from './courtGeometry';
 
 /**
@@ -39,6 +41,8 @@ export function drawFrame(
   title?: string[],
   caption?: string,
   faults?: FaultOverlayData,
+  /** Reception competence map, drawn between the court and the players as in the live view. */
+  zones?: ReceptionZones,
 ): void {
   const { minX, minY, width, height } = COURT_VIEWBOX;
 
@@ -55,17 +59,8 @@ export function drawFrame(
   ctx.fill();
   ctx.restore();
 
-  ctx.strokeStyle = COLOURS.line;
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.rect(COURT_RECT.x, COURT_RECT.y, COURT_RECT.width, COURT_RECT.height);
-  ctx.stroke();
-
-  drawLine(ctx, CENTRE_LINE.x1, CENTRE_LINE.y1, CENTRE_LINE.x2, CENTRE_LINE.y2);
-  drawLine(ctx, ATTACK_LINE.x1, ATTACK_LINE.y1, ATTACK_LINE.x2, ATTACK_LINE.y2, [9, 9]);
-  for (const tick of ATTACK_LINE_TICKS) {
-    drawLine(ctx, tick.x1, tick.y1, tick.x2, tick.y2, [9, 9]);
-  }
+  drawCourtLines(ctx, COLOURS.line, 4);
+  if (zones) drawZonesOverlay(ctx, zones);
 
   for (const player of players) {
     const position = positions[player.id];
@@ -188,8 +183,82 @@ function drawFaultOverlay(ctx: CanvasRenderingContext2D, positions: Record<strin
   }
 }
 
+/** Canvas 2D twin of CourtLines (CourtBackground.tsx): boundary, centre line, dashed attack line and ticks. */
+function drawCourtLines(ctx: CanvasRenderingContext2D, colour: string, lineWidth: number): void {
+  ctx.save();
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = lineWidth;
+  ctx.beginPath();
+  ctx.rect(COURT_RECT.x, COURT_RECT.y, COURT_RECT.width, COURT_RECT.height);
+  ctx.stroke();
+  ctx.restore();
+
+  drawLine(ctx, colour, lineWidth, CENTRE_LINE.x1, CENTRE_LINE.y1, CENTRE_LINE.x2, CENTRE_LINE.y2);
+  drawLine(ctx, colour, lineWidth, ATTACK_LINE.x1, ATTACK_LINE.y1, ATTACK_LINE.x2, ATTACK_LINE.y2, [9, 9]);
+  for (const tick of ATTACK_LINE_TICKS) {
+    drawLine(ctx, colour, lineWidth, tick.x1, tick.y1, tick.x2, tick.y2, [9, 9]);
+  }
+}
+
+/**
+ * Canvas 2D twin of court/ReceptionZonesLayer's underlay: translucent areas,
+ * each claimed border as a darker band clipped to its owner's area, white
+ * borders, and the court markings again in black on top.
+ */
+function drawZonesOverlay(ctx: CanvasRenderingContext2D, zones: ReceptionZones): void {
+  const tracePolygon = (points: Point[]) => {
+    ctx.beginPath();
+    points.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+    ctx.closePath();
+  };
+  const edges = getCompetenceEdges(zones);
+
+  zones.areas.forEach((area, i) => {
+    const polygon = areaPoints(zones, area);
+    ctx.save();
+    ctx.globalAlpha = ZONE_STYLE.fillOpacity;
+    ctx.fillStyle = area.color;
+    tracePolygon(polygon);
+    ctx.fill();
+    ctx.restore();
+
+    const owned = edges.filter((e) => e.owners.includes(i));
+    if (owned.length === 0) return;
+    ctx.save();
+    tracePolygon(polygon);
+    ctx.clip();
+    ctx.globalAlpha = ZONE_STYLE.bandOpacity;
+    ctx.strokeStyle = darken(area.color);
+    ctx.lineWidth = ZONE_STYLE.bandWidth;
+    ctx.lineCap = 'round';
+    for (const e of owned) {
+      const a = zones.vertices[e.a]!;
+      const b = zones.vertices[e.b]!;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+
+  ctx.save();
+  ctx.globalAlpha = ZONE_STYLE.borderOpacity;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = ZONE_STYLE.borderWidth;
+  for (const area of zones.areas) {
+    tracePolygon(areaPoints(zones, area));
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  drawCourtLines(ctx, COLOURS.zoneLine, ZONE_STYLE.courtLineWidth);
+}
+
 function drawLine(
   ctx: CanvasRenderingContext2D,
+  colour: string,
+  lineWidth: number,
   x1: number,
   y1: number,
   x2: number,
@@ -197,8 +266,8 @@ function drawLine(
   dash: number[] = [],
 ): void {
   ctx.save();
-  ctx.strokeStyle = COLOURS.line;
-  ctx.lineWidth = 4;
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = lineWidth;
   ctx.setLineDash(dash);
   ctx.beginPath();
   ctx.moveTo(x1, y1);

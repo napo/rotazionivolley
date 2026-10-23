@@ -1,0 +1,68 @@
+.court-tools {
+  margin-top: 1rem;
+}
+
+.court-tools__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  border-bottom: 2px solid #d4dbe1;
+}
+
+.court-tools__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: -2px;
+  padding: 0.5rem 0.85rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: #4b5b68;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.court-tools__tab:hover {
+  color: #164863;
+}
+
+.court-tools__tab[aria-selected='true'] {
+  color: #164863;
+  border-bottom-color: #164863;
+}
+
+.court-tools__badge {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: #d0021b;
+  color: #fff;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+.court-tools__body {
+  padding-top: 0.25rem;
+}
+
+.court-tools__hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.court-tools__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -33,6 +33,8 @@ interface CourtStageProps {
   apiRef?: MutableRefObject<CourtStageApi | null>;
   /** Extra Konva content drawn above the players, in court coordinates (e.g. the positional-fault overlay). */
   overlay?: ReactNode;
+  /** Extra Konva content drawn between the court and the players, in court coordinates (e.g. the reception zones). */
+  underlay?: ReactNode;
 }
 
 export function CourtStage({
@@ -47,6 +49,7 @@ export function CourtStage({
   ariaLabel,
   apiRef,
   overlay,
+  underlay,
 }: CourtStageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
@@ -97,6 +100,7 @@ export function CourtStage({
       <Stage ref={stageRef} width={width} height={height}>
         <Layer x={-COURT_VIEWBOX.minX * scale} y={-COURT_VIEWBOX.minY * scale} scaleX={scale} scaleY={scale}>
           <CourtBackground />
+          {underlay}
           {players.map((player) => {
             const position = positions[player.id];
             if (!position) return null;

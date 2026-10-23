@@ -69,3 +69,9 @@ export async function openNewSchemeEditor(page: Page) {
   await page.getByRole('button', { name: /Nuovo modulo/ }).click();
   await page.getByRole('button', { name: 'Inizia da questo schema' }).click();
 }
+
+/** Opens a tab of the court tools panel (positional faults, reception responsibilities) and returns its content. */
+export async function openCourtTool(page: Page, name: 'Falli di posizione' | 'Competenze di ricezione') {
+  await page.getByRole('tab', { name: new RegExp(name) }).click();
+  return page.getByRole('tabpanel');
+}

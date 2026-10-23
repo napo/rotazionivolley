@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import type { FormationConfig } from './configs/schema';
+import type { FormationConfig, ReceptionZones } from './configs/schema';
 import { CourtStage, type CourtStageApi } from './court/CourtStage';
 import { ANIMATION_DURATION_MS } from './court/courtGeometry';
 import { computeBenchDisplay } from './court/benchDisplay';
@@ -21,17 +21,36 @@ import { useAppState } from './state/AppStateContext';
 import { checkPositionalFaults, getPositionalCheckPhases, getRotationZones } from './state/positionalFaults';
 import { PositionalFaultOverlay } from './court/PositionalFaultOverlay';
 import { PositionalFaultPanel } from './faults/PositionalFaultPanel';
+import { ReceptionZonesHandles, ReceptionZonesUnderlay } from './court/ReceptionZonesLayer';
+import { ReceptionZonesPanel } from './zones/ReceptionZonesPanel';
+import { CourtToolsPanel, type CourtTool, type CourtToolKey } from './controls/CourtToolsPanel';
+import {
+  buildDefaultZones,
+  getOnCourtIds,
+  getReceptionPhase,
+  resolveReceptionZones,
+  withAreaChanged,
+  withEdgeSplit,
+  withVertexMoved,
+  withVertexRemoved,
+} from './state/receptionZones';
 import './App.css';
 
 function App() {
-  const { state, dispatch, config, customConfigs, addCustomConfig, removeCustomConfig, setComment } = useAppState();
+  const { state, dispatch, config, customConfigs, addCustomConfig, removeCustomConfig, setComment, setReceptionZones } =
+    useAppState();
   const { t } = useI18n();
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const courtStageApiRef = useRef<CourtStageApi | null>(null);
   const [infoOpen, setInfoOpen] = useState(false);
   const [view, setView] = useState<'viewer' | 'editor'>('viewer');
   const [editTarget, setEditTarget] = useState<FormationConfig | undefined>(undefined);
-  const [faultsOn, setFaultsOn] = useState(false);
+  // The open tab of the court tools panel — also which drawing is on court.
+  const [activeTool, setActiveTool] = useState<CourtToolKey | null>(null);
+  const [zonesEditing, setZonesEditing] = useState(false);
+  // The map while a vertex is being dragged — saved to the config only on
+  // drag end, so a drag doesn't rewrite stored schemes on every mouse move.
+  const [draggedZones, setDraggedZones] = useState<ReceptionZones | null>(null);
   // A custom entry overrides a built-in with the same id (e.g. a built-in
   // config with session-only comments layered on top — see setComment).
   const allConfigs = [...builtInConfigs.filter((c) => !customConfigs.some((cc) => cc.id === c.id)), ...customConfigs];
@@ -78,23 +97,80 @@ function App() {
   const { players, positions } = computeBenchDisplay(config, cellPositions, activeSwap);
 
   // Positional faults: receiving side only (FIVB 2025-2028), at the service
-  // hit — i.e. "base" and the reception formation, not later phases.
+  // hit — i.e. the reception formation, not "base" or later phases.
   const checkPhases = getPositionalCheckPhases(config.phases);
-  const faultsUnavailable =
-    state.team !== 'receive'
-      ? t('faults.unavailableServe')
-      : !checkPhases.includes(state.phaseKey)
-        ? t('faults.unavailablePhase', {
-            phases: checkPhases.map((k) => `"${config.phases[k]?.label ?? k}"`).join(', '),
-          })
-        : null;
-  const zones = faultsUnavailable ? {} : getRotationZones(config, state.setterPosition, activeSwap);
+  const faultsAvailable = state.team === 'receive' && checkPhases.includes(state.phaseKey);
+  const zones = faultsAvailable ? getRotationZones(config, state.setterPosition, activeSwap) : {};
   const relations = checkPositionalFaults(zones, positions);
-  const showFaults = faultsOn && !faultsUnavailable && relations.length > 0;
+  const faultsOn = activeTool === 'faults';
+  const showFaults = faultsOn && faultsAvailable && relations.length > 0;
   const selectedForFaults =
     showFaults && state.highlightedPlayerId && zones[state.highlightedPlayerId] !== undefined
       ? state.highlightedPlayerId
       : null;
+
+  // Reception competence map: receive side, reception phase only.
+  const receptionPhase = getReceptionPhase(config.phases);
+  const zonesAvailable = !!receptionPhase && state.team === 'receive' && state.phaseKey === receptionPhase;
+  const resolvedZones = resolveReceptionZones(config, state.setterPosition, players, positions);
+  const receptionZones = draggedZones ?? resolvedZones.zones;
+  const showZones = activeTool === 'zones' && zonesAvailable && receptionZones.areas.length > 0;
+  const editingZones = showZones && zonesEditing;
+  const saveZones = (zones: ReceptionZones | undefined) => setReceptionZones(state.setterPosition, zones);
+  // "Reset" goes back to the scheme's own map (a built-in ships one per
+  // rotation), or to the one derived from the positions when it has none;
+  // offered only once the map differs from that.
+  const originalZones = builtInConfigs.find((c) => c.id === config.id)?.receptionZones[String(state.setterPosition)];
+  const zonesCustomised =
+    JSON.stringify(config.receptionZones[String(state.setterPosition)]) !== JSON.stringify(originalZones);
+
+  // Only the tools that apply here: the reception formation of a receive
+  // rotation. A tab whose tool isn't available just stays as it was until
+  // it is again.
+  const faultCount = relations.filter((r) => !r.ok).length;
+  const courtTools: CourtTool[] = [];
+  if (faultsAvailable && relations.length > 0) {
+    courtTools.push({
+      key: 'faults',
+      label: t('faults.title'),
+      alert:
+        faultCount > 0
+          ? {
+              badge: String(faultCount),
+              text: t(faultCount === 1 ? 'faults.summaryOne' : 'faults.summaryMany', { count: faultCount }),
+            }
+          : undefined,
+      content: (
+        <PositionalFaultPanel
+          onSelectPlayer={(playerId) => dispatch({ type: 'SET_HIGHLIGHT', playerId })}
+          players={players}
+          zones={zones}
+          relations={relations}
+          selectedId={selectedForFaults}
+        />
+      ),
+    });
+  }
+  if (zonesAvailable && receptionZones.areas.length > 0) {
+    courtTools.push({
+      key: 'zones',
+      label: t('zones.title'),
+      content: (
+        <ReceptionZonesPanel
+          editing={zonesEditing}
+          onToggleEditing={() => setZonesEditing((on) => !on)}
+          players={players}
+          candidateIds={getOnCourtIds(players, positions).filter(
+            (id) => players.find((p) => p.id === id)?.role !== 'setter',
+          )}
+          zones={receptionZones}
+          onChangeArea={(playerId, change) => saveZones(withAreaChanged(receptionZones, playerId, change))}
+          onSetReceivers={(ids) => saveZones(buildDefaultZones(ids, positions, players, receptionZones))}
+          onReset={zonesCustomised ? () => saveZones(originalZones) : undefined}
+        />
+      ),
+    });
+  }
 
   return (
     <div className="app">
@@ -130,7 +206,7 @@ function App() {
               phaseKey={state.phaseKey}
               setterPosition={state.setterPosition}
               activeLiberoId={state.activeLiberoId}
-              faultView={faultsOn ? { selectedId: selectedForFaults } : null}
+              screen={{ faults: showFaults ? { selectedId: selectedForFaults } : null, zones: showZones }}
               embedded
             />
           </HeaderDropdown>
@@ -150,28 +226,42 @@ function App() {
             onTogglePlayer={(playerId) => dispatch({ type: 'TOGGLE_HIGHLIGHT', playerId })}
             ariaLabel={`${config.name}, ${config.phases[state.phaseKey]?.label ?? state.phaseKey}, P${state.setterPosition}`}
             apiRef={courtStageApiRef}
-            overlay={
-              showFaults ? (
-                <PositionalFaultOverlay
-                  zones={zones}
-                  positions={positions}
-                  relations={relations}
-                  selectedId={selectedForFaults}
+            underlay={
+              showZones ? (
+                <ReceptionZonesUnderlay
+                  zones={receptionZones}
                   revealDelayMs={ANIMATION_DURATION_MS}
+                  revealKey={`${state.configId}-${state.setterPosition}`}
                 />
               ) : null
             }
+            overlay={
+              <>
+                {showFaults && (
+                  <PositionalFaultOverlay
+                    zones={zones}
+                    positions={positions}
+                    relations={relations}
+                    selectedId={selectedForFaults}
+                    revealDelayMs={ANIMATION_DURATION_MS}
+                  />
+                )}
+                {editingZones && (
+                  <ReceptionZonesHandles
+                    zones={receptionZones}
+                    onMoveVertex={(id, point) => setDraggedZones(withVertexMoved(receptionZones, id, point))}
+                    onMoveEnd={() => {
+                      if (draggedZones) saveZones(draggedZones);
+                      setDraggedZones(null);
+                    }}
+                    onSplitEdge={(a, b) => saveZones(withEdgeSplit(receptionZones, a, b))}
+                    onRemoveVertex={(id) => saveZones(withVertexRemoved(receptionZones, id))}
+                  />
+                )}
+              </>
+            }
           />
-          <PositionalFaultPanel
-            unavailableReason={faultsUnavailable}
-            enabled={faultsOn}
-            onToggle={() => setFaultsOn((on) => !on)}
-            onSelectPlayer={(playerId) => dispatch({ type: 'SET_HIGHLIGHT', playerId })}
-            players={players}
-            zones={zones}
-            relations={relations}
-            selectedId={selectedForFaults}
-          />
+          <CourtToolsPanel tools={courtTools} activeKey={activeTool} onSelect={setActiveTool} />
           <CommentPanel
             value={getComment(config, state.phaseKey, state.setterPosition)}
             onChange={(text) => setComment(state.phaseKey, state.setterPosition, text)}

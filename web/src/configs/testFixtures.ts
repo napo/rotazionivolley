@@ -37,5 +37,6 @@ export function buildFixtureConfig(): FormationConfig {
     positions: { base, set: base, attack: base },
     liberoSwaps: {},
     comments: {},
+    receptionZones: {},
   };
 }

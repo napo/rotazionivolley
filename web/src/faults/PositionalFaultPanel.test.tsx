@@ -16,9 +16,6 @@ function renderPanel(props: Partial<Parameters<typeof PositionalFaultPanel>[0]> 
   const onSelectPlayer = vi.fn();
   renderWithProviders(
     <PositionalFaultPanel
-      unavailableReason={null}
-      enabled={false}
-      onToggle={() => {}}
       onSelectPlayer={onSelectPlayer}
       players={players}
       zones={zones}
@@ -31,19 +28,19 @@ function renderPanel(props: Partial<Parameters<typeof PositionalFaultPanel>[0]> 
 }
 
 describe('PositionalFaultPanel', () => {
-  it('announces a fault even while the overlay is hidden', () => {
+  it('sums up the faults of the formation', () => {
     renderPanel();
-    expect(screen.getByRole('alert')).toHaveTextContent('1 fallo di posizione');
-    expect(screen.getByRole('alert')).toHaveTextContent('Mostra');
+    expect(screen.getByText('1 fallo di posizione')).toBeInTheDocument();
   });
 
   it('stays quiet when the formation has no fault', () => {
     renderPanel({ relations: [{ ...fault, ok: true }] });
-    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByText('1 fallo di posizione')).toBeNull();
+    expect(screen.getByText('Nessun fallo di posizione in questa formazione.')).toBeInTheDocument();
   });
 
   it('switches between a single player and the whole formation', () => {
-    const { onSelectPlayer } = renderPanel({ enabled: true, selectedId: 'P' });
+    const { onSelectPlayer } = renderPanel({ selectedId: 'P' });
     expect(screen.getByRole('button', { name: 'P' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Tutta la formazione' })).toHaveAttribute('aria-pressed', 'false');
 

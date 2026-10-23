@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { dragPlayer, openNewSchemeEditor, selectReceiveRotation } from './testUtils';
+import { dragPlayer, openCourtTool, openNewSchemeEditor, selectReceiveRotation } from './testUtils';
 
 test.describe('Falli di posizione', () => {
   test('si passa dalla vista di un singolo giocatore alla vista completa', async ({ page }) => {
     await page.goto('/');
     await selectReceiveRotation(page, 'P2');
-    const panel = page.locator('[data-tutorial="faults"]');
-    await panel.getByRole('button', { name: 'Mostra' }).click();
+    await page.locator('[data-tutorial="phase"]').getByRole('button', { name: 'Ricezione' }).click();
+    const panel = await openCourtTool(page, 'Falli di posizione');
 
     const whole = panel.getByRole('button', { name: 'Tutta la formazione' });
     await expect(whole).toHaveAttribute('aria-pressed', 'true');
