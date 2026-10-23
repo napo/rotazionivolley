@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useI18n } from '../i18n/I18nContext';
 import { APP_VERSION } from '../version';
-import { isInstalledPwa, isIosDevice, isWebPlatform } from '../platform';
+import { isAndroidDevice, isInstalledPwa, isIosDevice, isWebPlatform } from '../platform';
 import { isNativeBuild, setUpdateChecksEnabled, updateChecksEnabled } from '../update/updates';
 import { ExternalLink } from '../ExternalLink';
-import { PAYPAL_DONATION_URL, SOURCE_REPOSITORY_URL } from '../links';
+import { PAYPAL_DONATION_URL, SOURCE_REPOSITORY_URL, releaseDownloads } from '../links';
 import paypalLogo from './paypal.svg';
 import './info.css';
 
@@ -20,6 +20,9 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
   // iPhone/iPad in Safari: there's no native iOS build to download, the
   // app installs from the browser instead (PWA, see vite.config.ts).
   const [showIosInstall] = useState(() => isWebPlatform() && isIosDevice() && !isInstalledPwa());
+  // Android in the browser: the same PWA installs from Chrome, as an
+  // alternative to sideloading the APK.
+  const [showAndroidInstall] = useState(() => isWebPlatform() && isAndroidDevice() && !isInstalledPwa());
   // Only the installed apps ever check for updates — see update/updates.ts.
   const [showUpdatesToggle] = useState(isNativeBuild);
   const [checksEnabled, setChecksEnabled] = useState(updateChecksEnabled);
@@ -75,14 +78,21 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
         )}
 
         {showIosInstall && <p>{t('update.iosInstallHint')}</p>}
+        {showAndroidInstall && <p>{t('info.androidInstallHint')}</p>}
 
         {showDownloads && (
           <>
-            <p>
-              {t('info.downloads.intro')}{' '}
-              <ExternalLink href={`${SOURCE_REPOSITORY_URL}/releases`}>
-                GitHub Releases
-              </ExternalLink>
+            <p>{t('info.downloads.intro', { version: APP_VERSION })}</p>
+            <ul className="info-downloads">
+              {releaseDownloads(APP_VERSION).map(({ label, href }) => (
+                <li key={href}>
+                  <ExternalLink href={href}>{label}</ExternalLink>
+                </li>
+              ))}
+            </ul>
+            <p className="info-overlay__note">
+              {t('info.downloads.allReleases')}{' '}
+              <ExternalLink href={`${SOURCE_REPOSITORY_URL}/releases`}>GitHub Releases</ExternalLink>
             </p>
             <p className="info-overlay__note">{t('info.downloads.macNotarizationNote')}</p>
             <p className="info-overlay__note">{t('info.downloads.androidSideloadNote')}</p>

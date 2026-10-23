@@ -25,3 +25,8 @@ export function isInstalledPwa(): boolean {
     (navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
+
+export function isAndroidDevice(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /Android/i.test(navigator.userAgent);
+}

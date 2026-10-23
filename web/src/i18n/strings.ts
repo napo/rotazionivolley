@@ -150,7 +150,10 @@ export const strings = {
     'info.version': 'Versione {version}',
     'info.licenseLabel': 'Software rilasciato con licenza',
     'info.downloads.intro':
-      'Se vuoi provare rotazionivolley sul tuo computer o sul tuo smartphone/tablet, trovi le versioni per Windows, macOS, Linux e Android a questo indirizzo:',
+      'Se vuoi provare rotazionivolley sul tuo computer o sul tuo smartphone/tablet, scarica la versione {version} per il tuo sistema:',
+    'info.downloads.allReleases': 'Tutte le versioni e le note di rilascio:',
+    'info.androidInstallHint':
+      "Su Android puoi anche installare l'app direttamente dal browser, senza APK: in Chrome apri il menu ⋮ e scegli \"Installa app\" (o \"Aggiungi a schermata Home\"). Funziona anche senza connessione e si aggiorna da sola.",
     'info.downloads.macNotarizationNote':
       'macOS: la versione per Mac non è firmata con un account Apple Developer (a pagamento). Al primo avvio, se macOS la blocca, autorizzala da Preferenze di Sistema → Privacy e sicurezza → "Apri comunque".',
     'info.schemesLocal':
@@ -328,7 +331,10 @@ export const strings = {
     'info.version': 'Version {version}',
     'info.licenseLabel': 'Software released under the',
     'info.downloads.intro':
-      'If you want to try rotazionivolley on your computer or your smartphone/tablet, you\'ll find the Windows, macOS, Linux and Android versions at this address:',
+      'If you want to try rotazionivolley on your computer or your smartphone/tablet, download version {version} for your system:',
+    'info.downloads.allReleases': 'All versions and release notes:',
+    'info.androidInstallHint':
+      'On Android you can also install the app straight from the browser, no APK needed: in Chrome open the ⋮ menu and choose "Install app" (or "Add to Home screen"). It also works offline and updates itself.',
     'info.downloads.macNotarizationNote':
       'macOS: the Mac build isn\'t signed with a (paid) Apple Developer account. If macOS blocks it on first launch, allow it from System Settings → Privacy & Security → "Open Anyway".',
     'info.schemesLocal':

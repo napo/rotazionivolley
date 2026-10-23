@@ -1,8 +1,7 @@
 name: Desktop build (Tauri)
 
-# Builds the Linux, Windows and macOS desktop apps via Tauri. Android is
-# currently built locally, not in CI (see README); iOS has its own workflow
-# (ios-build.yml) since it needs a macOS runner with Xcode.
+# Builds the Linux, Windows and macOS desktop apps via Tauri. Android
+# (android-build.yml) and iOS (ios-build.yml) have their own workflows.
 #
 # On a published release, each platform's installers are signed for the
 # in-app auto-updater (see web/src/update) using the TAURI_SIGNING_PRIVATE_KEY*

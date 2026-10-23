@@ -67,6 +67,12 @@
   color: #666;
 }
 
+.info-downloads {
+  margin: 0.4rem 0 0.6rem;
+  padding-left: 1.2rem;
+  line-height: 1.6;
+}
+
 /* White, so the PayPal wordmark keeps its colours */
 .info-support__button {
   display: inline-flex;
