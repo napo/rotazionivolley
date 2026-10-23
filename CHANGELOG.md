@@ -2,6 +2,15 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [2.4.1] - 2026-10-23
+
+### Aggiunto
+- Pagina Info (versione web): link diretti agli installer della versione corrente per Windows (.exe/.msi), macOS (.dmg), Linux (.AppImage/.deb/.rpm) e Android (.apk), oltre al link a tutte le release.
+- Su Android, nel browser, la pagina Info spiega come installare l'app come PWA da Chrome (menu ⋮ → "Installa app"), in alternativa all'APK.
+
+### Corretto
+- App desktop: la build ora genera i pacchetti firmati per l'aggiornamento in-app (`.sig`) e il manifest `latest.json`, mancanti nella 2.3.0. La release 2.4.0 è uscita senza installer: la 2.4.1 li include tutti.
+
 ## [2.4.0] - 2026-10-23
 
 ### Aggiunto
