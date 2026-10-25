@@ -2,6 +2,21 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [2.5.0] - 2026-10-25
+
+### Aggiunto
+- Competenze di ricezione: un pallino bianco lasciato sopra un altro si unisce a lui (durante il trascinamento quello di arrivo si cerchia di verde); l'unione non avviene se spezzerebbe una zona o la ridurrebbe a una linea.
+- Competenze di ricezione: doppio clic su un pallino bianco per eliminarlo, con una finestra di conferma e la casella "Non chiederlo più" (la conferma si riattiva dalla pagina Info, sezione Preferenze).
+- Menu Esporta: in fondo, "Esporta la configurazione (JSON)" salva lo schema in uso con tutte le sue modifiche, competenze comprese.
+
+### Modificato
+- Competenze di ricezione: sotto le zone il campo diventa bianco e ogni zona ha esattamente il colore del suo quadratino nella legenda.
+- Competenze di ricezione: le modifiche si fanno in modalità "Modifica" e vengono salvate nello schema in uso solo con "Salva" ("Annulla" le scarta); cambiando rotazione, fase o schema con modifiche non salvate viene chiesto se salvarle.
+- La pagina Info è ora una pagina intera invece di una finestra sovrapposta, con le sezioni affiancate sugli schermi larghi.
+
+### Corretto
+- Competenze di ricezione: il "+" su un confine aggiunge sempre il pallino da spostare (prima, sui confini corti, il clic finiva sul pallino vicino e non succedeva niente).
+
 ## [2.4.1] - 2026-10-23
 
 ### Aggiunto
