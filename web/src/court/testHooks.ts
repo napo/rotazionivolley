@@ -11,6 +11,9 @@ import type Konva from 'konva';
 export interface RvTestHooks {
   getPlayerRect(playerId: string): { x: number; y: number; width: number; height: number } | null;
   getPlayerFill(playerId: string): string | null;
+  /** Ids of the shapes whose id starts with `prefix` (e.g. "zone-vertex-", "zone-split-"). */
+  findNodeIds(prefix: string): string[];
+  getNodeRect(nodeId: string): { x: number; y: number; width: number; height: number } | null;
 }
 
 declare global {
@@ -31,6 +34,13 @@ export function registerTestHooks(stage: Konva.Stage): void {
       if (!node || typeof (node as Konva.Circle).fill !== 'function') return null;
       const fill = (node as Konva.Circle).fill();
       return typeof fill === 'string' ? fill : null;
+    },
+    findNodeIds(prefix) {
+      return stage.find((node: Konva.Node) => node.id().startsWith(prefix)).map((node) => node.id());
+    },
+    getNodeRect(nodeId) {
+      const node = stage.findOne(`#${nodeId}`);
+      return node ? node.getClientRect({ relativeTo: stage }) : null;
     },
   };
 }

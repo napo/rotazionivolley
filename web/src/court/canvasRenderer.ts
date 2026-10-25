@@ -1,6 +1,6 @@
 import type { PlayerDef, Point, ReceptionZones, RotationPositions } from '../configs/schema';
 import type { FaultOverlayData } from '../state/positionalFaults';
-import { areaPoints, darken, getCompetenceEdges } from '../state/receptionZones';
+import { areaPoints, darken, getCompetenceEdges, zoneFillColour } from '../state/receptionZones';
 import {
   ATTACK_LINE,
   ATTACK_LINE_TICKS,
@@ -201,7 +201,8 @@ function drawCourtLines(ctx: CanvasRenderingContext2D, colour: string, lineWidth
 }
 
 /**
- * Canvas 2D twin of court/ReceptionZonesLayer's underlay: translucent areas,
+ * Canvas 2D twin of court/ReceptionZonesLayer's underlay: a white court,
+ * the areas in their tints,
  * each claimed border as a darker band clipped to its owner's area, white
  * borders, and the court markings again in black on top.
  */
@@ -213,14 +214,14 @@ function drawZonesOverlay(ctx: CanvasRenderingContext2D, zones: ReceptionZones):
   };
   const edges = getCompetenceEdges(zones);
 
+  ctx.fillStyle = ZONE_STYLE.courtFill;
+  ctx.fillRect(COURT_RECT.x, COURT_RECT.y, COURT_RECT.width, COURT_RECT.height);
+
   zones.areas.forEach((area, i) => {
     const polygon = areaPoints(zones, area);
-    ctx.save();
-    ctx.globalAlpha = ZONE_STYLE.fillOpacity;
-    ctx.fillStyle = area.color;
+    ctx.fillStyle = zoneFillColour(area.color);
     tracePolygon(polygon);
     ctx.fill();
-    ctx.restore();
 
     const owned = edges.filter((e) => e.owners.includes(i));
     if (owned.length === 0) return;

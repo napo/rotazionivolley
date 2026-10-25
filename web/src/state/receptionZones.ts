@@ -9,7 +9,7 @@ import type {
   ReceptionZones,
   SetterPosition,
 } from '../configs/schema';
-import { COURT_RECT } from '../court/courtGeometry';
+import { COURT_RECT, ZONE_STYLE } from '../court/courtGeometry';
 
 /**
  * Reception competence maps: who covers which part of the court when the
@@ -302,6 +302,67 @@ export function withVertexRemoved(zones: ReceptionZones, vertexId: string): Rece
   return { vertices, areas: zones.areas.map((a) => ({ ...a, vertices: a.vertices.filter((v) => v !== vertexId) })) };
 }
 
+/** A vertex dropped closer than this to another one merges into it (court units). */
+export const MERGE_DISTANCE = 14;
+
+/** How tied a vertex is to its spot: court corners can't move, border vertices only slide along their border. */
+function pinning(p: Point): 0 | 1 | 2 {
+  if (isCornerVertex(p)) return 2;
+  return onVerticalBorder(p) || onHorizontalBorder(p) ? 1 : 0;
+}
+
+/**
+ * Whether vertex `a` can be merged into `b` while the areas still tile the
+ * court: an area using both must have them next to each other (otherwise it
+ * would be pinched in two) and keep at least three vertices afterwards.
+ * This also keeps two border vertices on different borders apart: the area
+ * at the court corner between them has both, not next to each other.
+ */
+export function canMergeVertices(zones: ReceptionZones, a: string, b: string): boolean {
+  if (!zones.vertices[a] || !zones.vertices[b] || a === b) return false;
+  return zones.areas.every((area) => {
+    const i = area.vertices.indexOf(a);
+    const j = area.vertices.indexOf(b);
+    if (i < 0 || j < 0) return true;
+    const n = area.vertices.length;
+    return n > 3 && ((i + 1) % n === j || (j + 1) % n === i);
+  });
+}
+
+/** The vertex `vertexId` would merge into if dropped where it is now (the nearest one in reach), or null. */
+export function findMergeTarget(zones: ReceptionZones, vertexId: string): string | null {
+  const p = zones.vertices[vertexId];
+  if (!p) return null;
+  let best: string | null = null;
+  let bestDistance = MERGE_DISTANCE;
+  for (const [id, q] of Object.entries(zones.vertices)) {
+    const distance = Math.hypot(q.x - p.x, q.y - p.y);
+    if (id !== vertexId && distance < bestDistance && canMergeVertices(zones, vertexId, id)) {
+      best = id;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+/**
+ * Merges vertex `a` into `b`: every area using `a` uses `b` instead (an
+ * edge between the two disappears), and `b` takes the position of the more
+ * tied of the two (see pinning) so the map keeps covering the court.
+ */
+export function withVerticesMerged(zones: ReceptionZones, a: string, b: string): ReceptionZones {
+  if (!canMergeVertices(zones, a, b)) return zones;
+  const pa = zones.vertices[a]!;
+  const pb = zones.vertices[b]!;
+  const vertices = { ...zones.vertices, [b]: pinning(pa) > pinning(pb) ? pa : pb };
+  delete vertices[a];
+  const areas = zones.areas.map((area) => {
+    const replaced = area.vertices.map((v) => (v === a ? b : v));
+    return { ...area, vertices: replaced.filter((v, i) => v !== replaced[(i + 1) % replaced.length]) };
+  });
+  return { vertices, areas };
+}
+
 export function withAreaChanged(zones: ReceptionZones, playerId: string, change: Partial<ReceptionArea>): ReceptionZones {
   return { ...zones, areas: zones.areas.map((a) => (a.playerId === playerId ? { ...a, ...change } : a)) };
 }
@@ -379,5 +440,16 @@ export function summariseNeighbours(zones: ReceptionZones): NeighbourSummary[] {
 export function darken(hex: string, amount = 0.45): string {
   const n = parseInt(hex.slice(1), 16);
   const ch = (shift: number) => Math.round(((n >> shift) & 255) * (1 - amount));
+  return `#${[16, 8, 0].map((s) => ch(s).toString(16).padStart(2, '0')).join('')}`;
+}
+
+/**
+ * The solid tint an area of colour `hex` is filled with on the (white)
+ * court — the colour at ZONE_STYLE.fillOpacity over white, precomputed so
+ * the court and the legend's swatch show exactly the same colour.
+ */
+export function zoneFillColour(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (shift: number) => Math.round(255 - (255 - ((n >> shift) & 255)) * ZONE_STYLE.fillOpacity);
   return `#${[16, 8, 0].map((s) => ch(s).toString(16).padStart(2, '0')).join('')}`;
 }

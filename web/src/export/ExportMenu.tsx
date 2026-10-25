@@ -9,6 +9,7 @@ import { isVideoExportSupported, recordSequenceAsVideo } from './video';
 import type { OverlayChoice } from './stills';
 import { getReceptionPhase } from '../state/receptionZones';
 import type { SaveOutcome } from './platformSave';
+import { downloadConfig } from '../editor/exportConfig';
 import './export.css';
 
 interface ExportMenuProps {
@@ -84,35 +85,13 @@ export function ExportMenu({
     );
   const sequenceInclude: OverlayChoice = sequenceHasReception ? include : { faults: false, zones: false };
 
-  async function handleExport() {
+  async function run(save: () => Promise<SaveOutcome>) {
     setBusy(true);
     setError(null);
     setSavedNote(false);
     setPendingShare(null);
     try {
-      const base = `${config.id}-p${setterPosition}-${phaseKey}`;
-      const outcome =
-        format === 'png'
-          ? await exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t, screen)
-          : format === 'pdf-single'
-            ? await exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t, screen)
-            : format === 'pdf-pipeline'
-              ? await exportPipelinePdf(
-                  config,
-                  buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
-                  `${config.id}-sequenza-${sequence}.pdf`,
-                  activeLiberoId,
-                  t,
-                  sequenceInclude,
-                )
-              : await recordSequenceAsVideo(
-                  config,
-                  buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
-                  `${config.id}-sequenza-${sequence}.webm`,
-                  activeLiberoId,
-                  t,
-                  sequenceInclude,
-                );
+      const outcome = await save();
       setSavedNote(outcome.kind === 'mobile');
       if (outcome.kind === 'shareReady') setPendingShare(() => outcome.share);
     } catch (err) {
@@ -120,6 +99,33 @@ export function ExportMenu({
     } finally {
       setBusy(false);
     }
+  }
+
+  function handleExport() {
+    const base = `${config.id}-p${setterPosition}-${phaseKey}`;
+    return run(() =>
+      format === 'png'
+        ? exportStateAsPng(config, team, phaseKey, setterPosition, `${base}.png`, activeLiberoId, t, screen)
+        : format === 'pdf-single'
+          ? exportSinglePagePdf(config, team, phaseKey, setterPosition, `${base}.pdf`, activeLiberoId, t, screen)
+          : format === 'pdf-pipeline'
+            ? exportPipelinePdf(
+                config,
+                buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
+                `${config.id}-sequenza-${sequence}.pdf`,
+                activeLiberoId,
+                t,
+                sequenceInclude,
+              )
+            : recordSequenceAsVideo(
+                config,
+                buildPipelinePages(config, { team, phaseKey, setterPosition }, sequence, t),
+                `${config.id}-sequenza-${sequence}.webm`,
+                activeLiberoId,
+                t,
+                sequenceInclude,
+              ),
+    );
   }
 
   return (
@@ -213,9 +219,25 @@ export function ExportMenu({
         )
       )}
 
-      <button type="button" className="export-menu__submit" onClick={handleExport} disabled={busy}>
+      <button type="button" className="export-menu__submit" onClick={() => void handleExport()} disabled={busy}>
         {busy ? t('export.submitBusy') : t('export.submit')}
       </button>
+
+      {/* Last, after every image/video option: the scheme itself, as saved (competence maps included). */}
+      <div className="export-menu__group export-menu__config" role="group" aria-labelledby="export-config-title">
+        <span id="export-config-title" className="export-menu__config-title">
+          {t('export.config.title')}
+        </span>
+        <button
+          type="button"
+          className="export-menu__config-btn"
+          onClick={() => void run(() => downloadConfig(config))}
+          disabled={busy}
+        >
+          {t('export.config.button')}
+        </button>
+        <p className="export-menu__config-note">{t('export.config.note')}</p>
+      </div>
       {savedNote && <p className="export-menu__saved">{t('export.saved')}</p>}
       {pendingShare && (
         <p className="export-menu__saved">

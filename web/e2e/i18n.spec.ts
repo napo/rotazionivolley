@@ -15,20 +15,23 @@ test.describe('Lingua e Info', () => {
     await expect(page.getByRole('heading', { name: 'Volleyball reception rotations' })).toBeVisible();
   });
 
-  test('il pannello Info mostra progetto, autore, codice sorgente e nota AI', async ({ page }) => {
+  test('la pagina Info mostra progetto, autore, codice sorgente e nota AI', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Info' }).click();
 
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('Maurizio Napolitano')).toBeVisible();
-    await expect(dialog.getByRole('link', { name: /rotazionivolley/ })).toHaveAttribute(
+    // A full page in place of the court, not a dialog over it.
+    const info = page.locator('.info-page');
+    await expect(page.getByRole('heading', { name: 'Informazioni' })).toBeVisible();
+    await expect(page.locator('.court-stage')).toHaveCount(0);
+    await expect(info.getByText('Maurizio Napolitano')).toBeVisible();
+    await expect(info.getByRole('link', { name: /rotazionivolley/ })).toHaveAttribute(
       'href',
       'https://github.com/napo/rotazionivolley',
     );
-    await expect(dialog.getByText(/Claude AI/)).toBeVisible();
+    await expect(info.getByText(/Claude AI/)).toBeVisible();
 
-    await page.getByRole('button', { name: 'Chiudi' }).click();
-    await expect(dialog).toHaveCount(0);
+    await page.getByRole('button', { name: /Torna alle rotazioni/ }).click();
+    await expect(info).toHaveCount(0);
+    await expect(page.locator('.court-stage')).toBeVisible();
   });
 });

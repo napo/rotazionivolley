@@ -23,16 +23,22 @@ import { PositionalFaultOverlay } from './court/PositionalFaultOverlay';
 import { PositionalFaultPanel } from './faults/PositionalFaultPanel';
 import { ReceptionZonesHandles, ReceptionZonesUnderlay } from './court/ReceptionZonesLayer';
 import { ReceptionZonesPanel } from './zones/ReceptionZonesPanel';
+import { VertexRemovalDialog } from './zones/VertexRemovalDialog';
+import { setVertexRemovalConfirmEnabled, vertexRemovalConfirmEnabled } from './zones/zonePreferences';
 import { CourtToolsPanel, type CourtTool, type CourtToolKey } from './controls/CourtToolsPanel';
 import {
   buildDefaultZones,
+  canRemoveVertex,
+  findMergeTarget,
   getOnCourtIds,
   getReceptionPhase,
   resolveReceptionZones,
   withAreaChanged,
   withEdgeSplit,
+  withReceptionZones,
   withVertexMoved,
   withVertexRemoved,
+  withVerticesMerged,
 } from './state/receptionZones';
 import './App.css';
 
@@ -42,15 +48,20 @@ function App() {
   const { t } = useI18n();
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const courtStageApiRef = useRef<CourtStageApi | null>(null);
-  const [infoOpen, setInfoOpen] = useState(false);
-  const [view, setView] = useState<'viewer' | 'editor'>('viewer');
+  const [view, setView] = useState<'viewer' | 'editor' | 'info'>('viewer');
   const [editTarget, setEditTarget] = useState<FormationConfig | undefined>(undefined);
   // The open tab of the court tools panel — also which drawing is on court.
   const [activeTool, setActiveTool] = useState<CourtToolKey | null>(null);
   const [zonesEditing, setZonesEditing] = useState(false);
-  // The map while a vertex is being dragged — saved to the config only on
-  // drag end, so a drag doesn't rewrite stored schemes on every mouse move.
+  // Competence changes made in edit mode, for one rotation of one scheme
+  // (`key`): written to the scheme in use only when approved with "Save".
+  // `zones: undefined` is a draft back to the map derived from the positions.
+  const [zonesDraft, setZonesDraft] = useState<{ key: string; zones: ReceptionZones | undefined } | null>(null);
+  // The map while a vertex is being dragged — put in the draft only on drag
+  // end, so a drag doesn't rebuild the draft on every mouse move.
   const [draggedZones, setDraggedZones] = useState<ReceptionZones | null>(null);
+  // A vertex double clicked for removal, waiting for the confirmation dialog.
+  const [vertexToRemove, setVertexToRemove] = useState<string | null>(null);
   // A custom entry overrides a built-in with the same id (e.g. a built-in
   // config with session-only comments layered on top — see setComment).
   const allConfigs = [...builtInConfigs.filter((c) => !customConfigs.some((cc) => cc.id === c.id)), ...customConfigs];
@@ -65,6 +76,34 @@ function App() {
     removeCustomConfig(target.id);
     if (state.configId === target.id) dispatch({ type: 'SELECT_CONFIG', configId: defaultConfig.id });
     return true;
+  }
+
+  // A draft for this rotation of this scheme, if any (one left from another
+  // rotation was already saved or dropped by leaveZonesDraft).
+  const zonesKey = `${config.id}-${state.setterPosition}`;
+  const draft = zonesDraft?.key === zonesKey ? zonesDraft : null;
+  const zonesDirty =
+    !!draft && JSON.stringify(draft.zones) !== JSON.stringify(config.receptionZones[String(state.setterPosition)]);
+  const saveZonesDraft = () => {
+    if (zonesDirty) setReceptionZones(state.setterPosition, draft!.zones);
+    setZonesDraft(null);
+  };
+  // Before leaving the rotation (or the scheme) shown: unsaved competence
+  // changes are saved or dropped, as the user says, never carried along.
+  const leaveZonesDraft = () => {
+    if (zonesDirty && window.confirm(t('zones.unsavedConfirm', { position: state.setterPosition }))) saveZonesDraft();
+    setZonesDraft(null);
+    setDraggedZones(null);
+  };
+  const guardedDispatch: typeof dispatch = (action) => {
+    if (action.type === 'SELECT_ROTATION' || action.type === 'SELECT_PHASE' || action.type === 'SELECT_CONFIG') {
+      leaveZonesDraft();
+    }
+    dispatch(action);
+  };
+
+  if (view === 'info') {
+    return <InfoPanel onClose={() => setView('viewer')} />;
   }
 
   if (view === 'editor') {
@@ -112,17 +151,20 @@ function App() {
   // Reception competence map: receive side, reception phase only.
   const receptionPhase = getReceptionPhase(config.phases);
   const zonesAvailable = !!receptionPhase && state.team === 'receive' && state.phaseKey === receptionPhase;
-  const resolvedZones = resolveReceptionZones(config, state.setterPosition, players, positions);
+  // What's shown is the draft while there is one, otherwise what the scheme has saved.
+  const zonesConfig = draft ? withReceptionZones(config, state.setterPosition, draft.zones) : config;
+  const resolvedZones = resolveReceptionZones(zonesConfig, state.setterPosition, players, positions);
   const receptionZones = draggedZones ?? resolvedZones.zones;
   const showZones = activeTool === 'zones' && zonesAvailable && receptionZones.areas.length > 0;
   const editingZones = showZones && zonesEditing;
-  const saveZones = (zones: ReceptionZones | undefined) => setReceptionZones(state.setterPosition, zones);
+  const editZones = (zones: ReceptionZones | undefined) => setZonesDraft({ key: zonesKey, zones });
   // "Reset" goes back to the scheme's own map (a built-in ships one per
   // rotation), or to the one derived from the positions when it has none;
   // offered only once the map differs from that.
   const originalZones = builtInConfigs.find((c) => c.id === config.id)?.receptionZones[String(state.setterPosition)];
   const zonesCustomised =
-    JSON.stringify(config.receptionZones[String(state.setterPosition)]) !== JSON.stringify(originalZones);
+    JSON.stringify(zonesConfig.receptionZones[String(state.setterPosition)]) !== JSON.stringify(originalZones);
+  const removeVertex = (id: string) => editZones(withVertexRemoved(receptionZones, id));
 
   // Only the tools that apply here: the reception formation of a receive
   // rotation. A tab whose tool isn't available just stays as it was until
@@ -158,15 +200,24 @@ function App() {
       content: (
         <ReceptionZonesPanel
           editing={zonesEditing}
-          onToggleEditing={() => setZonesEditing((on) => !on)}
+          dirty={zonesDirty}
+          onStartEditing={() => setZonesEditing(true)}
+          onSave={() => {
+            saveZonesDraft();
+            setZonesEditing(false);
+          }}
+          onDiscard={() => {
+            setZonesDraft(null);
+            setZonesEditing(false);
+          }}
           players={players}
           candidateIds={getOnCourtIds(players, positions).filter(
             (id) => players.find((p) => p.id === id)?.role !== 'setter',
           )}
           zones={receptionZones}
-          onChangeArea={(playerId, change) => saveZones(withAreaChanged(receptionZones, playerId, change))}
-          onSetReceivers={(ids) => saveZones(buildDefaultZones(ids, positions, players, receptionZones))}
-          onReset={zonesCustomised ? () => saveZones(originalZones) : undefined}
+          onChangeArea={(playerId, change) => editZones(withAreaChanged(receptionZones, playerId, change))}
+          onSetReceivers={(ids) => editZones(buildDefaultZones(ids, positions, players, receptionZones))}
+          onReset={zonesCustomised ? () => editZones(originalZones) : undefined}
         />
       ),
     });
@@ -181,14 +232,16 @@ function App() {
           <ConfigPicker
             configs={allConfigs}
             configId={state.configId}
-            onSelect={(configId) => dispatch({ type: 'SELECT_CONFIG', configId })}
+            onSelect={(configId) => guardedDispatch({ type: 'SELECT_CONFIG', configId })}
             onEdit={(config) => {
+              leaveZonesDraft();
               setEditTarget(config);
               setView('editor');
             }}
             canDelete={isDeletable}
             onDelete={deleteConfig}
             onAddNew={() => {
+              leaveZonesDraft();
               setEditTarget(undefined);
               setView('editor');
             }}
@@ -210,7 +263,14 @@ function App() {
               embedded
             />
           </HeaderDropdown>
-          <button type="button" className="app__header-btn" onClick={() => setInfoOpen(true)}>
+          <button
+            type="button"
+            className="app__header-btn"
+            onClick={() => {
+              leaveZonesDraft();
+              setView('info');
+            }}
+          >
             {t('app.infoButton')}
           </button>
         </div>
@@ -250,12 +310,18 @@ function App() {
                   <ReceptionZonesHandles
                     zones={receptionZones}
                     onMoveVertex={(id, point) => setDraggedZones(withVertexMoved(receptionZones, id, point))}
-                    onMoveEnd={() => {
-                      if (draggedZones) saveZones(draggedZones);
+                    onMoveEnd={(id) => {
+                      if (draggedZones) {
+                        const target = findMergeTarget(draggedZones, id);
+                        editZones(target ? withVerticesMerged(draggedZones, id, target) : draggedZones);
+                      }
                       setDraggedZones(null);
                     }}
-                    onSplitEdge={(a, b) => saveZones(withEdgeSplit(receptionZones, a, b))}
-                    onRemoveVertex={(id) => saveZones(withVertexRemoved(receptionZones, id))}
+                    onSplitEdge={(a, b) => editZones(withEdgeSplit(receptionZones, a, b))}
+                    onRequestRemoveVertex={(id) => {
+                      if (canRemoveVertex(receptionZones, id) && !vertexRemovalConfirmEnabled()) removeVertex(id);
+                      else setVertexToRemove(id);
+                    }}
                   />
                 )}
               </>
@@ -272,13 +338,13 @@ function App() {
           <RotationPanel
             setterPosition={state.setterPosition}
             team={state.team}
-            onSelect={(setterPosition, team) => dispatch({ type: 'SELECT_ROTATION', setterPosition, team })}
+            onSelect={(setterPosition, team) => guardedDispatch({ type: 'SELECT_ROTATION', setterPosition, team })}
           />
           <PhasePanel
             config={config}
             team={state.team}
             phaseKey={state.phaseKey}
-            onSelect={(phaseKey) => dispatch({ type: 'SELECT_PHASE', phaseKey })}
+            onSelect={(phaseKey) => guardedDispatch({ type: 'SELECT_PHASE', phaseKey })}
           />
         </div>
       </main>
@@ -291,7 +357,17 @@ function App() {
           }
         />
       )}
-      {infoOpen && <InfoPanel onClose={() => setInfoOpen(false)} />}
+      {vertexToRemove && (
+        <VertexRemovalDialog
+          removable={canRemoveVertex(receptionZones, vertexToRemove)}
+          onCancel={() => setVertexToRemove(null)}
+          onConfirm={(dontAskAgain) => {
+            if (dontAskAgain) setVertexRemovalConfirmEnabled(false);
+            removeVertex(vertexToRemove);
+            setVertexToRemove(null);
+          }}
+        />
+      )}
     </div>
   );
 }

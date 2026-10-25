@@ -52,8 +52,37 @@
   margin-top: 0.5rem;
 }
 
-.export-menu__note {
+.export-menu__note,
+.export-menu__config-note {
   margin: 0.5rem 0 0;
   font-size: 0.8rem;
   color: #555;
+}
+
+/* The scheme's own JSON, set apart below the image/video export. */
+.export-menu__config {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #dde3ea;
+}
+
+.export-menu__config-btn {
+  align-self: flex-start;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid #4596bf;
+  border-radius: 6px;
+  background: #fff;
+  color: #1f5f80;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.export-menu__config-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.export-menu__config-title {
+  font-size: 0.8rem;
+  color: #666;
 }

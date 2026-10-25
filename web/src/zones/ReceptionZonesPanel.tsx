@@ -1,12 +1,17 @@
 import type { CompetenceSide, PlayerDef, ReceptionArea, ReceptionZones } from '../configs/schema';
 import { useI18n } from '../i18n/I18nContext';
-import { COMPETENCE_SIDES, summariseNeighbours } from '../state/receptionZones';
+import { COMPETENCE_SIDES, summariseNeighbours, zoneFillColour } from '../state/receptionZones';
 import '../faults/faults.css';
 import './zones.css';
 
 interface ReceptionZonesPanelProps {
+  /** In edit mode every change is a draft, applied to the scheme in use only by "Save". */
   editing: boolean;
-  onToggleEditing: () => void;
+  /** The draft differs from what the scheme has saved. */
+  dirty: boolean;
+  onStartEditing: () => void;
+  onSave: () => void;
+  onDiscard: () => void;
   players: PlayerDef[];
   /** Players on court who may be given a zone (everyone but the setter). */
   candidateIds: string[];
@@ -22,16 +27,22 @@ const SIDE_ARROWS: Record<CompetenceSide, string> = { left: '←', right: '→',
 /**
  * Controls for the reception competence map drawn on the court (see
  * court/ReceptionZonesLayer), shown in its tab of the court tools panel
- * (see controls/CourtToolsPanel): an edit-mode switch, one row per receiver with their colour,
+ * (see controls/CourtToolsPanel): an edit-mode switch, one row per receiver with their colour
+ * (the swatch is the area's tint, exactly as on court),
  * the sides whose borders are their ball and a button to drop their zone
  * (the remaining ones are recomputed to cover the court), buttons to give
  * a zone to the other players on court (not the setter), and a
  * summary of who takes the ball between each pair of neighbours — flagging
- * borders nobody claims or both do.
+ * borders nobody claims or both do. Outside edit mode it's a read-only
+ * legend; in edit mode changes stay a draft until "Save" writes them to the
+ * scheme in use (or "Cancel" drops them).
  */
 export function ReceptionZonesPanel({
   editing,
-  onToggleEditing,
+  dirty,
+  onStartEditing,
+  onSave,
+  onDiscard,
   players,
   candidateIds,
   zones,
@@ -49,27 +60,36 @@ export function ReceptionZonesPanel({
     <div className="zones-panel">
       <div className="zones-panel__toolbar">
         <p className="fault-panel__note">{editing ? t('zones.editHint') : t('zones.hint')}</p>
-        <button
-          type="button"
-          className={`fault-panel__toggle${editing ? ' is-active' : ''}`}
-          aria-pressed={editing}
-          onClick={onToggleEditing}
-        >
-          {editing ? t('zones.editDone') : t('zones.edit')}
-        </button>
+        {!editing && (
+          <button type="button" className="fault-panel__toggle" onClick={onStartEditing}>
+            {t('zones.edit')}
+          </button>
+        )}
       </div>
 
       <ul className="zones-panel__areas">
         {zones.areas.map((area) => (
           <li key={area.playerId} className="zones-panel__area">
-            <label className="zones-panel__swatch" style={{ background: area.color }} title={t('zones.colour', { player: label(area.playerId) })}>
-              <input
-                type="color"
-                value={area.color}
-                aria-label={t('zones.colour', { player: label(area.playerId) })}
-                onChange={(e) => onChangeArea(area.playerId, { color: e.target.value })}
+            {editing ? (
+              <label
+                className="zones-panel__swatch"
+                style={{ background: zoneFillColour(area.color) }}
+                title={t('zones.colour', { player: label(area.playerId) })}
+              >
+                <input
+                  type="color"
+                  value={area.color}
+                  aria-label={t('zones.colour', { player: label(area.playerId) })}
+                  onChange={(e) => onChangeArea(area.playerId, { color: e.target.value })}
+                />
+              </label>
+            ) : (
+              <span
+                className="zones-panel__swatch is-readonly"
+                style={{ background: zoneFillColour(area.color) }}
+                title={t('zones.colour', { player: label(area.playerId) })}
               />
-            </label>
+            )}
             <span className="zones-panel__player">{label(area.playerId)}</span>
             <div className="zones-panel__sides" role="group" aria-label={t('zones.sidesLabel', { player: label(area.playerId) })}>
               {COMPETENCE_SIDES.map((side) => {
@@ -80,6 +100,7 @@ export function ReceptionZonesPanel({
                     type="button"
                     className="zones-panel__side"
                     aria-pressed={on}
+                    disabled={!editing}
                     title={t(`zones.side.${side}`)}
                     onClick={() =>
                       onChangeArea(area.playerId, {
@@ -92,16 +113,18 @@ export function ReceptionZonesPanel({
                 );
               })}
             </div>
-            <button
-              type="button"
-              className="zones-panel__remove"
-              aria-label={t('zones.remove', { player: label(area.playerId) })}
-              title={t('zones.remove', { player: label(area.playerId) })}
-              disabled={zones.areas.length <= 1}
-              onClick={() => onSetReceivers(receiverIds.filter((r) => r !== area.playerId))}
-            >
-              ✕
-            </button>
+            {editing && (
+              <button
+                type="button"
+                className="zones-panel__remove"
+                aria-label={t('zones.remove', { player: label(area.playerId) })}
+                title={t('zones.remove', { player: label(area.playerId) })}
+                disabled={zones.areas.length <= 1}
+                onClick={() => onSetReceivers(receiverIds.filter((r) => r !== area.playerId))}
+              >
+                ✕
+              </button>
+            )}
           </li>
         ))}
       </ul>
@@ -130,7 +153,7 @@ export function ReceptionZonesPanel({
         </ul>
       )}
 
-      {addableIds.length > 0 && (
+      {editing && addableIds.length > 0 && (
         <div className="fault-panel__views zones-panel__add" role="group" aria-label={t('zones.addLabel')}>
           <span className="zones-panel__add-label">{t('zones.addLabel')}</span>
           {addableIds.map((id) => (
@@ -147,12 +170,28 @@ export function ReceptionZonesPanel({
         </div>
       )}
 
-      {onReset && (
+      {editing && onReset && (
         <p className="fault-panel__note">
           <button type="button" className="zones-panel__reset" onClick={onReset}>
             {t('zones.reset')}
           </button>
         </p>
+      )}
+
+      {editing && (
+        <>
+          {dirty && <p className="zones-panel__unsaved">{t('zones.unsaved')}</p>}
+          <div className="zones-panel__actions">
+            <button type="button" className="zones-panel__save" onClick={onSave}>
+              {dirty ? t('zones.save') : t('zones.editDone')}
+            </button>
+            {dirty && (
+              <button type="button" className="zones-panel__discard" onClick={onDiscard}>
+                {t('zones.discard')}
+              </button>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

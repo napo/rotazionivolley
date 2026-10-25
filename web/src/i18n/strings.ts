@@ -67,10 +67,23 @@ export const strings = {
     'zones.addLabel': 'Dai una zona a:',
     'zones.add': 'Dai una zona a {player}',
     'zones.editHint':
-      'Trascina i vertici bianchi: i confini condivisi si spostano insieme a tutte le zone che li toccano. Il "+" su un confine aggiunge un vertice, il doppio clic su un vertice lo toglie. Aggiungere o togliere una zona ricalcola le aree dalle posizioni dei giocatori.',
+      'Trascina i vertici bianchi: i confini condivisi si spostano insieme a tutte le zone che li toccano. Il "+" su un confine aggiunge un vertice da spostare; un vertice lasciato sopra un altro si unisce a lui (quello di arrivo si cerchia di verde); il doppio clic su un vertice lo elimina. Aggiungere o togliere una zona ricalcola le aree dalle posizioni dei giocatori. Le modifiche valgono per lo schema solo quando premi "Salva".',
     'zones.hint':
       'Ogni colore è la zona di un ricevitore; la fascia più scura lungo un confine indica chi prende la palla che cade lì. I lati sono dal punto di vista del giocatore, rivolto verso la rete.',
     'zones.reset': 'Ripristina le zone di partenza',
+    'zones.save': 'Salva',
+    'zones.discard': 'Annulla',
+    'zones.unsaved': 'Modifiche non ancora salvate nello schema.',
+    'zones.unsavedConfirm':
+      'Ci sono modifiche non salvate alle competenze di ricezione di P{position}.\n\nOK: salvale nello schema in uso.\nAnnulla: scartale.',
+    'zones.removeVertex.title': 'Eliminare il punto?',
+    'zones.removeVertex.text': 'Il punto viene tolto e il confine torna dritto tra i due punti vicini.',
+    'zones.removeVertex.fixed':
+      'Questo punto non si può eliminare: unisce tre o più zone, oppure è dove un confine incontra il bordo del campo. Si può solo spostare.',
+    'zones.removeVertex.dontAsk': 'Non chiederlo più (si riattiva dalla pagina Info)',
+    'zones.removeVertex.cancel': 'Annulla',
+    'zones.removeVertex.confirm': 'Elimina',
+    'zones.removeVertex.ok': 'Ho capito',
 
     'export.title': 'Esporta',
     'export.format': 'Formato',
@@ -84,6 +97,10 @@ export const strings = {
     'export.sequence.receiveRotation': 'Ricezione rotazione P{position}',
     'export.sequence.full': 'Tutte le fasi',
     'export.submit': 'Esporta',
+    'export.config.title': 'Configurazione',
+    'export.config.button': 'Esporta la configurazione (JSON)',
+    'export.config.note':
+      'Lo schema in uso con tutte le sue modifiche (competenze di ricezione comprese), da condividere o reimportare dall\'editor.',
     'export.submitBusy': 'Esportazione…',
     'export.error.generic': 'Esportazione non riuscita',
     'export.saved': "Salvato nei Documenti dell'app. Puoi anche condividerlo da lì.",
@@ -143,6 +160,11 @@ export const strings = {
 
     'info.title': 'Informazioni',
     'info.close': 'Chiudi',
+    'info.back': '← Torna alle rotazioni',
+    'info.about': 'Il progetto',
+    'info.preferences': 'Preferenze',
+    'info.zonesConfirmRemoval': 'Chiedi conferma prima di eliminare un punto delle competenze di ricezione',
+    'info.install': "Installa l'app",
     'info.project': 'Progetto di',
     'info.builtOn': 'Applicazione costruita su VBRotations di Andy Edwards (licenza Apache 2.0).',
     'info.sourceLabel': 'Codice sorgente:',
@@ -241,10 +263,23 @@ export const strings = {
     'zones.addLabel': 'Give a zone to:',
     'zones.add': 'Give a zone to {player}',
     'zones.editHint':
-      "Drag the white vertices: shared borders move together with every zone touching them. The \"+\" on a border adds a vertex, double-clicking a vertex removes it. Adding or removing a zone recomputes the areas from the players' positions.",
+      "Drag the white vertices: shared borders move together with every zone touching them. The \"+\" on a border adds a vertex to drag; a vertex dropped on another merges into it (the one it lands on gets a green ring); double-clicking a vertex deletes it. Adding or removing a zone recomputes the areas from the players' positions. Changes apply to the scheme only when you press \"Save\".",
     'zones.hint':
       "Each colour is one receiver's zone; the darker band along a border shows who takes the ball landing there. Sides are from the player's point of view, facing the net.",
     'zones.reset': 'Reset to the starting zones',
+    'zones.save': 'Save',
+    'zones.discard': 'Cancel',
+    'zones.unsaved': 'Changes not saved to the scheme yet.',
+    'zones.unsavedConfirm':
+      'There are unsaved changes to the reception responsibilities of P{position}.\n\nOK: save them to the scheme in use.\nCancel: discard them.',
+    'zones.removeVertex.title': 'Delete this point?',
+    'zones.removeVertex.text': 'The point is removed and the border runs straight between its two neighbours again.',
+    'zones.removeVertex.fixed':
+      "This point can't be deleted: it joins three or more zones, or it's where a border meets the edge of the court. It can only be moved.",
+    'zones.removeVertex.dontAsk': "Don't ask again (turn it back on from the Info page)",
+    'zones.removeVertex.cancel': 'Cancel',
+    'zones.removeVertex.confirm': 'Delete',
+    'zones.removeVertex.ok': 'Got it',
 
     'configPicker.edit': 'Edit {name}',
     'configPicker.delete': 'Delete {name}',
@@ -265,6 +300,10 @@ export const strings = {
     'export.sequence.receiveRotation': 'Receive rotation P{position}',
     'export.sequence.full': 'All phases',
     'export.submit': 'Export',
+    'export.config.title': 'Configuration',
+    'export.config.button': 'Export the configuration (JSON)',
+    'export.config.note':
+      'The scheme in use with all its changes (reception responsibilities included), to share or import again from the editor.',
     'export.submitBusy': 'Exporting…',
     'export.error.generic': 'Export failed',
     'export.saved': "Saved to the app's Documents. You can also share it from there.",
@@ -324,6 +363,11 @@ export const strings = {
 
     'info.title': 'About',
     'info.close': 'Close',
+    'info.back': '← Back to the rotations',
+    'info.about': 'The project',
+    'info.preferences': 'Preferences',
+    'info.zonesConfirmRemoval': 'Ask before deleting a point of the reception responsibilities',
+    'info.install': 'Install the app',
     'info.project': 'Project by',
     'info.builtOn': 'Built on VBRotations by Andy Edwards (Apache License 2.0).',
     'info.sourceLabel': 'Source code:',

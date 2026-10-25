@@ -60,7 +60,10 @@ export const ANIMATION_DURATION_MS = 500;
 
 /** Reception competence map styling (live Konva view and exports alike). */
 export const ZONE_STYLE = {
-  fillOpacity: 0.25,
+  /** The court turns white under the map, so an area's tint is exactly the legend's swatch (see zoneFillColour). */
+  courtFill: '#ffffff',
+  /** How much of the area's colour goes into its tint over the white court. */
+  fillOpacity: 0.45,
   /** Full width of a claimed border's band; only the owner's half shows (clipped to their area). */
   bandWidth: 28,
   bandOpacity: 0.8,

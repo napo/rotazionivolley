@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { builtInConfigs, defaultConfig } from '../configs';
 import { parseFormationConfig, SETTER_POSITIONS, type PlayerDef, type ReceptionZones } from '../configs/schema';
-import { COURT_RECT } from '../court/courtGeometry';
+import { COURT_RECT, ZONE_STYLE } from '../court/courtGeometry';
 import { computeBenchDisplay } from '../court/benchDisplay';
 import {
   areaPoints,
   buildDefaultZones,
+  canMergeVertices,
   canRemoveVertex,
+  findMergeTarget,
   constrainVertex,
   getCompetenceEdges,
   getReceptionPhase,
@@ -17,7 +19,9 @@ import {
   withEdgeSplit,
   withReceptionZones,
   withVertexMoved,
+  zoneFillColour,
   withVertexRemoved,
+  withVerticesMerged,
 } from './receptionZones';
 import { getPositions, resolveActiveLiberoSwap } from './selectors';
 
@@ -128,6 +132,48 @@ describe('modifica dei vertici', () => {
     const cornerId = Object.entries(zones.vertices).find(([, p]) => p.x === COURT_RECT.x && p.y === COURT_RECT.y)![0];
     expect(canRemoveVertex(zones, cornerId)).toBe(false);
   });
+
+  it('due vertici vicini sullo stesso confine si uniscono in uno solo', () => {
+    const split = withEdgeSplit(zones, edge!.a, edge!.b);
+    const newId = Object.keys(split.vertices).find((id) => !zones.vertices[id])!;
+    const near = { x: split.vertices[edge!.a]!.x + 5, y: split.vertices[edge!.a]!.y + 5 };
+    const dropped = withVertexMoved(split, newId, near);
+    const target = findMergeTarget(dropped, newId);
+    expect(target).toBe(edge!.a);
+
+    const merged = withVerticesMerged(dropped, newId, target!);
+    expect(merged.vertices[newId]).toBeUndefined();
+    expect(merged.areas).toEqual(zones.areas);
+    // Still the whole court.
+    const total = merged.areas.reduce((sum, _, i) => sum + polygonArea(merged, i), 0);
+    expect(total).toBeCloseTo(COURT_RECT.width * COURT_RECT.height, 0);
+  });
+
+  it('troppo lontani non si uniscono', () => {
+    const split = withEdgeSplit(zones, edge!.a, edge!.b);
+    const newId = Object.keys(split.vertices).find((id) => !zones.vertices[id])!;
+    expect(findMergeTarget(split, newId)).toBeNull();
+  });
+
+  it('non si uniscono se strozzerebbero una zona o taglierebbero un angolo del campo', () => {
+    // Two non-consecutive vertices of the same area: it would be pinched in two.
+    const area = zones.areas.find((a) => a.vertices.length >= 4)!;
+    expect(canMergeVertices(zones, area.vertices[0]!, area.vertices[2]!)).toBe(false);
+
+    // Border vertices on two different borders, either side of the top-left corner: the corner's area has both.
+    const L = COURT_RECT.x;
+    const T = COURT_RECT.y;
+    const R = COURT_RECT.x + COURT_RECT.width;
+    const Bt = COURT_RECT.y + COURT_RECT.height;
+    const corner: ReceptionZones = {
+      vertices: { c0: { x: L, y: T }, c1: { x: R, y: T }, c2: { x: R, y: Bt }, c3: { x: L, y: Bt }, t: { x: L + 5, y: T }, l: { x: L, y: T + 5 } },
+      areas: [
+        { playerId: 'A', color: '#000000', competence: [], vertices: ['c0', 't', 'l'] },
+        { playerId: 'B', color: '#000000', competence: [], vertices: ['t', 'c1', 'c2', 'c3', 'l'] },
+      ],
+    };
+    expect(canMergeVertices(corner, 't', 'l')).toBe(false);
+  });
 });
 
 describe('competenze', () => {
@@ -194,5 +240,16 @@ describe('salvataggio', () => {
     const withoutLibero = shown.filter((p) => p.id !== 'L1');
     expect(resolveReceptionZones(config, 1, withoutLibero, shownPositions).stored).toBe(false);
     expect(withReceptionZones(config, 1, undefined).receptionZones['1']).toBeUndefined();
+  });
+});
+
+describe('zoneFillColour', () => {
+  it('is the colour at the fill opacity over the white court, the same for court and legend', () => {
+    expect(ZONE_STYLE.courtFill).toBe('#ffffff');
+    expect(zoneFillColour('#ffffff')).toBe('#ffffff');
+    const k = ZONE_STYLE.fillOpacity;
+    const expected = (c: number) => Math.round(255 - (255 - c) * k).toString(16).padStart(2, '0');
+    expect(zoneFillColour('#000000')).toBe(`#${expected(0).repeat(3)}`);
+    expect(zoneFillColour('#1d4ed8')).toBe(`#${expected(0x1d)}${expected(0x4e)}${expected(0xd8)}`);
   });
 });

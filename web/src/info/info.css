@@ -1,70 +1,83 @@
-.info-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(20, 30, 40, 0.5);
+/* A full page in place of the court (see InfoPanel), like the editor. */
+.info-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding: 0 1rem 2rem;
+  background: #fafafa;
+}
+
+.info-page__header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 0;
 }
 
-.info-overlay__box {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1.5rem;
-  max-width: 480px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-}
-
-.info-overlay__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.info-overlay__header h2 {
+.info-page__header h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
 }
 
-.info-overlay__header button {
-  border: none;
-  background: none;
-  font-size: 1.1rem;
+.info-page__back {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
   cursor: pointer;
-  color: #666;
-  line-height: 1;
-  padding: 0.25rem;
+  font-weight: 600;
 }
 
-.info-overlay__box section {
-  margin-top: 1rem;
+.info-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 1rem;
+  align-items: start;
 }
 
-.info-overlay__box h3 {
-  margin: 0 0 0.25rem;
-  font-size: 0.9rem;
+.info-page__card {
+  background: #fff;
+  border: 1px solid #e1e6ec;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  font-size: 1rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.info-page__card h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #666;
+  color: #164863;
 }
 
-.info-overlay__box p {
+.info-page__card p {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-.info-overlay__box p + p {
-  margin-top: 0.6rem;
+.info-page__card p + p {
+  margin-top: 0.7rem;
 }
 
-.info-overlay__note {
-  font-size: 0.85rem;
+.info-page__note {
+  font-size: 0.9rem;
   color: #666;
+}
+
+.info-page__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  cursor: pointer;
+}
+
+.info-page__check input {
+  margin-top: 0.3rem;
+  flex: none;
 }
 
 .info-downloads {
