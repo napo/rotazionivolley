@@ -2,6 +2,11 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [2.5.1] - 2026-10-25
+
+### Modificato
+- Competenze di ricezione: nuove mappe predefinite per i due schemi inclusi. Lo schema "S1 che attacca sempre da 4" ha la sua P1 e condivide le rotazioni da P2 a P6 con il modulo a tre.
+
 ## [2.5.0] - 2026-10-25
 
 ### Aggiunto
