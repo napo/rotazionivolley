@@ -42,16 +42,16 @@ test.describe('Competenze di ricezione', () => {
     await page.locator('[data-tutorial="phase"]').getByRole('button', { name: 'Ricezione' }).click();
     const panel = await openCourtTool(page, 'Competenze di ricezione');
 
-    // Built-in P1: S2 (back row) takes the ball towards L1; S1 (front row) leaves it to L1.
-    await expect(panel).toContainText('tra S2 e L1: palla di S2');
-    await expect(panel).toContainText('tra L1 e S1: palla di L1');
+    // Built-in P1: L1 takes the ball towards S2; S1 takes it towards L1.
+    await expect(panel).toContainText('tra S2 e L1: palla di L1');
+    await expect(panel).toContainText('tra L1 e S1: palla di S1');
     await expect(panel.getByRole('button', { name: 'Ripristina le zone di partenza' })).toHaveCount(0);
 
     // Outside edit mode it's only a legend.
-    const leftOfL1 = panel.getByRole('group', { name: 'Lati di competenza di L1' }).getByRole('button', { name: /Sinistra/ });
-    await expect(leftOfL1).toBeDisabled();
+    const rightOfS2 = panel.getByRole('group', { name: 'Lati di competenza di S2' }).getByRole('button', { name: /Destra/ });
+    await expect(rightOfS2).toBeDisabled();
     await panel.getByRole('button', { name: 'Modifica' }).click();
-    await leftOfL1.click();
+    await rightOfS2.click();
     await expect(panel).toContainText('tra S2 e L1: la rivendicano entrambi');
     await expect(panel).toContainText('Modifiche non ancora salvate');
     await panel.getByRole('button', { name: 'Salva' }).click();
@@ -69,7 +69,7 @@ test.describe('Competenze di ricezione', () => {
 
     await panel.getByRole('button', { name: 'Modifica' }).click();
     await panel.getByRole('button', { name: 'Ripristina le zone di partenza' }).click();
-    await expect(panel).toContainText('tra S2 e L1: palla di S2');
+    await expect(panel).toContainText('tra S2 e L1: palla di L1');
     await expect(panel.getByRole('button', { name: 'Ripristina le zone di partenza' })).toHaveCount(0);
     await panel.getByRole('button', { name: 'Salva' }).click();
   });
@@ -79,8 +79,9 @@ test.describe('Competenze di ricezione', () => {
     const panel = await openReceptionZones(page);
     await panel.getByRole('button', { name: 'Modifica' }).click();
 
+    // Everyone but the setter has a zone in the built-in P1 map: freeing the opposite's makes it the only one to give.
+    await panel.getByRole('button', { name: 'Togli la zona di O' }).click();
     const addGroup = panel.getByRole('group', { name: 'Dai una zona a:' });
-    // The front-row middle already has a zone in the built-in P1 map: only the opposite is left (never the setter).
     await expect(addGroup.getByRole('button')).toHaveText(['+ O']);
 
     await addGroup.getByRole('button', { name: 'Dai una zona a O' }).click();
@@ -96,15 +97,15 @@ test.describe('Competenze di ricezione', () => {
   test('le modifiche non salvate si scartano con Annulla, o si salvano/scartano cambiando rotazione', async ({ page }) => {
     await page.goto('/');
     const panel = await openReceptionZones(page);
-    const leftOfL1 = panel.getByRole('group', { name: 'Lati di competenza di L1' }).getByRole('button', { name: /Sinistra/ });
+    const rightOfS2 = panel.getByRole('group', { name: 'Lati di competenza di S2' }).getByRole('button', { name: /Destra/ });
 
     await panel.getByRole('button', { name: 'Modifica' }).click();
-    await leftOfL1.click();
+    await rightOfS2.click();
     await panel.getByRole('button', { name: 'Annulla' }).click();
-    await expect(panel).toContainText('tra S2 e L1: palla di S2');
+    await expect(panel).toContainText('tra S2 e L1: palla di L1');
 
     await panel.getByRole('button', { name: 'Modifica' }).click();
-    await leftOfL1.click();
+    await rightOfS2.click();
     page.once('dialog', (dialog) => void dialog.accept());
     await selectReceiveRotation(page, 'P6');
     await openReceptionZones(page);
@@ -185,7 +186,7 @@ test.describe('Competenze di ricezione', () => {
     await page.goto('/');
     const panel = await openReceptionZones(page);
     await panel.getByRole('button', { name: 'Modifica' }).click();
-    await panel.getByRole('group', { name: 'Lati di competenza di L1' }).getByRole('button', { name: /Sinistra/ }).click();
+    await panel.getByRole('group', { name: 'Lati di competenza di S2' }).getByRole('button', { name: /Destra/ }).click();
     await panel.getByRole('button', { name: 'Salva' }).click();
 
     await openExportMenu(page);
@@ -197,8 +198,8 @@ test.describe('Competenze di ricezione', () => {
     const path = await download.path();
     const { readFileSync } = await import('node:fs');
     const config = JSON.parse(readFileSync(path!, 'utf8'));
-    const l1 = config.receptionZones['1'].areas.find((a: { playerId: string }) => a.playerId === 'L1');
-    expect(l1.competence).toContain('left');
+    const s2 = config.receptionZones['1'].areas.find((a: { playerId: string }) => a.playerId === 'S2');
+    expect(s2.competence).toContain('right');
   });
 
   test('ogni "+" aggiunge un pallino, anche sui confini già divisi', async ({ page }) => {
@@ -240,6 +241,6 @@ test.describe('Competenze di ricezione', () => {
     await page.mouse.up();
 
     expect((await findCourtNodeIds(page, 'zone-vertex-')).sort()).toEqual([...before].sort());
-    await expect(panel).toContainText('tra S2 e L1: palla di S2');
+    await expect(panel).toContainText('tra S2 e L1: palla di L1');
   });
 });

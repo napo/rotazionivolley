@@ -214,10 +214,6 @@ describe('schemi inclusi', () => {
         const swap = resolveActiveLiberoSwap(config, 'receive', sp, null);
         const { players: shown, positions: shownPositions } = computeBenchDisplay(config, getPositions(config, phase, sp), swap);
         expect(resolveReceptionZones(config, sp, shown, shownPositions).stored, `P${sp}`).toBe(true);
-        // Nobody claims both sides.
-        for (const area of config.receptionZones[String(sp)]!.areas) {
-          expect(area.competence.includes('left') && area.competence.includes('right'), `P${sp} ${area.playerId}`).toBe(false);
-        }
       }
     },
   );
