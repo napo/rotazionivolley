@@ -2,6 +2,12 @@
 
 Tutte le modifiche rilevanti di questo progetto sono documentate in questo file.
 
+## [2.5.2] - 2026-10-26
+
+### Modificato
+- Su iPhone/iPad il suggerimento per installare l'app indica anche il passaggio "Visualizza altro" nel menu Condividi di Safari, dove le versioni recenti di iOS nascondono "Aggiungi alla schermata Home".
+- Nuova immagine di anteprima per la condivisione del sito sui social, con il campo e un esempio di falli di posizione.
+
 ## [2.5.1] - 2026-10-25
 
 ### Modificato
