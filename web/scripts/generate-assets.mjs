@@ -161,7 +161,7 @@ const SOCIAL_HTML = `<!doctype html><html lang="it"><head><meta charset="utf-8">
   .brand { display: flex; align-items: center; gap: 22px; }
   .brand img { width: 84px; height: 84px; border-radius: 22px; box-shadow: 0 2px 8px rgba(16,35,58,.25); }
   .brand h1 { font-size: 56px; font-weight: 800; letter-spacing: -1px; white-space: nowrap; }
-  h2 { margin-top: 56px; font-size: 44px; line-height: 1.2; font-weight: 800; color: #374151; }
+  h2 { margin-top: 56px; font-size: 38px; white-space: nowrap; line-height: 1.2; font-weight: 800; color: #374151; }
   h2 em { font-style: normal; color: #e8590c; }
   p { margin-top: 24px; font-size: 21px; line-height: 1.5; color: #4b5563; width: 470px; }
   .pills { display: flex; gap: 12px; margin-top: 30px; }
@@ -177,7 +177,7 @@ const SOCIAL_HTML = `<!doctype html><html lang="it"><head><meta charset="utf-8">
   <div class="shot front"><img src="${toDataUrl(faultsShot)}"></div>
   <div class="left">
     <div class="brand"><img src="${iconDataUrl}"><h1>Rotazioni Volley</h1></div>
-    <h2>Sei rotazioni,<br><em>un campo animato</em></h2>
+    <h2>Le rotazioni della pallavolo<br><em>in un campo animato</em></h2>
     <p>Scegli lo schema di ricezione: l'app muove i giocatori in ogni rotazione e fase e ti mostra i possibili falli di posizione.</p>
     <div class="pills"><span>Rotazioni P1–P6</span><span>Falli di posizione</span><span>Open source</span></div>
   </div>

@@ -17,7 +17,7 @@ l'applicazione può essere usata a questo indirizzo [https://napo.github.io/rota
 - **Note**: un commento per ogni rotazione e fase, riportato anche negli export.
 - **Export**: PNG, PDF (pagina singola o sequenza) e video animato (`.webm`, o `.mp4` su Safari), con la possibilità di includere falli di posizione e competenze di ricezione. Dallo stesso menu si esporta la configurazione dello schema in uso (JSON), competenze comprese.
 - **Sostieni lo sviluppo**: nella pagina Info, una donazione volontaria tramite PayPal (facoltativa, non sblocca nulla); l'app la ricorda solo negli avvisi di aggiornamento.
-- **Installabile come app (PWA)**: dal browser si può installare l'app sulla schermata Home (su iPhone/iPad: Safari → Condividi → "Aggiungi alla schermata Home"; su Android: Chrome → menu ⋮ → "Installa app"). Funziona anche senza connessione.
+- **Installabile come app (PWA)**: dal browser si può installare l'app sulla schermata Home (su iPhone/iPad: Safari → Condividi → "Visualizza altro" → "Aggiungi alla schermata Home"; su Android: Chrome → menu ⋮ → "Installa app"). Funziona anche senza connessione.
 - **App desktop e Android**: gli installer per Windows (`.exe`/`.msi`), macOS (`.dmg`), Linux (`.AppImage`/`.deb`/`.rpm`) e Android (`.apk`) sono allegati a ogni [release](https://github.com/napo/rotazionivolley/releases/latest) e linkati dalla pagina Info della versione web.
 - **Aggiornamenti**: la versione web/PWA scarica le nuove versioni da sola e propone "Aggiorna ora"; le app desktop/Android segnalano quando c'è una versione più recente (su desktop si installa in-app con un clic), e il controllo si può disattivare dalla pagina Info.
 

@@ -205,7 +205,7 @@ export const strings = {
     'support.note':
       'La donazione è completamente facoltativa e non sblocca funzionalità aggiuntive. Il link apre il sito di PayPal: finché non lo scegli, questa pagina non contatta PayPal.',
     'update.iosInstallHint':
-      "Puoi installare l'app su iPhone/iPad: in Safari tocca Condividi e poi \"Aggiungi alla schermata Home\". Funziona anche senza connessione e si aggiorna da sola.",
+      "Puoi installare l'app su iPhone/iPad: in Safari tocca Condividi, poi \"Visualizza altro\" (la freccia in basso) e scegli \"Aggiungi alla schermata Home\". Funziona anche senza connessione e si aggiorna da sola.",
     'info.updatesCheck': "Controlla gli aggiornamenti all'avvio",
 
     'language.label': 'Lingua',
@@ -408,7 +408,7 @@ export const strings = {
     'support.note':
       'The donation is entirely optional and does not unlock any extra features. The link opens the PayPal website: until you choose it, this page does not contact PayPal.',
     'update.iosInstallHint':
-      'You can install the app on iPhone/iPad: in Safari tap Share, then "Add to Home Screen". It also works offline and updates itself.',
+      'You can install the app on iPhone/iPad: in Safari tap Share, then "View More" (the arrow at the bottom) and pick "Add to Home Screen". It also works offline and updates itself.',
     'info.updatesCheck': 'Check for updates at start',
 
     'language.label': 'Language',
