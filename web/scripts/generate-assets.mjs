@@ -10,7 +10,7 @@
 //   node scripts/generate-assets.mjs
 
 import { chromium } from '@playwright/test';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import sharp from 'sharp';
@@ -130,15 +130,63 @@ const clipLeft = Math.min(titleBox.x, courtBox.x) - PAD;
 const clipTop = titleBox.y - PAD;
 const clipRight = Math.max(titleBox.x + titleBox.width, courtBox.x + courtBox.width);
 const clipBottom = courtBox.y + courtBox.height;
-const socialShotPath = join(__dirname, '.social-shot.png');
-await page.screenshot({
-  path: socialShotPath,
+const baseShot = await page.screenshot({
   clip: { x: clipLeft, y: clipTop, width: clipRight - clipLeft, height: clipBottom - clipTop },
 });
-await sharp(socialShotPath)
-  .resize(1200, 630, { fit: 'contain', background: BACKGROUND_COLOUR })
-  .toFile(join(WEB_PUBLIC_DIR, 'social-preview.png'));
-rmSync(socialShotPath);
+// Second capture: the setter's positional faults in P5 reception — the
+// overlay's arrows to the players P must stay ahead of / beside — laid over
+// the first one in the card.
+await page
+  .locator('[data-tutorial="rotation"] [data-tutorial="rotation-receive"]')
+  .getByRole('button', { name: 'P5' })
+  .click();
+await page.locator('[data-tutorial="phase"]').getByRole('button', { name: 'Ricezione' }).click();
+const faultsTab = page.getByRole('tab', { name: /Falli di posizione/ });
+if ((await faultsTab.getAttribute('aria-selected')) !== 'true') await faultsTab.click();
+await page.getByRole('tabpanel').getByRole('button', { name: 'P', exact: true }).click();
+await page.waitForTimeout(800);
+const faultsShot = await page.locator('.court-stage').screenshot();
+
+// The card itself is plain HTML rendered by the same browser, laid out like
+// the other volleyserve.it previews: brand column on the left, app captures
+// tilted on the right.
+const toDataUrl = (buf) => `data:image/png;base64,${buf.toString('base64')}`;
+const iconDataUrl = toDataUrl(await iconMaster.clone().resize(256, 256, { kernel: 'lanczos3' }).png().toBuffer());
+const SOCIAL_HTML = `<!doctype html><html lang="it"><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1200px; height: 630px; overflow: hidden; position: relative; background: #f3f4f6;
+    font-family: Inter, 'Open Sans', 'Noto Sans', sans-serif; color: #10233a; }
+  .bar { position: absolute; left: 0; top: 0; width: 14px; height: 100%; background: linear-gradient(#10233a 0 66%, #e8590c 66%); }
+  .left { position: absolute; left: 64px; top: 62px; width: 520px; z-index: 2; }
+  .brand { display: flex; align-items: center; gap: 22px; }
+  .brand img { width: 84px; height: 84px; border-radius: 22px; box-shadow: 0 2px 8px rgba(16,35,58,.25); }
+  .brand h1 { font-size: 56px; font-weight: 800; letter-spacing: -1px; white-space: nowrap; }
+  h2 { margin-top: 56px; font-size: 44px; line-height: 1.2; font-weight: 800; color: #374151; }
+  h2 em { font-style: normal; color: #e8590c; }
+  p { margin-top: 24px; font-size: 21px; line-height: 1.5; color: #4b5563; width: 470px; }
+  .pills { display: flex; gap: 12px; margin-top: 30px; }
+  .pills span { background: #10233a; color: #fff; font-size: 19px; font-weight: 600; padding: 10px 18px; border-radius: 999px; white-space: nowrap; }
+  .url { position: absolute; left: 64px; bottom: 34px; font-size: 32px; font-weight: 800; color: #1f6f8b; }
+  .shot { position: absolute; background: #fff; box-shadow: 0 18px 40px rgba(16,35,58,.28); border: 1px solid #d1d5db; }
+  .shot img { display: block; width: 100%; }
+  .back { left: 640px; top: 40px; width: 470px; transform: rotate(-4deg); }
+  .front { left: 840px; top: 230px; width: 350px; transform: rotate(3deg); border: 6px solid #fff; }
+</style></head><body>
+  <div class="bar"></div>
+  <div class="shot back"><img src="${toDataUrl(baseShot)}"></div>
+  <div class="shot front"><img src="${toDataUrl(faultsShot)}"></div>
+  <div class="left">
+    <div class="brand"><img src="${iconDataUrl}"><h1>Rotazioni Volley</h1></div>
+    <h2>Sei rotazioni,<br><em>un campo animato</em></h2>
+    <p>Scegli lo schema di ricezione: l'app muove i giocatori in ogni rotazione e fase e ti mostra i possibili falli di posizione.</p>
+    <div class="pills"><span>Rotazioni P1–P6</span><span>Falli di posizione</span><span>Open source</span></div>
+  </div>
+  <div class="url">rotazioni.volleyserve.it</div>
+</body></html>`;
+const socialPage = await browser.newPage({ viewport: { width: 1200, height: 630 } });
+await socialPage.setContent(SOCIAL_HTML, { waitUntil: 'load' });
+await socialPage.screenshot({ path: join(WEB_PUBLIC_DIR, 'social-preview.png') });
+await socialPage.close();
 console.log('wrote public/social-preview.png (1200x630)');
 
 // --- Android launcher icons --------------------------------------------
